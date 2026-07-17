@@ -29,7 +29,12 @@ function apiPing() {
 
 function apiCheckSheets() {
   return Api.withSessionOnly('apiCheckSheets', function(user) {
-    const spreadsheet = SheetRepository.getSpreadsheet();
+    let spreadsheet;
+    try {
+      spreadsheet = SheetRepository.getSpreadsheet();
+    } catch (error) {
+      throw new Error('No fue posible abrir el Google Sheets configurado. Verifica permisos del propietario y SPREADSHEET_ID. Detalle: ' + error.message);
+    }
     const configSheet = spreadsheet.getSheetByName(Config.SHEETS.CONFIG);
     return ok({
       user: user,

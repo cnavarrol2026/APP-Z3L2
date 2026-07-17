@@ -117,14 +117,30 @@
       google.script.run
         .withSuccessHandler((response) => {
           window.clearTimeout(timeout);
-          response && response.ok ? resolve(response.data) : reject(new Error(response.message));
+          if (response && response.ok) {
+            resolve(response.data);
+            return;
+          }
+          reject(new Error(getErrorMessage(response, 'La función ' + functionName + ' no devolvió una respuesta válida.')));
         })
         .withFailureHandler((error) => {
           window.clearTimeout(timeout);
-          reject(error);
+          reject(new Error(getErrorMessage(error, 'No fue posible ejecutar ' + functionName + '.')));
         })
         [functionName](payload);
     });
+  }
+
+  function getErrorMessage(error, fallback) {
+    if (!error) return fallback || 'Ocurrió un error sin detalle.';
+    if (typeof error === 'string') return error;
+    if (error.message) return error.message;
+    if (error.errorMessage) return error.errorMessage;
+    try {
+      return JSON.stringify(error);
+    } catch (ignored) {
+      return fallback || 'Ocurrió un error sin detalle.';
+    }
   }
 
   function loadInitialData() {
@@ -150,11 +166,12 @@
         renderAll();
       })
       .catch((error) => {
+        const message = getErrorMessage(error, 'No fue posible conectar con la base de datos.');
         window.clearTimeout(slowLoadTimer);
         document.getElementById('userEmail').textContent = 'Base no conectada';
         setGlobalStatus('No fue posible conectar con la base de datos. La interfaz permanece disponible.', 'error');
-        renderLoadWarnings(['No fue posible conectar con la base de datos: ' + error.message]);
-        showToast(error.message);
+        renderLoadWarnings(['No fue posible conectar con la base de datos: ' + message]);
+        showToast(message);
       });
   }
 
@@ -427,7 +444,7 @@
           showToast('Registro creado.');
           loadInitialData();
         })
-        .catch((error) => showToast(error.message));
+        .catch((error) => showToast(getErrorMessage(error, 'No fue posible crear el registro.')));
     };
   }
 
@@ -442,7 +459,7 @@
         showToast('Campo creado.');
         loadInitialData();
       })
-      .catch((error) => showToast(error.message));
+      .catch((error) => showToast(getErrorMessage(error, 'No fue posible crear el campo.')));
   }
 
   function saveDraft(event) {
@@ -465,7 +482,7 @@
         showToast('Borrador guardado.');
         loadInitialData();
       })
-      .catch((error) => showToast(error.message));
+      .catch((error) => showToast(getErrorMessage(error, 'No fue posible guardar el producto.')));
   }
 
   function validateImageInput(event) {
@@ -490,7 +507,7 @@
         showToast('PDF generado.');
         window.open(file.url, '_blank');
       })
-      .catch((error) => showToast(error.message));
+      .catch((error) => showToast(getErrorMessage(error, 'No fue posible generar el PDF.')));
   }
 
   function createBackup() {
@@ -499,7 +516,7 @@
         showToast('Respaldo creado.');
         window.open(file.url, '_blank');
       })
-      .catch((error) => showToast(error.message));
+      .catch((error) => showToast(getErrorMessage(error, 'No fue posible crear el respaldo.')));
   }
 
   function showToast(message) {

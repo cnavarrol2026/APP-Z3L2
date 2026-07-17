@@ -326,6 +326,23 @@ Cuando una web app queda esperando datos, no conviene seguir mezclando UI con le
 
 Esto permite saber si el bloqueo está en el despliegue/Apps Script, en la autorización de Sheets o en la lectura de datos.
 
+### `google.script.run` puede devolver errores sin forma estándar
+
+La consola mostró:
+
+```text
+Cannot read properties of null (reading 'message')
+```
+
+Eso ocurrió porque el frontend asumía que toda respuesta fallida tenía `.message`. En Apps Script, una llamada puede fallar o devolver `null`/objetos no estándar, y el manejador debe ser defensivo.
+
+Solución aplicada:
+
+- función `getErrorMessage(error, fallback)`;
+- validación de `response` antes de leer `response.message`;
+- mensajes fallback por función;
+- `apiCheckSheets` con error explícito si no puede abrir el Spreadsheet.
+
 ### Comparación inicial con Mermas
 
 Se revisó Mermas solo en lectura. Su manifiesto usa:

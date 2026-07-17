@@ -32,3 +32,7 @@
 - Se agrega timeout frontend de 20 segundos para evitar espera infinita si Apps Script no responde.
 - Se agrega render local inmediato del esqueleto técnico antes de cualquier llamada a Apps Script.
 - Se cambia scope de Sheets desde `spreadsheets.currentonly` a `spreadsheets` para evitar dependencia frágil del contexto de hoja activa en web app.
+- Se cambian mensajes de estado para evitar términos confusos como “Modo local”.
+- Se mejora visualmente Catálogos con tarjetas más parejas, labels claros y acciones específicas.
+- Se cambia el botón visible de producto desde “Guardar borrador” a “Guardar producto”.
+- Se incorpora branding liviano en el encabezado usando una versión pequeña del logo corporativo.

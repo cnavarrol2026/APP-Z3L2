@@ -301,6 +301,30 @@ Si el usuario entra a la app y Google Sheets tarda, falla o pide autorización, 
 Cambio aplicado:
 
 - render local inmediato de la plantilla técnica;
-- estado superior `Listo`, `Sincronizado`, `Modo local` según corresponda;
+- estado superior claro como `Esqueleto listo`, `Datos sincronizados` o `Datos no disponibles`;
 - aviso global visible cuando Sheets tarda o falla;
 - cambio de scope desde `spreadsheets.currentonly` a `spreadsheets` para evitar que la web app dependa del contexto de hoja activa.
+
+### No mostrar términos técnicos internos en la interfaz
+
+Términos como `Modo local`, `borrador` o `etapa` pueden ser correctos internamente, pero confunden al usuario operativo. En la UI deben mostrarse acciones y estados entendibles:
+
+- `Esqueleto listo`;
+- `Datos sincronizados`;
+- `Datos no disponibles`;
+- `Guardar producto`.
+
+El modelo interno puede seguir usando borradores y etapas para control técnico, pero esos conceptos no deben dominar la experiencia principal.
+
+### Comparación inicial con Mermas
+
+Se revisó Mermas solo en lectura. Su manifiesto usa:
+
+- `spreadsheets`;
+- `userinfo.email`;
+- `script.container.ui`;
+- `script.external_request`;
+- `executeAs: USER_DEPLOYING`;
+- `access: ANYONE`.
+
+APP-Z3L2 ya quedó alineado al menos en `spreadsheets`, `USER_DEPLOYING` y `ANYONE`. La diferencia del banner superior de Google no parece venir del HTML; queda pendiente comparar el despliegue publicado exacto y el comportamiento de la URL final.

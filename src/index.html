@@ -9,9 +9,12 @@
 </head>
 <body>
   <header class="app-header">
-    <div>
-      <p class="eyebrow">Zona 3 Línea 2</p>
-      <h1><?= appName ?></h1>
+    <div class="brand-lockup">
+      <div class="brand-mark" aria-hidden="true"></div>
+      <div>
+        <p class="eyebrow">Zona 3 Línea 2</p>
+        <h1><?= appName ?></h1>
+      </div>
     </div>
     <div class="user-box">
       <span id="userEmail">Abriendo aplicación...</span>
@@ -86,32 +89,64 @@
       <section id="config-page-catalogos" class="config-page">
       <div class="admin-grid">
         <form id="categoryForm" class="admin-card">
-          <h3>Categorías</h3>
-          <input name="nombre" placeholder="Nueva categoría" required>
-          <button>Agregar</button>
+          <div class="admin-card-head">
+            <div>
+              <p class="eyebrow">Catálogo</p>
+              <h3>Categorías</h3>
+            </div>
+          </div>
+          <label>Nueva categoría
+            <input name="nombre" placeholder="Ej: Vinos 750 ml" required>
+          </label>
+          <button>Agregar categoría</button>
           <div id="categoryList" class="list"></div>
         </form>
 
         <form id="bottleForm" class="admin-card">
-          <h3>Botellas</h3>
-          <input name="nombre" placeholder="Nueva botella" required>
-          <button>Agregar</button>
+          <div class="admin-card-head">
+            <div>
+              <p class="eyebrow">Catálogo</p>
+              <h3>Botellas</h3>
+            </div>
+          </div>
+          <label>Nueva botella
+            <input name="nombre" placeholder="Ej: Bordelesa cónica 750 ml" required>
+          </label>
+          <button>Agregar botella</button>
           <div id="bottleList" class="list"></div>
         </form>
 
         <form id="sectionForm" class="admin-card">
-          <h3>Secciones</h3>
-          <input name="nombre" placeholder="Nueva sección" required>
-          <input name="orden" type="number" placeholder="Orden">
-          <button>Agregar</button>
+          <div class="admin-card-head">
+            <div>
+              <p class="eyebrow">Ficha técnica</p>
+              <h3>Secciones</h3>
+            </div>
+          </div>
+          <label>Nueva sección
+            <input name="nombre" placeholder="Ej: Ajustes de cabezal" required>
+          </label>
+          <label>Orden
+            <input name="orden" type="number" placeholder="Orden">
+          </label>
+          <button>Agregar sección</button>
           <div id="sectionList" class="list"></div>
         </form>
 
         <form id="unitForm" class="admin-card">
-          <h3>Unidades</h3>
-          <input name="nombre" placeholder="Nueva unidad" required>
-          <input name="orden" type="number" placeholder="Orden">
-          <button>Agregar</button>
+          <div class="admin-card-head">
+            <div>
+              <p class="eyebrow">Ficha técnica</p>
+              <h3>Unidades</h3>
+            </div>
+          </div>
+          <label>Nueva unidad
+            <input name="nombre" placeholder="Ej: mm" required>
+          </label>
+          <label>Orden
+            <input name="orden" type="number" placeholder="Orden">
+          </label>
+          <button>Agregar unidad</button>
           <div id="unitList" class="list"></div>
         </form>
       </div>
@@ -200,7 +235,7 @@
             <div id="draftTechnicalFields" class="draft-technical-fields"></div>
           </section>
           <div class="actions">
-            <button type="submit">Guardar borrador</button>
+            <button type="submit">Guardar producto</button>
           </div>
         </form>
       </section>

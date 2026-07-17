@@ -65,8 +65,8 @@
     state.drafts = [];
     state.discarded = [];
     state.history = [];
-    document.getElementById('userEmail').textContent = 'Listo';
-    setGlobalStatus('Esqueleto cargado. Sincronizando con Sheets...', 'info');
+    document.getElementById('userEmail').textContent = 'Esqueleto listo';
+    setGlobalStatus('Ficha lista para revisar. Sincronizando datos guardados...', 'info');
     renderAll();
   }
 
@@ -129,9 +129,9 @@
 
   function loadInitialData() {
     const slowLoadTimer = window.setTimeout(() => {
-      document.getElementById('userEmail').textContent = 'Modo local';
-      setGlobalStatus('Sheets está tardando en responder. Puedes revisar el esqueleto mientras sincroniza.', 'warning');
-      renderLoadWarnings(['Sheets está tardando en responder. La app mantiene el esqueleto local visible.']);
+      document.getElementById('userEmail').textContent = 'Esperando datos';
+      setGlobalStatus('Los datos guardados aún no responden. La ficha base sigue disponible.', 'warning');
+      renderLoadWarnings(['Los datos guardados aún no responden. Puedes seguir revisando la estructura base.']);
     }, 8000);
     callServer('apiGetInitialData')
       .then((data) => {
@@ -142,16 +142,16 @@
         state.drafts = data.drafts;
         state.discarded = data.discarded;
         state.history = data.history;
-        document.getElementById('userEmail').textContent = 'Sincronizado';
+        document.getElementById('userEmail').textContent = 'Datos sincronizados';
         setGlobalStatus('', '');
         renderLoadWarnings(data.warnings || []);
         renderAll();
       })
       .catch((error) => {
         window.clearTimeout(slowLoadTimer);
-        document.getElementById('userEmail').textContent = 'Modo local';
-        setGlobalStatus('No se pudo sincronizar con Sheets. El esqueleto queda disponible en modo local.', 'error');
-        renderLoadWarnings(['No fue posible sincronizar con Sheets: ' + error.message]);
+        document.getElementById('userEmail').textContent = 'Datos no disponibles';
+        setGlobalStatus('No se pudo leer la base guardada. La ficha base sigue visible.', 'error');
+        renderLoadWarnings(['No fue posible leer la base guardada: ' + error.message]);
         showToast(error.message);
       });
   }

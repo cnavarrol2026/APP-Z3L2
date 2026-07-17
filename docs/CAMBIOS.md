@@ -17,3 +17,4 @@
 - Se crea despliegue web inicial de Apps Script.
 - Se reducen scopes iniciales a `userinfo.email` y `spreadsheets.currentonly` para evitar una advertencia OAuth más agresiva al iniciar.
 - Se cambia el despliegue web para ejecutar como propietario (`USER_DEPLOYING`) y evitar el bucle de autorización por usuario.
+- Se ajusta seguridad para no bloquear cuando Apps Script no entrega el correo del usuario en despliegue como propietario.

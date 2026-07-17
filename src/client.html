@@ -59,7 +59,7 @@
         state.drafts = data.drafts;
         state.discarded = data.discarded;
         state.history = data.history;
-        document.getElementById('userEmail').textContent = data.user.email;
+        document.getElementById('userEmail').textContent = data.user.displayName || data.user.email || 'Usuario Google';
         renderAll();
       })
       .catch((error) => showToast(error.message));

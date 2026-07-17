@@ -206,3 +206,15 @@ Para una aplicación administrada por un propietario corporativo, usar:
 ```
 
 Así el script accede a Sheets/Drive con la cuenta propietaria del despliegue y el usuario final solo entra con Google. La auditoría de usuario debe seguir intentando leer `Session.getActiveUser().getEmail()`, pero el acceso a datos no depende de permisos individuales del usuario.
+
+### `Session.getActiveUser().getEmail()` vacío con `USER_DEPLOYING`
+
+Al cambiar el despliegue para ejecutar como propietario, la interfaz cargó, pero el backend bloqueó con:
+
+```text
+No fue posible identificar tu cuenta Google.
+```
+
+Causa: en despliegues Apps Script ejecutados como propietario, `Session.getActiveUser().getEmail()` puede venir vacío según el contexto de acceso y políticas de Workspace.
+
+Solución aplicada: no bloquear el ingreso si el correo viene vacío. Usar un usuario técnico visible como `Usuario Google` y conservar auditoría con `usuario.google.no.identificado` hasta que se defina una estrategia de identidad más estricta.

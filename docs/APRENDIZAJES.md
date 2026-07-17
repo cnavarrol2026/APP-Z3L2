@@ -188,3 +188,21 @@ Para reducir la fricción inicial, se cambió el manifiesto a scopes mínimos:
 Se dejaron fuera del primer inicio los scopes de Drive y Documents. Esto posterga funciones de imágenes, respaldos y PDF hasta una autorización posterior o hasta configurar OAuth corporativo verificado.
 
 Aprendizaje: para una primera entrada de usuario, pedir solo permisos mínimos. Agregar Drive/PDF más adelante cuando la pantalla principal ya esté validada o cuando TI apruebe un OAuth Client corporativo.
+
+### Bucle de autorización en web app
+
+Si el despliegue queda con:
+
+```json
+"executeAs": "USER_ACCESSING"
+```
+
+cada usuario debe autorizar los permisos del script, lo que en cuentas Workspace puede generar un bucle de autorización/unverified app muy mala experiencia.
+
+Para una aplicación administrada por un propietario corporativo, usar:
+
+```json
+"executeAs": "USER_DEPLOYING"
+```
+
+Así el script accede a Sheets/Drive con la cuenta propietaria del despliegue y el usuario final solo entra con Google. La auditoría de usuario debe seguir intentando leer `Session.getActiveUser().getEmail()`, pero el acceso a datos no depende de permisos individuales del usuario.

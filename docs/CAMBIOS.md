@@ -16,3 +16,4 @@
 - Se crean/registran carpetas Drive desde el propio script corporativo.
 - Se crea despliegue web inicial de Apps Script.
 - Se reducen scopes iniciales a `userinfo.email` y `spreadsheets.currentonly` para evitar una advertencia OAuth más agresiva al iniciar.
+- Se cambia el despliegue web para ejecutar como propietario (`USER_DEPLOYING`) y evitar el bucle de autorización por usuario.

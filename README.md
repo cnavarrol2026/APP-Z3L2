@@ -79,6 +79,10 @@ Despliegue con permisos mínimos:
 
 - https://script.google.com/macros/s/AKfycbzP9DuZ3rIG6NBU49a7BR6xFtjHWTggIMKCHQDAFIvm-MjBFumFqa_0_UYvCMgCbdBP/exec
 
+Despliegue sin autorización por usuario:
+
+- https://script.google.com/macros/s/AKfycbyOz1p3Ifv3iK12IahQJ3vazLx2_PPAjk47ekFQtKnlfTa6LFdXwqQZWCLXJiJjcW8u/exec
+
 ## Validación rápida
 
 - La pantalla inicial debe cargar sin datos de ejemplo.

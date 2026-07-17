@@ -23,3 +23,8 @@
 - Se corrige la carga de la plantilla técnica para no depender de `Config` durante evaluación global de Apps Script.
 - Se agrega mensaje visible si falla la carga inicial de datos desde Apps Script.
 - Se segmenta la pantalla de Configuración en pestañas horizontales internas para separar ficha técnica, catálogos, campos, producto nuevo, pendientes, descartados y respaldo.
+- Se hace más robusta la carga inicial: si la plantilla no puede materializarse en Sheets, la app mantiene categorías y usa una plantilla técnica de respaldo.
+- Se rediseña Producto nuevo para mostrar el esqueleto de ficha técnica rellenable dentro del formulario.
+- Se elimina `Etapa` de la interfaz visible y queda como dato técnico interno del borrador.
+- Se separan ETQ y CET en bloques visuales con código e imagen PNG propia.
+- Se agrega aviso visible de carga lenta o fallo de backend en todas las páginas internas de Configuración.

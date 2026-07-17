@@ -13,14 +13,26 @@ const Api = {
 
 function apiGetInitialData() {
   return Api.withAuth('apiGetInitialData', function(user) {
-    TemplateService.ensureDefaultTechnicalTemplate(user.email);
+    let templateWarning = '';
+    try {
+      TemplateService.ensureDefaultTechnicalTemplate(user.email);
+    } catch (error) {
+      templateWarning = 'No se pudo materializar la plantilla en Sheets: ' + error.message;
+      ErrorService.record('TemplateService.ensureDefaultTechnicalTemplate', error);
+    }
+    const admin = CatalogService.getAdminData(false);
+    const fallback = TemplateService.getFallbackAdminData();
+    if (!admin.secciones.length) admin.secciones = fallback.secciones;
+    if (!admin.campos.length) admin.campos = fallback.campos;
+    if (!admin.unidades.length) admin.unidades = fallback.unidades;
     return ok({
       user: user,
       lookup: ArticleService.getLookupData(),
-      admin: CatalogService.getAdminData(false),
+      admin: admin,
       drafts: DraftService.listPendingDrafts(),
       discarded: DraftService.listDiscardedDrafts(),
-      history: HistoryService.listEvents({})
+      history: HistoryService.listEvents({}),
+      warnings: templateWarning ? [templateWarning] : []
     });
   });
 }

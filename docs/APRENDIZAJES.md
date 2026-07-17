@@ -262,3 +262,21 @@ La pantalla de Configuración se volvió confusa al mezclar en una sola vista:
 - respaldo.
 
 Solución aplicada: usar pestañas horizontales internas dentro de Configuración. Cada pestaña debe representar una tarea clara y mostrar solo los controles necesarios para esa tarea.
+
+### Producto nuevo debe mostrar el esqueleto de ficha, no campos sueltos
+
+El alta de producto no es solo código, descripción e imagen. Para este proyecto, el usuario espera ver la ficha técnica armada y rellenarla desde el mismo flujo.
+
+Decisiones aplicadas:
+
+- ocultar `Etapa` porque es un estado técnico interno del borrador;
+- separar ETQ y CET en bloques visuales propios;
+- mostrar imagen ETQ e imagen CET como controles separados;
+- renderizar las secciones y campos de la ficha dentro de Producto nuevo;
+- guardar los valores capturados dentro del `payloadJson` del borrador mientras se completa la persistencia vertical definitiva.
+
+### Fallos de carga inicial deben verse en todas las páginas
+
+Si `apiGetInitialData` falla o tarda demasiado, no basta con mostrar el error en una sola pestaña. El usuario puede estar en Producto nuevo, Catálogos o Pendientes y pensar que la app está vacía.
+
+Solución aplicada: avisos visibles de carga lenta o error de backend en todas las páginas internas de Configuración.

@@ -48,6 +48,50 @@ const TemplateService = {
     { id: 'uni_m_min', nombre: 'm/min', orden: 20 }
   ],
 
+  getFallbackAdminData: function() {
+    const units = this.DEFAULT_UNITS.map(function(unit) {
+      return {
+        id: unit.id,
+        nombre: unit.nombre,
+        nombreNormalizado: normalizeText(unit.nombre),
+        orden: unit.orden,
+        activo: true
+      };
+    });
+    const sections = [];
+    const fields = [];
+    this.DEFAULT_SECTIONS.forEach(function(section) {
+      sections.push({
+        id: section.id,
+        nombre: section.nombre,
+        nombreNormalizado: normalizeText(section.nombre),
+        orden: section.orden,
+        activo: true
+      });
+      section.fields.forEach(function(field) {
+        const unit = field.unidad ? units.find(function(item) {
+          return item.nombre === field.unidad;
+        }) : null;
+        fields.push({
+          id: field.id,
+          seccionId: section.id,
+          nombre: field.nombre,
+          nombreNormalizado: normalizeText(section.id + '|' + field.nombre),
+          tipo: field.tipo,
+          obligatorio: field.obligatorio,
+          unidadId: unit ? unit.id : '',
+          orden: field.orden,
+          activo: true
+        });
+      });
+    });
+    return {
+      secciones: sections,
+      campos: fields,
+      unidades: units
+    };
+  },
+
   ensureDefaultTechnicalTemplate: function(userEmail) {
     const date = nowIso();
     const unitsByName = {};

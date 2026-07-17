@@ -47,7 +47,9 @@
     document.getElementById('fieldForm').addEventListener('submit', submitField);
     document.getElementById('draftForm').addEventListener('submit', saveDraft);
     document.getElementById('backupButton').addEventListener('click', createBackup);
-    document.getElementById('imageInput').addEventListener('change', validateImageInput);
+    document.querySelectorAll('.image-input').forEach((input) => {
+      input.addEventListener('change', validateImageInput);
+    });
     document.getElementById('categorySelect').addEventListener('change', renderBottleSelect);
     document.getElementById('bottleSelect').addEventListener('change', renderArticleSelect);
     document.getElementById('articleSelect').addEventListener('change', renderArticleDetail);
@@ -64,8 +66,13 @@
   }
 
   function loadInitialData() {
+    const slowLoadTimer = window.setTimeout(() => {
+      document.getElementById('userEmail').textContent = 'Cargando datos...';
+      renderLoadWarnings(['La carga inicial está tardando más de lo esperado. Si no aparecen categorías o campos, recarga la página.']);
+    }, 8000);
     callServer('apiGetInitialData')
       .then((data) => {
+        window.clearTimeout(slowLoadTimer);
         state.user = data.user;
         state.lookup = data.lookup;
         state.admin = data.admin;
@@ -73,14 +80,13 @@
         state.discarded = data.discarded;
         state.history = data.history;
         document.getElementById('userEmail').textContent = data.user.displayName || data.user.email || 'Usuario Google';
+        renderLoadWarnings(data.warnings || []);
         renderAll();
       })
       .catch((error) => {
+        window.clearTimeout(slowLoadTimer);
         document.getElementById('userEmail').textContent = 'No se pudo cargar la sesión';
-        const template = document.getElementById('templateStructure');
-        if (template) {
-          template.innerHTML = '<div class="empty-state">No fue posible cargar datos desde Apps Script: ' + error.message + '</div>';
-        }
+        renderLoadWarnings(['No fue posible cargar datos desde Apps Script: ' + error.message]);
         showToast(error.message);
       });
   }
@@ -89,8 +95,23 @@
     renderCategorySelect();
     renderAdminLists();
     renderTemplateStructure();
+    renderDraftTechnicalFields();
     renderDraftLists();
     renderHistory();
+  }
+
+  function renderLoadWarnings(warnings) {
+    const message = warnings && warnings.length ? warnings.join(' ') : '';
+    document.querySelectorAll('.load-warning').forEach((item) => {
+      item.remove();
+    });
+    if (!message) return;
+    document.querySelectorAll('.config-page').forEach((page) => {
+      const warning = document.createElement('div');
+      warning.className = 'empty-state load-warning';
+      warning.textContent = message;
+      page.prepend(warning);
+    });
   }
 
   function renderCategorySelect() {
@@ -237,6 +258,47 @@
     });
   }
 
+  function renderDraftTechnicalFields() {
+    const container = document.getElementById('draftTechnicalFields');
+    if (!container) return;
+    const sections = state.admin.secciones || [];
+    const fields = state.admin.campos || [];
+    const units = state.admin.unidades || [];
+    container.innerHTML = '';
+    if (!sections.length || !fields.length) {
+      container.innerHTML = '<div class="empty-state">No hay estructura técnica cargada.</div>';
+      return;
+    }
+    sections.forEach((section) => {
+      const sectionFields = fields
+        .filter((field) => field.seccionId === section.id)
+        .sort((a, b) => Number(a.orden || 0) - Number(b.orden || 0));
+      if (!sectionFields.length) return;
+      const block = document.createElement('section');
+      block.className = 'draft-section';
+      const title = document.createElement('h4');
+      title.textContent = section.nombre;
+      const grid = document.createElement('div');
+      grid.className = 'draft-field-grid';
+      sectionFields.forEach((field) => {
+        const unit = units.find((item) => item.id === field.unidadId);
+        const label = document.createElement('label');
+        label.textContent = field.nombre + (unit ? ' (' + unit.nombre + ')' : '');
+        const input = document.createElement('input');
+        input.className = 'draft-field';
+        input.dataset.fieldId = field.id;
+        input.dataset.fieldName = field.nombre;
+        input.type = field.tipo === 'NUMERO' ? 'number' : 'text';
+        input.required = field.obligatorio === true || field.obligatorio === 'TRUE';
+        if (field.tipo === 'NUMERO') input.step = 'any';
+        label.appendChild(input);
+        grid.appendChild(label);
+      });
+      block.append(title, grid);
+      container.appendChild(block);
+    });
+  }
+
   function renderAdminLists() {
     renderList('categoryList', state.admin.categorias || []);
     renderList('bottleList', state.admin.botellas || []);
@@ -314,7 +376,14 @@
     const payload = Object.fromEntries(new FormData(form).entries());
     payload.etqAplica = form.etqAplica.checked;
     payload.cetAplica = form.cetAplica.checked;
-    payload.payload = {};
+    payload.etapa = 'FICHA_TECNICA';
+    payload.payload = {
+      valores: Array.from(document.querySelectorAll('.draft-field')).map((input) => ({
+        campoId: input.dataset.fieldId,
+        campo: input.dataset.fieldName,
+        valor: input.value
+      }))
+    };
     callServer('apiSaveDraft', payload)
       .then(() => {
         form.reset();
@@ -327,14 +396,15 @@
   function validateImageInput(event) {
     const file = event.target.files[0];
     if (!file) return;
+    const imageType = event.target.dataset.imageType || 'imagen';
     if (file.type !== 'image/png') {
       event.target.value = '';
-      showToast('Solo se aceptan imágenes PNG.');
+      showToast('Solo se aceptan imágenes PNG para ' + imageType + '.');
       return;
     }
     if (file.size > 1024 * 1024) {
       event.target.value = '';
-      showToast('La imagen supera el máximo permitido de 1 MB.');
+      showToast('La imagen ' + imageType + ' supera el máximo permitido de 1 MB.');
     }
   }
 

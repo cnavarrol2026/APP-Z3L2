@@ -163,29 +163,40 @@
           <label>Descripción
             <input name="descripcion" required>
           </label>
-          <label>
-            <input type="checkbox" name="etqAplica"> ETQ aplica
-          </label>
-          <label>Código ETQ
-            <input name="codigoEtq">
-          </label>
-          <label>
-            <input type="checkbox" name="cetAplica"> CET aplica
-          </label>
-          <label>Código CET
-            <input name="codigoCet">
-          </label>
-          <label>Etapa
-            <input name="etapa" value="DATOS_GENERALES">
-          </label>
-          <label>Imagen PNG de prueba
-            <input id="imageInput" type="file" accept="image/png">
-          </label>
-          <p class="help">
-            Para ubicar la Etiqueta (ETQ) o Contraetiqueta (CET), acceda a
-            <a href="https://dsgr.ccu.cl/GBO.pdf" target="_blank" rel="noopener">https://dsgr.ccu.cl/CODIGO.pdf</a>
-            y reemplace GBO por el código exacto. La aplicación no descarga imágenes automáticamente.
-          </p>
+          <div class="image-choice-grid">
+            <section class="image-choice">
+              <label class="toggle-row">
+                <input type="checkbox" name="etqAplica">
+                <span>ETQ aplica</span>
+              </label>
+              <label>Código ETQ
+                <input name="codigoEtq">
+              </label>
+              <label>Imagen ETQ PNG
+                <input class="image-input" data-image-type="ETQ" type="file" accept="image/png">
+              </label>
+            </section>
+
+            <section class="image-choice">
+              <label class="toggle-row">
+                <input type="checkbox" name="cetAplica">
+                <span>CET aplica</span>
+              </label>
+              <label>Código CET
+                <input name="codigoCet">
+              </label>
+              <label>Imagen CET PNG
+                <input class="image-input" data-image-type="CET" type="file" accept="image/png">
+              </label>
+            </section>
+          </div>
+          <section class="technical-entry">
+            <div>
+              <p class="eyebrow">Ficha técnica</p>
+              <h3>Campos de configuración</h3>
+            </div>
+            <div id="draftTechnicalFields" class="draft-technical-fields"></div>
+          </section>
           <div class="actions">
             <button type="submit">Guardar borrador</button>
           </div>

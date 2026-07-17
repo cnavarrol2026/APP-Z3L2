@@ -230,3 +230,21 @@ Para que la aplicación sea entendible desde el primer acceso, conviene precarga
 - unidades mínimas necesarias.
 
 Eso no contamina la base con datos de ejemplo, porque solo crea la estructura de captura. Los valores de cada artículo siguen naciendo vacíos.
+
+### Evitar dependencias de carga en constantes globales de Apps Script
+
+En Apps Script, los archivos `.gs` no deben depender de que otro archivo ya haya inicializado sus constantes al momento de evaluar objetos globales.
+
+Problema detectado:
+
+```js
+const TemplateService = {
+  DEFAULT_SECTIONS: [
+    { tipo: Config.FIELD_TYPES.TEXT }
+  ]
+};
+```
+
+Si `TemplateService.gs` se evalúa antes que `Config.gs`, la carga inicial puede fallar y la interfaz queda sin datos.
+
+Solución aplicada: usar valores literales estables (`TEXTO`, `NUMERO`) dentro de la plantilla global, y reservar `Config` para ejecución de funciones donde ya está disponible.

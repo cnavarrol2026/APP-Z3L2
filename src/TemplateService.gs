@@ -5,11 +5,11 @@ const TemplateService = {
       nombre: 'Botella e Insumos',
       orden: 10,
       fields: [
-        { id: 'cam_tipo_botella', nombre: 'Tipo de botella', tipo: Config.FIELD_TYPES.TEXT, obligatorio: true, orden: 10 },
-        { id: 'cam_medidas_etiqueta', nombre: 'Medidas etiqueta', tipo: Config.FIELD_TYPES.TEXT, obligatorio: true, orden: 20 },
-        { id: 'cam_altura_pegado_etiqueta', nombre: 'Altura de pegado (etiqueta)', tipo: Config.FIELD_TYPES.NUMBER, unidad: 'mm', obligatorio: true, orden: 30 },
-        { id: 'cam_altura_contra_etiqueta', nombre: 'Altura contra-etiqueta', tipo: Config.FIELD_TYPES.NUMBER, unidad: 'mm', obligatorio: false, orden: 40 },
-        { id: 'cam_altura_medalla', nombre: 'Altura medalla', tipo: Config.FIELD_TYPES.NUMBER, unidad: 'mm', obligatorio: false, orden: 50 }
+        { id: 'cam_tipo_botella', nombre: 'Tipo de botella', tipo: 'TEXTO', obligatorio: true, orden: 10 },
+        { id: 'cam_medidas_etiqueta', nombre: 'Medidas etiqueta', tipo: 'TEXTO', obligatorio: true, orden: 20 },
+        { id: 'cam_altura_pegado_etiqueta', nombre: 'Altura de pegado (etiqueta)', tipo: 'NUMERO', unidad: 'mm', obligatorio: true, orden: 30 },
+        { id: 'cam_altura_contra_etiqueta', nombre: 'Altura contra-etiqueta', tipo: 'NUMERO', unidad: 'mm', obligatorio: false, orden: 40 },
+        { id: 'cam_altura_medalla', nombre: 'Altura medalla', tipo: 'NUMERO', unidad: 'mm', obligatorio: false, orden: 50 }
       ]
     },
     {
@@ -17,16 +17,16 @@ const TemplateService = {
       nombre: 'Ajustes Mecánicos de Etiquetadora',
       orden: 20,
       fields: [
-        { id: 'cam_entrada_guia_sin_fin', nombre: 'Entrada guía sin fin', tipo: Config.FIELD_TYPES.TEXT, obligatorio: false, orden: 10 },
-        { id: 'cam_guia_botellas', nombre: 'Guía de botellas', tipo: Config.FIELD_TYPES.TEXT, obligatorio: false, orden: 20 },
-        { id: 'cam_altura_estrella', nombre: 'Altura de estrella', tipo: Config.FIELD_TYPES.NUMBER, unidad: 'mm', obligatorio: false, orden: 30 },
-        { id: 'cam_levas', nombre: 'Levas', tipo: Config.FIELD_TYPES.TEXT, obligatorio: false, orden: 40 },
-        { id: 'cam_altura_estaciones', nombre: 'Altura estaciones', tipo: Config.FIELD_TYPES.NUMBER, unidad: 'mm', obligatorio: false, orden: 50 },
-        { id: 'cam_profundidad_estaciones', nombre: 'Profundidad estaciones', tipo: Config.FIELD_TYPES.NUMBER, unidad: 'mm', obligatorio: false, orden: 60 },
-        { id: 'cam_ajuste_lateral', nombre: 'Ajuste lateral', tipo: Config.FIELD_TYPES.NUMBER, unidad: 'mm', obligatorio: false, orden: 70 },
-        { id: 'cam_velocidad_emision', nombre: 'Velocidad emisión', tipo: Config.FIELD_TYPES.NUMBER, unidad: 'm/min', obligatorio: false, orden: 80 },
-        { id: 'cam_distancia_etiqueta', nombre: 'Distancia de etiqueta', tipo: Config.FIELD_TYPES.NUMBER, unidad: 'mm', obligatorio: false, orden: 90 },
-        { id: 'cam_tipo_chaleco', nombre: 'Tipo de chaleco', tipo: Config.FIELD_TYPES.TEXT, obligatorio: false, orden: 100 }
+        { id: 'cam_entrada_guia_sin_fin', nombre: 'Entrada guía sin fin', tipo: 'TEXTO', obligatorio: false, orden: 10 },
+        { id: 'cam_guia_botellas', nombre: 'Guía de botellas', tipo: 'TEXTO', obligatorio: false, orden: 20 },
+        { id: 'cam_altura_estrella', nombre: 'Altura de estrella', tipo: 'NUMERO', unidad: 'mm', obligatorio: false, orden: 30 },
+        { id: 'cam_levas', nombre: 'Levas', tipo: 'TEXTO', obligatorio: false, orden: 40 },
+        { id: 'cam_altura_estaciones', nombre: 'Altura estaciones', tipo: 'NUMERO', unidad: 'mm', obligatorio: false, orden: 50 },
+        { id: 'cam_profundidad_estaciones', nombre: 'Profundidad estaciones', tipo: 'NUMERO', unidad: 'mm', obligatorio: false, orden: 60 },
+        { id: 'cam_ajuste_lateral', nombre: 'Ajuste lateral', tipo: 'NUMERO', unidad: 'mm', obligatorio: false, orden: 70 },
+        { id: 'cam_velocidad_emision', nombre: 'Velocidad emisión', tipo: 'NUMERO', unidad: 'm/min', obligatorio: false, orden: 80 },
+        { id: 'cam_distancia_etiqueta', nombre: 'Distancia de etiqueta', tipo: 'NUMERO', unidad: 'mm', obligatorio: false, orden: 90 },
+        { id: 'cam_tipo_chaleco', nombre: 'Tipo de chaleco', tipo: 'TEXTO', obligatorio: false, orden: 100 }
       ]
     },
     {
@@ -34,11 +34,11 @@ const TemplateService = {
       nombre: 'Ajustes de Capsuladora',
       orden: 30,
       fields: [
-        { id: 'cam_formato_capsula', nombre: 'N° formato (cápsula)', tipo: Config.FIELD_TYPES.TEXT, obligatorio: false, orden: 10 },
-        { id: 'cam_formato_botella', nombre: 'N° formato (botella)', tipo: Config.FIELD_TYPES.TEXT, obligatorio: false, orden: 20 },
-        { id: 'cam_color_formato', nombre: 'Color de formato', tipo: Config.FIELD_TYPES.TEXT, obligatorio: false, orden: 30 },
-        { id: 'cam_material_capsula', nombre: 'Material (PVC / Complex)', tipo: Config.FIELD_TYPES.TEXT, obligatorio: false, orden: 40 },
-        { id: 'cam_sinfin_capsuladora', nombre: 'Sinfín capsuladora', tipo: Config.FIELD_TYPES.TEXT, obligatorio: false, orden: 50 }
+        { id: 'cam_formato_capsula', nombre: 'N° formato (cápsula)', tipo: 'TEXTO', obligatorio: false, orden: 10 },
+        { id: 'cam_formato_botella', nombre: 'N° formato (botella)', tipo: 'TEXTO', obligatorio: false, orden: 20 },
+        { id: 'cam_color_formato', nombre: 'Color de formato', tipo: 'TEXTO', obligatorio: false, orden: 30 },
+        { id: 'cam_material_capsula', nombre: 'Material (PVC / Complex)', tipo: 'TEXTO', obligatorio: false, orden: 40 },
+        { id: 'cam_sinfin_capsuladora', nombre: 'Sinfín capsuladora', tipo: 'TEXTO', obligatorio: false, orden: 50 }
       ]
     }
   ],

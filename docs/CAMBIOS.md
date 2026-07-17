@@ -20,3 +20,5 @@
 - Se ajusta seguridad para no bloquear cuando Apps Script no entrega el correo del usuario en despliegue como propietario.
 - Se agrega plantilla base de ficha técnica con secciones y campos iniciales sin cargar artículos ni valores de ejemplo.
 - Se mejora la pantalla de Configuración para mostrar la estructura de ficha técnica agrupada por sección y permitir agregar campos.
+- Se corrige la carga de la plantilla técnica para no depender de `Config` durante evaluación global de Apps Script.
+- Se agrega mensaje visible si falla la carga inicial de datos desde Apps Script.

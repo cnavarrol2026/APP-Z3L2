@@ -63,7 +63,14 @@
         document.getElementById('userEmail').textContent = data.user.displayName || data.user.email || 'Usuario Google';
         renderAll();
       })
-      .catch((error) => showToast(error.message));
+      .catch((error) => {
+        document.getElementById('userEmail').textContent = 'No se pudo cargar la sesión';
+        const template = document.getElementById('templateStructure');
+        if (template) {
+          template.innerHTML = '<div class="empty-state">No fue posible cargar datos desde Apps Script: ' + error.message + '</div>';
+        }
+        showToast(error.message);
+      });
   }
 
   function renderAll() {

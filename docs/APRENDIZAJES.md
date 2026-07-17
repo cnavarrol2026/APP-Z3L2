@@ -363,3 +363,15 @@ Se revisó Mermas solo en lectura. Su manifiesto usa:
 - `access: ANYONE`.
 
 APP-Z3L2 ya quedó alineado al menos en `spreadsheets`, `USER_DEPLOYING` y `ANYONE`. La diferencia del banner superior de Google no parece venir del HTML; queda pendiente comparar el despliegue publicado exacto y el comportamiento de la URL final.
+
+### Carga inicial liviana antes de sincronizar Sheets
+
+La captura con consola abierta mostró que `apiPing` y la interfaz cargaban, pero `apiGetInitialData` devolvía una respuesta inválida. Eso acota el problema: no estaba fallando la apertura general de la web app, sino la carga inicial pesada que mezclaba plantilla, catálogos, borradores, historial y lectura de Sheets.
+
+Decisión aplicada:
+
+- `apiGetInitialData` debe entregar solo una base técnica liviana y serializable.
+- `apiGetSavedData` debe leer Sheets después, en una sincronización separada.
+- Si falla la lectura de Sheets, la interfaz debe seguir disponible y el mensaje debe nombrar la etapa que falló.
+
+Aprendizaje: en Apps Script conviene que la primera respuesta del frontend sea pequeña, defensiva y sin escrituras. Las lecturas más amplias de Sheets deben ejecutarse después para evitar pantallas atrapadas en carga.

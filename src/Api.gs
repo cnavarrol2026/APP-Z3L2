@@ -48,6 +48,33 @@ function apiCheckSheets() {
 function apiGetInitialData() {
   return Api.withSessionOnly('apiGetInitialData', function(user) {
     const fallback = TemplateService.getFallbackAdminData();
+    return ok({
+      user: user,
+      lookup: {
+        categorias: [],
+        botellas: [],
+        relaciones: [],
+        articulos: []
+      },
+      admin: {
+        categorias: [],
+        botellas: [],
+        relaciones: [],
+        secciones: fallback.secciones,
+        campos: fallback.campos,
+        unidades: fallback.unidades
+      },
+      drafts: [],
+      discarded: [],
+      history: [],
+      warnings: []
+    });
+  });
+}
+
+function apiGetSavedData() {
+  return Api.withSessionOnly('apiGetSavedData', function(user) {
+    const fallback = TemplateService.getFallbackAdminData();
     const categories = SheetRepository.listSafe(Config.SHEETS.CATEGORIES).filter(function(row) { return toBoolean(row.activo); });
     const bottles = SheetRepository.listSafe(Config.SHEETS.BOTTLES).filter(function(row) { return toBoolean(row.activo); });
     const relations = SheetRepository.listSafe(Config.SHEETS.CATEGORY_BOTTLE).filter(function(row) { return toBoolean(row.activo); });
@@ -55,14 +82,6 @@ function apiGetInitialData() {
     const sections = SheetRepository.listSafe(Config.SHEETS.SECTIONS).filter(function(row) { return toBoolean(row.activo); }).sort(CatalogService.byOrder);
     const fields = SheetRepository.listSafe(Config.SHEETS.FIELDS).filter(function(row) { return toBoolean(row.activo); }).sort(CatalogService.byOrder);
     const units = SheetRepository.listSafe(Config.SHEETS.UNITS).filter(function(row) { return toBoolean(row.activo); }).sort(CatalogService.byOrder);
-    const admin = {
-      categorias: categories,
-      botellas: bottles,
-      relaciones: relations,
-      secciones: sections.length ? sections : fallback.secciones,
-      campos: fields.length ? fields : fallback.campos,
-      unidades: units.length ? units : fallback.unidades
-    };
     return ok({
       user: user,
       lookup: {
@@ -71,9 +90,16 @@ function apiGetInitialData() {
         relaciones: relations,
         articulos: articles
       },
-      admin: admin,
-      drafts: SheetRepository.listSafe(Config.SHEETS.DRAFTS).filter(function(row) { return row.estado === Config.STATES.DRAFT; }),
-      discarded: SheetRepository.listSafe(Config.SHEETS.DISCARDED_DRAFTS).filter(function(row) { return row.estado === Config.STATES.DISCARDED; }),
+      admin: {
+        categorias: categories,
+        botellas: bottles,
+        relaciones: relations,
+        secciones: sections.length ? sections : fallback.secciones,
+        campos: fields.length ? fields : fallback.campos,
+        unidades: units.length ? units : fallback.unidades
+      },
+      drafts: [],
+      discarded: [],
       history: [],
       warnings: []
     });

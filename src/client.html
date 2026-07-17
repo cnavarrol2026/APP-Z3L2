@@ -153,10 +153,6 @@
     callServer('apiPing')
       .then((ping) => {
         if (ping && ping.user) setUserInfo(ping.user);
-        return callServer('apiCheckSheets');
-      })
-      .then((sheetCheck) => {
-        if (sheetCheck && sheetCheck.user) setUserInfo(sheetCheck.user);
         return callServer('apiGetInitialData');
       })
       .then((data) => {
@@ -167,19 +163,47 @@
         state.drafts = data.drafts;
         state.discarded = data.discarded;
         state.history = data.history;
-        setConnectionStatus('Base sincronizada');
+        setConnectionStatus('Aplicación disponible');
         setUserInfo(data.user);
+        setGlobalStatus('Base técnica cargada. Verificando datos guardados...', 'info');
+        renderLoadWarnings(data.warnings || []);
+        renderAll();
+        syncSavedData();
+      })
+      .catch((error) => {
+        const message = getErrorMessage(error, 'No fue posible conectar con la base de datos.');
+        window.clearTimeout(slowLoadTimer);
+        setConnectionStatus('Aplicación disponible');
+        setGlobalStatus('No fue posible verificar Apps Script. Detalle: ' + message, 'error');
+        renderLoadWarnings(['No fue posible verificar Apps Script: ' + message]);
+        showToast(message);
+      });
+  }
+
+  function syncSavedData() {
+    callServer('apiCheckSheets')
+      .then((sheetCheck) => {
+        if (sheetCheck && sheetCheck.user) setUserInfo(sheetCheck.user);
+        return callServer('apiGetSavedData');
+      })
+      .then((data) => {
+        state.user = data.user || state.user;
+        state.lookup = data.lookup || state.lookup;
+        state.admin = data.admin || state.admin;
+        state.drafts = data.drafts || [];
+        state.discarded = data.discarded || [];
+        state.history = data.history || [];
+        setConnectionStatus('Base sincronizada');
+        setUserInfo(state.user);
         setGlobalStatus('', '');
         renderLoadWarnings(data.warnings || []);
         renderAll();
       })
       .catch((error) => {
-        const message = getErrorMessage(error, 'No fue posible conectar con la base de datos.');
-        window.clearTimeout(slowLoadTimer);
+        const message = getErrorMessage(error, 'No fue posible leer los datos guardados.');
         setConnectionStatus('Base no conectada');
-        setGlobalStatus('No fue posible conectar con la base de datos. Detalle: ' + message, 'error');
-        renderLoadWarnings(['No fue posible conectar con la base de datos: ' + message]);
-        showToast(message);
+        setGlobalStatus('No fue posible leer los datos guardados. Detalle: ' + message, 'error');
+        renderLoadWarnings(['No fue posible leer los datos guardados: ' + message]);
       });
   }
 

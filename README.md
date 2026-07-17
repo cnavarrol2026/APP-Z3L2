@@ -75,6 +75,10 @@ Despliegue web inicial:
 
 - https://script.google.com/macros/s/AKfycbyVNTQFjcytiBD-TtvkFmenqjmNqvV4aMVHSFYaF4GrztzxATuzKRRNvW4QMjZi15Q/exec
 
+Despliegue con permisos mínimos:
+
+- https://script.google.com/macros/s/AKfycbzP9DuZ3rIG6NBU49a7BR6xFtjHWTggIMKCHQDAFIvm-MjBFumFqa_0_UYvCMgCbdBP/exec
+
 ## Validación rápida
 
 - La pantalla inicial debe cargar sin datos de ejemplo.

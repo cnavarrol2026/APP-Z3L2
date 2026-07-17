@@ -175,3 +175,16 @@ El usuario ejecutó desde el editor Apps Script corporativo:
 - `VER_CONFIG_APP_Z3L2`
 
 Las ejecuciones completaron correctamente. Después de eso, `clasp deploy` permitió crear el despliegue web inicial.
+
+### Pantalla "Google no ha verificado esta aplicación"
+
+La pantalla de advertencia pertenece a Google OAuth y no se puede personalizar desde HTML, CSS ni Apps Script.
+
+Para reducir la fricción inicial, se cambió el manifiesto a scopes mínimos:
+
+- `userinfo.email`
+- `spreadsheets.currentonly`
+
+Se dejaron fuera del primer inicio los scopes de Drive y Documents. Esto posterga funciones de imágenes, respaldos y PDF hasta una autorización posterior o hasta configurar OAuth corporativo verificado.
+
+Aprendizaje: para una primera entrada de usuario, pedir solo permisos mínimos. Agregar Drive/PDF más adelante cuando la pantalla principal ya esté validada o cuando TI apruebe un OAuth Client corporativo.

@@ -1,5 +1,9 @@
 const SheetRepository = {
   getSpreadsheet: function() {
+    const activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    if (activeSpreadsheet) {
+      return activeSpreadsheet;
+    }
     if (!Config.SPREADSHEET_ID || Config.SPREADSHEET_ID.indexOf('CONFIGURAR_') === 0) {
       throw new Error('Falta configurar SPREADSHEET_ID en Config.gs.');
     }

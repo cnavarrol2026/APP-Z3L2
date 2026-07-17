@@ -31,6 +31,7 @@ Crear una versión Apps Script y desplegar URL `/exec` con acceso para usuarios 
 - Google Sheets: https://docs.google.com/spreadsheets/d/1vdFkhk0nGzlnX_aZ80l9hmSdHhD3_LSQOVBdXbURH6A/edit
 - Apps Script: https://script.google.com/d/1mgAMib7TF1n0vjTiuAghftgrqVD-A2sLN5cGZcxoplLwYREKXHsuak2h/edit
 - Web app inicial: https://script.google.com/macros/s/AKfycbyVNTQFjcytiBD-TtvkFmenqjmNqvV4aMVHSFYaF4GrztzxATuzKRRNvW4QMjZi15Q/exec
+- Web app con permisos mínimos: https://script.google.com/macros/s/AKfycbzP9DuZ3rIG6NBU49a7BR6xFtjHWTggIMKCHQDAFIvm-MjBFumFqa_0_UYvCMgCbdBP/exec
 
 ## Inicialización manual completada
 

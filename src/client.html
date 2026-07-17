@@ -65,8 +65,8 @@
     state.drafts = [];
     state.discarded = [];
     state.history = [];
-    document.getElementById('userEmail').textContent = 'Esqueleto listo';
-    setGlobalStatus('Ficha lista para revisar. Sincronizando datos guardados...', 'info');
+    document.getElementById('userEmail').textContent = 'Aplicación disponible';
+    setGlobalStatus('Interfaz disponible. Verificando conexión con la base de datos...', 'info');
     renderAll();
   }
 
@@ -129,11 +129,13 @@
 
   function loadInitialData() {
     const slowLoadTimer = window.setTimeout(() => {
-      document.getElementById('userEmail').textContent = 'Esperando datos';
-      setGlobalStatus('Los datos guardados aún no responden. La ficha base sigue disponible.', 'warning');
-      renderLoadWarnings(['Los datos guardados aún no responden. Puedes seguir revisando la estructura base.']);
+      document.getElementById('userEmail').textContent = 'Verificando base de datos';
+      setGlobalStatus('La base de datos está tardando más de lo esperado. La interfaz permanece disponible.', 'warning');
+      renderLoadWarnings(['La base de datos está tardando más de lo esperado. La interfaz permanece disponible.']);
     }, 8000);
-    callServer('apiGetInitialData')
+    callServer('apiPing')
+      .then(() => callServer('apiCheckSheets'))
+      .then(() => callServer('apiGetInitialData'))
       .then((data) => {
         window.clearTimeout(slowLoadTimer);
         state.user = data.user;
@@ -142,16 +144,16 @@
         state.drafts = data.drafts;
         state.discarded = data.discarded;
         state.history = data.history;
-        document.getElementById('userEmail').textContent = 'Datos sincronizados';
+        document.getElementById('userEmail').textContent = 'Base sincronizada';
         setGlobalStatus('', '');
         renderLoadWarnings(data.warnings || []);
         renderAll();
       })
       .catch((error) => {
         window.clearTimeout(slowLoadTimer);
-        document.getElementById('userEmail').textContent = 'Datos no disponibles';
-        setGlobalStatus('No se pudo leer la base guardada. La ficha base sigue visible.', 'error');
-        renderLoadWarnings(['No fue posible leer la base guardada: ' + error.message]);
+        document.getElementById('userEmail').textContent = 'Base no conectada';
+        setGlobalStatus('No fue posible conectar con la base de datos. La interfaz permanece disponible.', 'error');
+        renderLoadWarnings(['No fue posible conectar con la base de datos: ' + error.message]);
         showToast(error.message);
       });
   }

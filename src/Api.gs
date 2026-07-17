@@ -20,6 +20,26 @@ const Api = {
   }
 };
 
+function apiPing() {
+  return ok({
+    timestamp: nowIso(),
+    app: Config.APP_NAME
+  });
+}
+
+function apiCheckSheets() {
+  return Api.withSessionOnly('apiCheckSheets', function(user) {
+    const spreadsheet = SheetRepository.getSpreadsheet();
+    const configSheet = spreadsheet.getSheetByName(Config.SHEETS.CONFIG);
+    return ok({
+      user: user,
+      spreadsheetId: spreadsheet.getId(),
+      spreadsheetName: spreadsheet.getName(),
+      hasConfigSheet: !!configSheet
+    });
+  });
+}
+
 function apiGetInitialData() {
   return Api.withSessionOnly('apiGetInitialData', function(user) {
     const fallback = TemplateService.getFallbackAdminData();

@@ -316,6 +316,16 @@ Términos como `Modo local`, `borrador` o `etapa` pueden ser correctos intername
 
 El modelo interno puede seguir usando borradores y etapas para control técnico, pero esos conceptos no deben dominar la experiencia principal.
 
+### Diagnosticar Apps Script antes de seguir cambiando UI
+
+Cuando una web app queda esperando datos, no conviene seguir mezclando UI con lectura de Sheets. Hay que separar:
+
+- `apiPing`: confirma que Apps Script y `google.script.run` responden sin tocar Sheets;
+- `apiCheckSheets`: confirma que el script puede abrir la hoja vinculada;
+- `apiGetInitialData`: carga datos reales solo después de que lo anterior funcione.
+
+Esto permite saber si el bloqueo está en el despliegue/Apps Script, en la autorización de Sheets o en la lectura de datos.
+
 ### Comparación inicial con Mermas
 
 Se revisó Mermas solo en lectura. Su manifiesto usa:

@@ -36,3 +36,6 @@
 - Se mejora visualmente Catálogos con tarjetas más parejas, labels claros y acciones específicas.
 - Se cambia el botón visible de producto desde “Guardar borrador” a “Guardar producto”.
 - Se incorpora branding liviano en el encabezado usando una versión pequeña del logo corporativo.
+- Se agregan diagnósticos separados `apiPing` y `apiCheckSheets` para distinguir si falla Apps Script o la conexión con Sheets.
+- Se profesionalizan mensajes de estado: `Aplicación disponible`, `Verificando base de datos`, `Base sincronizada`, `Base no conectada`.
+- Se ajusta la jerarquía tipográfica del título principal.

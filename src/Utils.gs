@@ -32,9 +32,17 @@ function fail(message, errorCode, data) {
   return { ok: false, message: message || 'No fue posible completar la operación.', errorCode: errorCode || 'ERROR', data: data || null };
 }
 
+function toClientValue(value) {
+  if (value === undefined || value === null) return '';
+  if (Object.prototype.toString.call(value) === '[object Date]') {
+    return Utilities.formatDate(value, Config.TIME_ZONE, "yyyy-MM-dd'T'HH:mm:ss");
+  }
+  return value;
+}
+
 function asRowObject(headers, values) {
   return headers.reduce(function(row, header, index) {
-    row[header] = values[index] === undefined ? '' : values[index];
+    row[header] = toClientValue(values[index]);
     return row;
   }, {});
 }

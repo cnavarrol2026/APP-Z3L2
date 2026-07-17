@@ -375,3 +375,15 @@ Decisión aplicada:
 - Si falla la lectura de Sheets, la interfaz debe seguir disponible y el mensaje debe nombrar la etapa que falló.
 
 Aprendizaje: en Apps Script conviene que la primera respuesta del frontend sea pequeña, defensiva y sin escrituras. Las lecturas más amplias de Sheets deben ejecutarse después para evitar pantallas atrapadas en carga.
+
+### Valores de Sheets antes de enviarlos al navegador
+
+Cuando una función de `google.script.run` devuelve filas leídas con `getValues()`, no conviene enviar los valores crudos al frontend. Las fechas y otros tipos internos de Apps Script pueden provocar que el navegador reciba una respuesta nula o inválida, aunque la función del backend haya terminado.
+
+Decisión aplicada:
+
+- centralizar la conversión en `toClientValue`;
+- convertir fechas a texto ISO;
+- usar esa conversión dentro de `asRowObject`, que es el punto común de lectura de Sheets.
+
+Aprendizaje: todo dato que sale de Google Sheets hacia HTML Service debe quedar serializado como valores simples antes de retornar por `google.script.run`.

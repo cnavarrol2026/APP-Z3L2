@@ -45,3 +45,4 @@
 - Se muestra el correo del usuario si Apps Script lo entrega; si no, se muestra `Usuario Google autenticado`.
 - El aviso global de conexión ahora incluye el detalle técnico visible.
 - Se separa la carga inicial de la sincronización con Sheets: `apiGetInitialData` entrega una base técnica liviana y `apiGetSavedData` lee los datos guardados después.
+- Se serializan los valores leídos desde Sheets antes de enviarlos al frontend para evitar respuestas inválidas en `google.script.run`.

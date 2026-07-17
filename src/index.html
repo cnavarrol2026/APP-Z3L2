@@ -57,9 +57,19 @@
     <section id="view-configuracion" class="view">
       <div class="panel-title-row">
         <h2>Configuración</h2>
-        <button id="backupButton">Crear respaldo ZIP</button>
       </div>
 
+      <nav class="config-tabs" aria-label="Secciones de configuración">
+        <button class="config-tab active" type="button" data-config-page="ficha">Ficha técnica</button>
+        <button class="config-tab" type="button" data-config-page="catalogos">Catálogos</button>
+        <button class="config-tab" type="button" data-config-page="campos">Campos</button>
+        <button class="config-tab" type="button" data-config-page="producto">Producto nuevo</button>
+        <button class="config-tab" type="button" data-config-page="pendientes">Pendientes</button>
+        <button class="config-tab" type="button" data-config-page="descartados">Descartados</button>
+        <button class="config-tab" type="button" data-config-page="respaldo">Respaldo</button>
+      </nav>
+
+      <section id="config-page-ficha" class="config-page active">
       <section class="wide-panel template-panel">
         <div class="panel-title-row">
           <div>
@@ -69,7 +79,9 @@
         </div>
         <div id="templateStructure" class="template-structure"></div>
       </section>
+      </section>
 
+      <section id="config-page-catalogos" class="config-page">
       <div class="admin-grid">
         <form id="categoryForm" class="admin-card">
           <h3>Categorías</h3>
@@ -101,7 +113,9 @@
           <div id="unitList" class="list"></div>
         </form>
       </div>
+      </section>
 
+      <section id="config-page-campos" class="config-page">
       <section class="wide-panel">
         <h3>Agregar campo a la ficha técnica</h3>
         <form id="fieldForm" class="wizard-grid">
@@ -131,7 +145,9 @@
           </div>
         </form>
       </section>
+      </section>
 
+      <section id="config-page-producto" class="config-page">
       <section class="wide-panel">
         <h3>Agregar producto nuevo</h3>
         <form id="draftForm" class="wizard-grid">
@@ -175,15 +191,31 @@
           </div>
         </form>
       </section>
+      </section>
 
+      <section id="config-page-pendientes" class="config-page">
       <section class="wide-panel">
         <h3>Pendientes</h3>
         <div id="draftList" class="list"></div>
       </section>
+      </section>
 
+      <section id="config-page-descartados" class="config-page">
       <section class="wide-panel">
         <h3>Descartados</h3>
         <div id="discardedList" class="list"></div>
+      </section>
+      </section>
+
+      <section id="config-page-respaldo" class="config-page">
+        <section class="wide-panel backup-panel">
+          <div>
+            <p class="eyebrow">Respaldo manual</p>
+            <h3>Exportar base actual</h3>
+          </div>
+          <p class="help">Genera un ZIP con CSV por hoja y JSON maestro relacional.</p>
+          <button id="backupButton" type="button">Crear respaldo ZIP</button>
+        </section>
       </section>
     </section>
 

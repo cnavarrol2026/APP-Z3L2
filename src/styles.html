@@ -70,6 +70,21 @@
     overflow-x: auto;
   }
 
+  .config-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+    padding: 10px;
+    overflow-x: auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+  }
+
   button {
     min-height: 40px;
     border: 0;
@@ -87,12 +102,14 @@
   }
 
   button.secondary,
-  .tab-button {
+  .tab-button,
+  .config-tab {
     background: #e9eef8;
     color: var(--blue-dark);
   }
 
-  .tab-button.active {
+  .tab-button.active,
+  .config-tab.active {
     background: var(--blue);
     color: white;
   }
@@ -108,6 +125,14 @@
   }
 
   .view.active {
+    display: block;
+  }
+
+  .config-page {
+    display: none;
+  }
+
+  .config-page.active {
     display: block;
   }
 
@@ -238,6 +263,12 @@
   .template-panel {
     margin-top: 0;
     margin-bottom: 18px;
+  }
+
+  .backup-panel {
+    display: grid;
+    gap: 14px;
+    max-width: 560px;
   }
 
   .template-structure,

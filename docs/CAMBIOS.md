@@ -22,3 +22,4 @@
 - Se mejora la pantalla de Configuración para mostrar la estructura de ficha técnica agrupada por sección y permitir agregar campos.
 - Se corrige la carga de la plantilla técnica para no depender de `Config` durante evaluación global de Apps Script.
 - Se agrega mensaje visible si falla la carga inicial de datos desde Apps Script.
+- Se segmenta la pantalla de Configuración en pestañas horizontales internas para separar ficha técnica, catálogos, campos, producto nuevo, pendientes, descartados y respaldo.

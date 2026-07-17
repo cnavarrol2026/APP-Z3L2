@@ -248,3 +248,17 @@ const TemplateService = {
 Si `TemplateService.gs` se evalúa antes que `Config.gs`, la carga inicial puede fallar y la interfaz queda sin datos.
 
 Solución aplicada: usar valores literales estables (`TEXTO`, `NUMERO`) dentro de la plantilla global, y reservar `Config` para ejecución de funciones donde ya está disponible.
+
+### Configuración debe separar tareas, no apilar formularios
+
+La pantalla de Configuración se volvió confusa al mezclar en una sola vista:
+
+- plantilla de ficha técnica;
+- catálogos;
+- creación de campos;
+- creación de producto;
+- pendientes;
+- descartados;
+- respaldo.
+
+Solución aplicada: usar pestañas horizontales internas dentro de Configuración. Cada pestaña debe representar una tarea clara y mostrar solo los controles necesarios para esa tarea.

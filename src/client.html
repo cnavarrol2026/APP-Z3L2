@@ -65,7 +65,8 @@
     state.drafts = [];
     state.discarded = [];
     state.history = [];
-    document.getElementById('userEmail').textContent = 'Aplicación disponible';
+    setConnectionStatus('Aplicación disponible');
+    setUserInfo({ displayName: 'Usuario Google', identified: false });
     setGlobalStatus('Interfaz disponible. Verificando conexión con la base de datos...', 'info');
     renderAll();
   }
@@ -145,13 +146,19 @@
 
   function loadInitialData() {
     const slowLoadTimer = window.setTimeout(() => {
-      document.getElementById('userEmail').textContent = 'Verificando base de datos';
+      setConnectionStatus('Verificando base de datos');
       setGlobalStatus('La base de datos está tardando más de lo esperado. La interfaz permanece disponible.', 'warning');
       renderLoadWarnings(['La base de datos está tardando más de lo esperado. La interfaz permanece disponible.']);
     }, 8000);
     callServer('apiPing')
-      .then(() => callServer('apiCheckSheets'))
-      .then(() => callServer('apiGetInitialData'))
+      .then((ping) => {
+        if (ping && ping.user) setUserInfo(ping.user);
+        return callServer('apiCheckSheets');
+      })
+      .then((sheetCheck) => {
+        if (sheetCheck && sheetCheck.user) setUserInfo(sheetCheck.user);
+        return callServer('apiGetInitialData');
+      })
       .then((data) => {
         window.clearTimeout(slowLoadTimer);
         state.user = data.user;
@@ -160,7 +167,8 @@
         state.drafts = data.drafts;
         state.discarded = data.discarded;
         state.history = data.history;
-        document.getElementById('userEmail').textContent = 'Base sincronizada';
+        setConnectionStatus('Base sincronizada');
+        setUserInfo(data.user);
         setGlobalStatus('', '');
         renderLoadWarnings(data.warnings || []);
         renderAll();
@@ -168,11 +176,35 @@
       .catch((error) => {
         const message = getErrorMessage(error, 'No fue posible conectar con la base de datos.');
         window.clearTimeout(slowLoadTimer);
-        document.getElementById('userEmail').textContent = 'Base no conectada';
-        setGlobalStatus('No fue posible conectar con la base de datos. La interfaz permanece disponible.', 'error');
+        setConnectionStatus('Base no conectada');
+        setGlobalStatus('No fue posible conectar con la base de datos. Detalle: ' + message, 'error');
         renderLoadWarnings(['No fue posible conectar con la base de datos: ' + message]);
         showToast(message);
       });
+  }
+
+  function setConnectionStatus(message) {
+    const status = document.getElementById('connectionStatus');
+    if (status) status.textContent = message;
+  }
+
+  function setUserInfo(user) {
+    const container = document.getElementById('userEmail');
+    if (!container) return;
+    if (!user) {
+      container.textContent = 'Usuario Google';
+      return;
+    }
+    if (user.identified && user.email) {
+      container.textContent = user.email;
+      return;
+    }
+    if (user.effectiveEmail) {
+      container.textContent = 'Usuario Google autenticado';
+      container.title = 'Apps Script ejecuta con la cuenta propietaria: ' + user.effectiveEmail;
+      return;
+    }
+    container.textContent = user.displayName || 'Usuario Google autenticado';
   }
 
   function setGlobalStatus(message, tone) {

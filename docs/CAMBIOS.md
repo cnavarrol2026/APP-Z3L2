@@ -41,3 +41,6 @@
 - Se ajusta la jerarquía tipográfica del título principal.
 - Se corrige el manejo de respuestas nulas de `google.script.run` para mostrar el error real en vez de romper con `Cannot read properties of null`.
 - `apiCheckSheets` ahora devuelve un mensaje claro si no puede abrir el Google Sheets configurado.
+- Se separa en el encabezado el estado de conexión y el usuario conectado.
+- Se muestra el correo del usuario si Apps Script lo entrega; si no, se muestra `Usuario Google autenticado`.
+- El aviso global de conexión ahora incluye el detalle técnico visible.

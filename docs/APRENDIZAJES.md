@@ -343,6 +343,14 @@ Solución aplicada:
 - mensajes fallback por función;
 - `apiCheckSheets` con error explícito si no puede abrir el Spreadsheet.
 
+### Usuario conectado en Apps Script no siempre entrega correo
+
+En web apps ejecutadas como propietario (`USER_DEPLOYING`), `Session.getActiveUser().getEmail()` puede venir vacío según políticas de Google Workspace y contexto del usuario. Aun así, la app puede mostrar un estado profesional:
+
+- si Google entrega correo: mostrar el correo del usuario;
+- si no lo entrega: mostrar `Usuario Google autenticado`;
+- conservar `Session.getEffectiveUser().getEmail()` como referencia técnica del propietario de ejecución, no como usuario operativo.
+
 ### Comparación inicial con Mermas
 
 Se revisó Mermas solo en lectura. Su manifiesto usa:

@@ -1,4 +1,13 @@
 const Api = {
+  withSessionOnly: function(functionName, callback) {
+    try {
+      const user = SecurityService.requireAuthenticatedUser();
+      return callback(user);
+    } catch (error) {
+      return fail(error.message, error.code || 'APP_ERROR');
+    }
+  },
+
   withAuth: function(functionName, callback) {
     try {
       const user = SecurityService.requireAuthenticatedUser();
@@ -12,27 +21,36 @@ const Api = {
 };
 
 function apiGetInitialData() {
-  return Api.withAuth('apiGetInitialData', function(user) {
-    let templateWarning = '';
-    try {
-      TemplateService.ensureDefaultTechnicalTemplate(user.email);
-    } catch (error) {
-      templateWarning = 'No se pudo materializar la plantilla en Sheets: ' + error.message;
-      ErrorService.record('TemplateService.ensureDefaultTechnicalTemplate', error);
-    }
-    const admin = CatalogService.getAdminData(false);
+  return Api.withSessionOnly('apiGetInitialData', function(user) {
     const fallback = TemplateService.getFallbackAdminData();
-    if (!admin.secciones.length) admin.secciones = fallback.secciones;
-    if (!admin.campos.length) admin.campos = fallback.campos;
-    if (!admin.unidades.length) admin.unidades = fallback.unidades;
+    const categories = SheetRepository.listSafe(Config.SHEETS.CATEGORIES).filter(function(row) { return toBoolean(row.activo); });
+    const bottles = SheetRepository.listSafe(Config.SHEETS.BOTTLES).filter(function(row) { return toBoolean(row.activo); });
+    const relations = SheetRepository.listSafe(Config.SHEETS.CATEGORY_BOTTLE).filter(function(row) { return toBoolean(row.activo); });
+    const articles = SheetRepository.listSafe(Config.SHEETS.ARTICLES).filter(function(row) { return row.estado === Config.STATES.ACTIVE; });
+    const sections = SheetRepository.listSafe(Config.SHEETS.SECTIONS).filter(function(row) { return toBoolean(row.activo); }).sort(CatalogService.byOrder);
+    const fields = SheetRepository.listSafe(Config.SHEETS.FIELDS).filter(function(row) { return toBoolean(row.activo); }).sort(CatalogService.byOrder);
+    const units = SheetRepository.listSafe(Config.SHEETS.UNITS).filter(function(row) { return toBoolean(row.activo); }).sort(CatalogService.byOrder);
+    const admin = {
+      categorias: categories,
+      botellas: bottles,
+      relaciones: relations,
+      secciones: sections.length ? sections : fallback.secciones,
+      campos: fields.length ? fields : fallback.campos,
+      unidades: units.length ? units : fallback.unidades
+    };
     return ok({
       user: user,
-      lookup: ArticleService.getLookupData(),
+      lookup: {
+        categorias: categories,
+        botellas: bottles,
+        relaciones: relations,
+        articulos: articles
+      },
       admin: admin,
-      drafts: DraftService.listPendingDrafts(),
-      discarded: DraftService.listDiscardedDrafts(),
-      history: HistoryService.listEvents({}),
-      warnings: templateWarning ? [templateWarning] : []
+      drafts: SheetRepository.listSafe(Config.SHEETS.DRAFTS).filter(function(row) { return row.estado === Config.STATES.DRAFT; }),
+      discarded: SheetRepository.listSafe(Config.SHEETS.DISCARDED_DRAFTS).filter(function(row) { return row.estado === Config.STATES.DISCARDED; }),
+      history: [],
+      warnings: []
     });
   });
 }

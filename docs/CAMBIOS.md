@@ -28,3 +28,5 @@
 - Se elimina `Etapa` de la interfaz visible y queda como dato técnico interno del borrador.
 - Se separan ETQ y CET en bloques visuales con código e imagen PNG propia.
 - Se agrega aviso visible de carga lenta o fallo de backend en todas las páginas internas de Configuración.
+- Se acelera la carga inicial: ya no ejecuta `ensureDatabase`, no materializa plantilla, no escribe en Sheets y no lee historial al entrar.
+- Se agrega timeout frontend de 20 segundos para evitar espera infinita si Apps Script no responde.

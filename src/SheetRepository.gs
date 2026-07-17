@@ -1,13 +1,20 @@
 const SheetRepository = {
+  _spreadsheet: null,
+
   getSpreadsheet: function() {
+    if (this._spreadsheet) {
+      return this._spreadsheet;
+    }
     const activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     if (activeSpreadsheet) {
-      return activeSpreadsheet;
+      this._spreadsheet = activeSpreadsheet;
+      return this._spreadsheet;
     }
     if (!Config.SPREADSHEET_ID || Config.SPREADSHEET_ID.indexOf('CONFIGURAR_') === 0) {
       throw new Error('Falta configurar SPREADSHEET_ID en Config.gs.');
     }
-    return SpreadsheetApp.openById(Config.SPREADSHEET_ID);
+    this._spreadsheet = SpreadsheetApp.openById(Config.SPREADSHEET_ID);
+    return this._spreadsheet;
   },
 
   ensureDatabase: function() {
@@ -53,6 +60,14 @@ const SheetRepository = {
       .map(function(values) {
         return asRowObject(headers, values);
       });
+  },
+
+  listSafe: function(sheetName) {
+    try {
+      return this.list(sheetName);
+    } catch (error) {
+      return [];
+    }
   },
 
   append: function(sheetName, object) {

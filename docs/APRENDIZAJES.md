@@ -280,3 +280,16 @@ Decisiones aplicadas:
 Si `apiGetInitialData` falla o tarda demasiado, no basta con mostrar el error en una sola pestaña. El usuario puede estar en Producto nuevo, Catálogos o Pendientes y pensar que la app está vacía.
 
 Solución aplicada: avisos visibles de carga lenta o error de backend en todas las páginas internas de Configuración.
+
+### La carga inicial de Apps Script debe ser solo lectura mínima
+
+Apps Script puede sentirse congelado si la primera llamada de la web app intenta hacer demasiadas cosas: validar/crear hojas, escribir plantilla, leer historial, leer borradores y armar toda la app en una sola ejecución.
+
+Regla aplicada desde ahora:
+
+- la carga inicial solo lee lo mínimo para pintar la pantalla;
+- no debe llamar `ensureDatabase`;
+- no debe escribir plantilla en Sheets;
+- no debe leer historial completo al inicio;
+- debe usar una plantilla fallback en memoria si las hojas aún no tienen estructura;
+- el frontend debe tener timeout para no quedar esperando indefinidamente.

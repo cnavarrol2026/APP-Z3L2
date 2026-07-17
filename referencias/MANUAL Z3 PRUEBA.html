@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Ajustes de Línea</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #16a34a;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: var(--dark);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        /* Selector de producto gigante */
+        .selector-box {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        select {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: 3px solid var(--primary);
+            border-radius: 8px;
+            background-color: white;
+            cursor: pointer;
+            outline: none;
+        }
+
+        /* Distribución de Paneles */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .grid {
+                grid-template-columns: 350px 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            padding: 20px;
+            border-top: 5px solid var(--primary);
+        }
+
+        /* Panel Izquierdo: Etiqueta Visual */
+        .etiqueta-card {
+            border-top-color: #f59e0b; /* Color naranja para destacar */
+            text-align: center;
+        }
+
+        .img-container {
+            background: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            min-height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .img-container:hover {
+            transform: scale(1.02);
+        }
+
+        .img-container img {
+            max-width: 100%;
+            max-height: 220px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .badge-codigo {
+            display: inline-block;
+            background: #e2e8f0;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        /* Paneles de Ajustes */
+        .param-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .param-box {
+            background: var(--light);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .param-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: #64748b;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .param-value {
+            font-size: 1.15rem;
+            font-weight: bold;
+            color: var(--dark);
+        }
+
+        /* Colores dinámicos para avisos rápidos */
+        .badge-color {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .color-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: inline-block;
+            border: 1px solid #94a3b8;
+        }
+
+        /* Sección de secciones */
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            margin-top: 15px;
+            color: var(--primary);
+        }
+
+        .section-title:first-of-type {
+            margin-top: 0;
+        }
+
+        /* Modal para zoom de imagen */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Encabezado con Selector -->
+    <header>
+        <h1>MANUAL DE CONFIGURACIÓN DE LÍNEA</h1>
+        <div class="selector-box">
+            <select id="productSelect" onchange="actualizarValores()">
+                <option value="cabernet">Cabernet Sauvignon Reserva 750cc</option>
+                <option value="pisco">Pisco Premium Especial 1L</option>
+                <option value="espumante">Espumante Brut 750cc</option>
+            </select>
+        </div>
+    </header>
+
+    <!-- Área de Trabajo -->
+    <div class="grid">
+        
+        <!-- COLUMNA IZQUIERDA: VALIDACIÓN VISUAL -->
+        <div class="card etiqueta-card">
+            <h2 class="section-title">Etiqueta Referencial</h2>
+            <p style="font-size: 0.9rem; color: #64748b;">(Toca la imagen para ampliar)</p>
+            
+            <div class="img-container" onclick="abrirZoom()">
+                <!-- Imagen de reemplazo con servicio placeholder para pruebas -->
+                <img id="imgEtiqueta" src="https://placehold.co/400x300/e2e8f0/1e293b?text=Cargando..." alt="Etiqueta">
+            </div>
+
+            <div class="param-title">Código SKU Insumo</div>
+            <div class="badge-codigo" id="skuInsumo">SKU-0000</div>
+        </div>
+
+        <!-- COLUMNA DERECHA: PARAMETROS MAQUINA -->
+        <div class="card">
+            <!-- SECCIÓN BOTELLA Y ETIQUETAS -->
+            <h2 class="section-title">📐 Botella e Insumos</h2>
+            <div class="param-grid">
+                <div class="param-box">
+                    <div class="param-title">Tipo de Botella</div>
+                    <div class="param-value" id="tipoBotella">-</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-title">Medidas Etiqueta</div>
+                    <div class="param-value" id="medidasEtiqueta">-</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-title">Altura de Pegado (Etiqueta)</div>
+                    <div class="param-value" id="alturaPegado">-</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-title">Altura Contra-Etiqueta</div>
+                    <div class="param-value" id="alturaContra">-</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-title">Altura Medalla</div>
+                    <div class="param-value" id="alturaMedalla">-</div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN AJUSTES ETIQUETADORA -->
+            <h2 class="section-title">⚙️ Ajustes Mecánicos de Etiquetadora</h2>
+            <div class="param-grid">
+                <div class="param-box">
+                    <div class="param-title">Entrada Guía Sin Fin</div>
+                    <div class="param-value" id="guiaSinFin">-</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-title">Guía de Botellas</div>
+                    <div class="param-value" id="guiaBotellas">-</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-title">Altura de Estrella</div>
+                    <div class="param-value" id="alturaEstrella">-</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-title">Levas</div>
+                    <div class="param-value" id="levas">-</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-title">Altura Estaciones</div>
+                    <div class="param-value" id="alturaEstaciones">-</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-title">Profundidad Estaciones</div>
+                    <div class="param-value" id="profundidadEstaciones">-</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-title">Ajuste Lateral</div>
+                    <div class="param-value" id="ajusteLateral">-</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-title">Velocidad Emisión</div>
+                    <div class="param-value" id="velocidadEmision">-</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-title">Distancia de Etiqueta</div>
+                    <div class="param-value" id="distanciaEtiqueta">-</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-title">Tipo de Chaleco</div>
+                    <div class="param-value" id="tipoChaleco">-</div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN CAPSULADORA -->
+            <h2 class="section-title">🍾 Ajustes de Capsuladora</h2>
+            <div class="param-grid">
+                <div class="param-box">
+                    <div class="param-title">N° Formato (Cápsula)</div>
+                    <div class="param-value" id="formatoCapsula">-</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-title">N° Formato (Botella)</div>
+                    <div class="param-value" id="formatoBotella">-</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-title">Color de Formato</div>
+                    <div class="param-value" id="colorFormato">-</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-title">Material (PVC / Complex)</div>
+                    <div class="param-value" id="materialCapsula">-</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-title">Sinfín Capsuladora</div>
+                    <div class="param-value" id="sinFinCapsuladora">-</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal para ver la imagen grande -->
+<div id="zoomModal" class="modal" onclick="cerrarZoom()">
+    <img id="imgZoom" src="" alt="Zoom Etiqueta">
+</div>
+
+<script>
+    // ESTA ES TU BASE DE DATOS (Fácil de modificar)
+    // Cada vez que agregues un producto en Excel, puedes agregarlo aquí de la misma forma.
+    const baseDatos = {
+        cabernet: {
+            sku: "SKU-99213",
+            imagen: "https://placehold.co/400x300/991b1b/ffffff?text=Cabernet+Reserva", // Aquí pones la ruta de tu foto real (ej: "imagenes/etiqueta_cabernet.jpg")
+            tipoBotella: "Bordelesa Cónica 750ml",
+            medidasEtiqueta: "120 x 90 mm",
+            alturaPegado: "35 mm",
+            alturaContra: "40 mm",
+            alturaMedalla: "180 mm",
+            guiaSinFin: "Posición C-4",
+            guiaBotellas: "Estándar 75mm",
+            alturaEstrella: "150 mm",
+            levas: "Curva A",
+            alturaEstaciones: "112 mm",
+            profundidadEstaciones: "45 mm",
+            ajusteLateral: "+2.5 mm",
+            velocidadEmision: "15 m/min",
+            distanciaEtiqueta: "3.0 mm",
+            tipoChaleco: "Neopreno Suave N°2",
+            formatoCapsula: "FC-2931",
+            formatoBotella: "FB-BORD-750",
+            colorFormato: '<span class="badge-color"><span class="color-dot" style="background-color: #ef4444;"></span> Rojo</span>',
+            materialCapsula: "PVC (Termocontraíble)",
+            sinFinCapsuladora: "SF-C-085"
+        },
+        pisco: {
+            sku: "SKU-77541",
+            imagen: "https://placehold.co/400x300/1e3a8a/ffffff?text=Pisco+Premium", // Tu foto real aquí
+            tipoBotella: "Cilíndrica Transparente 1L",
+            medidasEtiqueta: "140 x 110 mm",
+            alturaPegado: "25 mm",
+            alturaContra: "30 mm",
+            alturaMedalla: "No Aplica",
+            guiaSinFin: "Posición D-2",
+            guiaBotellas: "Ajustada 85mm",
+            alturaEstrella: "185 mm",
+            levas: "Curva C",
+            alturaEstaciones: "130 mm",
+            profundidadEstaciones: "52 mm",
+            ajusteLateral: "0.0 mm",
+            velocidadEmision: "12 m/min",
+            distanciaEtiqueta: "4.0 mm",
+            tipoChaleco: "Cepillo Flexible N°1",
+            formatoCapsula: "FC-3135",
+            formatoBotella: "FB-CIL-1000",
+            colorFormato: '<span class="badge-color"><span class="color-dot" style="background-color: #22c55e;"></span> Verde</span>',
+            materialCapsula: "Complex (Polilaminado)",
+            sinFinCapsuladora: "SF-C-102"
+        },
+        espumante: {
+            sku: "SKU-88432",
+            imagen: "https://placehold.co/400x300/ca8a04/ffffff?text=Espumante+Brut", // Tu foto real aquí
+            tipoBotella: "Champaña Tradicional 750ml",
+            medidasEtiqueta: "110 x 80 mm",
+            alturaPegado: "45 mm",
+            alturaContra: "50 mm",
+            alturaMedalla: "190 mm (Cuello)",
+            guiaSinFin: "Posición A-1",
+            guiaBotellas: "Ancha 90mm",
+            alturaEstrella: "160 mm",
+            levas: "Curva B",
+            alturaEstaciones: "120 mm",
+            profundidadEstaciones: "48 mm",
+            ajusteLateral: "-1.0 mm",
+            velocidadEmision: "10 m/min",
+            distanciaEtiqueta: "3.5 mm",
+            tipoChaleco: "Goma Semirígida N°3",
+            formatoCapsula: "FC-3440",
+            formatoBotella: "FB-CHAM-750",
+            colorFormato: '<span class="badge-color"><span class="color-dot" style="background-color: #eab308;"></span> Amarillo</span>',
+            materialCapsula: "Complex (Polilaminado)",
+            sinFinCapsuladora: "SF-C-095"
+        }
+    };
+
+    // Función que lee el selector y llena los campos automáticamente
+    function actualizarValores() {
+        const selector = document.getElementById("productSelect");
+        const productoSeleccionado = selector.value;
+        const datos = baseDatos[productoSeleccionado];
+
+        if (datos) {
+            // Actualizar Imagen y Código
+            document.getElementById("imgEtiqueta").src = datos.imagen;
+            document.getElementById("skuInsumo").innerText = datos.sku;
+
+            // Actualizar Bloque Botella e Insumos
+            document.getElementById("tipoBotella").innerText = datos.tipoBotella;
+            document.getElementById("medidasEtiqueta").innerText = datos.medidasEtiqueta;
+            document.getElementById("alturaPegado").innerText = datos.alturaPegado;
+            document.getElementById("alturaContra").innerText = datos.alturaContra;
+            document.getElementById("alturaMedalla").innerText = datos.alturaMedalla;
+
+            // Actualizar Etiquetadora
+            document.getElementById("guiaSinFin").innerText = datos.guiaSinFin;
+            document.getElementById("guiaBotellas").innerText = datos.guiaBotellas;
+            document.getElementById("alturaEstrella").innerText = datos.alturaEstrella;
+            document.getElementById("levas").innerText = datos.levas;
+            document.getElementById("alturaEstaciones").innerText = datos.alturaEstaciones;
+            document.getElementById("profundidadEstaciones").innerText = datos.profundidadEstaciones;
+            document.getElementById("ajusteLateral").innerText = datos.ajusteLateral;
+            document.getElementById("velocidadEmision").innerText = datos.velocidadEmision;
+            document.getElementById("distanciaEtiqueta").innerText = datos.distanciaEtiqueta;
+            document.getElementById("tipoChaleco").innerText = datos.tipoChaleco;
+
+            // Actualizar Capsuladora
+            document.getElementById("formatoCapsula").innerText = datos.formatoCapsula;
+            document.getElementById("formatoBotella").innerText = datos.formatoBotella;
+            document.getElementById("colorFormato").innerHTML = datos.colorFormato; // innerHTML para renderizar el circulo de color
+            document.getElementById("materialCapsula").innerText = datos.materialCapsula;
+            document.getElementById("sinFinCapsuladora").innerText = datos.sinFinCapsuladora;
+        }
+    }
+
+    // Funciones sencillas para el modal de zoom de etiqueta
+    function abrirZoom() {
+        const imgOriginal = document.getElementById("imgEtiqueta").src;
+        document.getElementById("imgZoom").src = imgOriginal;
+        document.getElementById("zoomModal").style.display = "flex";
+    }
+
+    function cerrarZoom() {
+        document.getElementById("zoomModal").style.display = "none";
+    }
+
+    // Ejecutar al cargar la página para rellenar el primer producto por defecto
+    window.onload = actualizarValores;
+</script>
+
+</body>
+</html>

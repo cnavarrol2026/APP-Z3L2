@@ -1,0 +1,11 @@
+.clasp.json
+.DS_Store
+node_modules/
+dist/
+tmp/
+*.log
+*.zip
+*.xlsx
+*.csv
+*.bak
+desktop.ini

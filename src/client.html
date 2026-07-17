@@ -1,0 +1,290 @@
+<script>
+  const state = {
+    lookup: { categorias: [], botellas: [], relaciones: [], articulos: [] },
+    admin: {},
+    drafts: [],
+    discarded: [],
+    history: [],
+    user: null
+  };
+
+  document.addEventListener('DOMContentLoaded', init);
+
+  function init() {
+    bindTabs();
+    bindForms();
+    loadInitialData();
+  }
+
+  function bindTabs() {
+    document.querySelectorAll('.tab-button').forEach((button) => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.tab-button').forEach((item) => item.classList.remove('active'));
+        document.querySelectorAll('.view').forEach((item) => item.classList.remove('active'));
+        button.classList.add('active');
+        document.getElementById('view-' + button.dataset.view).classList.add('active');
+      });
+    });
+  }
+
+  function bindForms() {
+    document.getElementById('categoryForm').addEventListener('submit', submitCatalog('apiCreateCategory'));
+    document.getElementById('bottleForm').addEventListener('submit', submitCatalog('apiCreateBottle'));
+    document.getElementById('sectionForm').addEventListener('submit', submitCatalog('apiCreateSection'));
+    document.getElementById('unitForm').addEventListener('submit', submitCatalog('apiCreateUnit'));
+    document.getElementById('draftForm').addEventListener('submit', saveDraft);
+    document.getElementById('backupButton').addEventListener('click', createBackup);
+    document.getElementById('imageInput').addEventListener('change', validateImageInput);
+    document.getElementById('categorySelect').addEventListener('change', renderBottleSelect);
+    document.getElementById('bottleSelect').addEventListener('change', renderArticleSelect);
+    document.getElementById('articleSelect').addEventListener('change', renderArticleDetail);
+    document.getElementById('pdfButton').addEventListener('click', generatePdf);
+  }
+
+  function callServer(functionName, payload) {
+    return new Promise((resolve, reject) => {
+      google.script.run
+        .withSuccessHandler((response) => response && response.ok ? resolve(response.data) : reject(new Error(response.message)))
+        .withFailureHandler((error) => reject(error))
+        [functionName](payload);
+    });
+  }
+
+  function loadInitialData() {
+    callServer('apiGetInitialData')
+      .then((data) => {
+        state.user = data.user;
+        state.lookup = data.lookup;
+        state.admin = data.admin;
+        state.drafts = data.drafts;
+        state.discarded = data.discarded;
+        state.history = data.history;
+        document.getElementById('userEmail').textContent = data.user.email;
+        renderAll();
+      })
+      .catch((error) => showToast(error.message));
+  }
+
+  function renderAll() {
+    renderCategorySelect();
+    renderAdminLists();
+    renderDraftLists();
+    renderHistory();
+  }
+
+  function renderCategorySelect() {
+    fillSelect('categorySelect', state.lookup.categorias, 'Selecciona categoría');
+    renderBottleSelect();
+  }
+
+  function renderBottleSelect() {
+    const categoryId = document.getElementById('categorySelect').value;
+    const bottleIds = state.lookup.relaciones
+      .filter((relation) => relation.categoriaId === categoryId)
+      .map((relation) => relation.botellaId);
+    const bottles = state.lookup.botellas.filter((bottle) => bottleIds.includes(bottle.id));
+    fillSelect('bottleSelect', bottles, 'Selecciona botella');
+    renderArticleSelect();
+  }
+
+  function renderArticleSelect() {
+    const categoryId = document.getElementById('categorySelect').value;
+    const bottleId = document.getElementById('bottleSelect').value;
+    const articles = state.lookup.articulos.filter((article) => article.categoriaId === categoryId && article.botellaId === bottleId);
+    const select = document.getElementById('articleSelect');
+    select.innerHTML = '<option value="">Selecciona artículo</option>';
+    articles.forEach((article) => {
+      const option = document.createElement('option');
+      option.value = article.id;
+      option.textContent = article.codigoArticulo + ' - ' + article.descripcion;
+      select.appendChild(option);
+    });
+    renderArticleDetail();
+  }
+
+  function renderArticleDetail() {
+    const articleId = document.getElementById('articleSelect').value;
+    const article = state.lookup.articulos.find((item) => item.id === articleId);
+    const detail = document.getElementById('articleDetail');
+    const images = document.getElementById('imageSummary');
+    document.getElementById('pdfButton').disabled = !article;
+    if (!article) {
+      detail.className = 'empty-state';
+      detail.textContent = 'Selecciona un artículo activo para ver la ficha.';
+      images.className = 'empty-state';
+      images.textContent = 'Selecciona un artículo activo para ver sus códigos ETQ y CET.';
+      return;
+    }
+    detail.className = '';
+    detail.innerHTML = '';
+    [
+      ['Código', article.codigoArticulo],
+      ['Descripción', article.descripcion],
+      ['Estado', article.estado],
+      ['Creado por', article.creadoPor],
+      ['Última modificación', article.fechaModificacion]
+    ].forEach(([label, value]) => {
+      const item = document.createElement('div');
+      item.className = 'list-item';
+      item.textContent = label + ': ' + (value || '');
+      detail.appendChild(item);
+    });
+    images.className = '';
+    images.innerHTML = '';
+    const etq = document.createElement('div');
+    etq.className = 'list-item';
+    etq.textContent = article.etqAplica === true || article.etqAplica === 'TRUE' ? 'ETQ: ' + article.codigoEtq : 'ETQ: No aplica';
+    const cet = document.createElement('div');
+    cet.className = 'list-item';
+    cet.textContent = article.cetAplica === true || article.cetAplica === 'TRUE' ? 'CET: ' + article.codigoCet : 'CET: No aplica';
+    images.append(etq, cet);
+  }
+
+  function fillSelect(id, rows, emptyText) {
+    const select = document.getElementById(id);
+    select.innerHTML = '';
+    const empty = document.createElement('option');
+    empty.value = '';
+    empty.textContent = emptyText;
+    select.appendChild(empty);
+    rows.forEach((row) => {
+      const option = document.createElement('option');
+      option.value = row.id;
+      option.textContent = row.nombre;
+      select.appendChild(option);
+    });
+    fillDraftSelects();
+  }
+
+  function fillDraftSelects() {
+    fillPlainSelect('draftCategory', state.admin.categorias || [], 'Selecciona categoría');
+    fillPlainSelect('draftBottle', state.admin.botellas || [], 'Selecciona botella');
+  }
+
+  function fillPlainSelect(id, rows, emptyText) {
+    const select = document.getElementById(id);
+    if (!select) return;
+    const current = select.value;
+    select.innerHTML = '<option value="">' + emptyText + '</option>';
+    rows.forEach((row) => {
+      const option = document.createElement('option');
+      option.value = row.id;
+      option.textContent = row.nombre;
+      select.appendChild(option);
+    });
+    select.value = current;
+  }
+
+  function renderAdminLists() {
+    renderList('categoryList', state.admin.categorias || []);
+    renderList('bottleList', state.admin.botellas || []);
+    renderList('sectionList', state.admin.secciones || []);
+    renderList('unitList', state.admin.unidades || []);
+  }
+
+  function renderList(id, rows) {
+    const container = document.getElementById(id);
+    container.innerHTML = '';
+    if (!rows.length) {
+      container.innerHTML = '<div class="empty-state">Sin registros.</div>';
+      return;
+    }
+    rows.forEach((row) => {
+      const item = document.createElement('div');
+      item.className = 'list-item';
+      item.textContent = row.nombre;
+      container.appendChild(item);
+    });
+  }
+
+  function renderDraftLists() {
+    renderList('draftList', state.drafts.map((draft) => ({ nombre: draft.codigoArticulo + ' - ' + draft.descripcion })));
+    renderList('discardedList', state.discarded.map((draft) => ({ nombre: draft.borradorId + ' - ' + draft.motivo })));
+  }
+
+  function renderHistory() {
+    const container = document.getElementById('historyList');
+    container.innerHTML = '';
+    if (!state.history.length) {
+      container.innerHTML = '<div class="empty-state">Sin historial registrado.</div>';
+      return;
+    }
+    state.history.forEach((event) => {
+      const item = document.createElement('div');
+      item.className = 'history-item';
+      item.textContent = event.fecha + ' | ' + event.usuario + ' | ' + event.tipoAccion + ' | ' + event.motivo;
+      container.appendChild(item);
+    });
+  }
+
+  function submitCatalog(functionName) {
+    return function(event) {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const payload = Object.fromEntries(new FormData(form).entries());
+      callServer(functionName, payload)
+        .then(() => {
+          form.reset();
+          showToast('Registro creado.');
+          loadInitialData();
+        })
+        .catch((error) => showToast(error.message));
+    };
+  }
+
+  function saveDraft(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const payload = Object.fromEntries(new FormData(form).entries());
+    payload.etqAplica = form.etqAplica.checked;
+    payload.cetAplica = form.cetAplica.checked;
+    payload.payload = {};
+    callServer('apiSaveDraft', payload)
+      .then(() => {
+        form.reset();
+        showToast('Borrador guardado.');
+        loadInitialData();
+      })
+      .catch((error) => showToast(error.message));
+  }
+
+  function validateImageInput(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (file.type !== 'image/png') {
+      event.target.value = '';
+      showToast('Solo se aceptan imágenes PNG.');
+      return;
+    }
+    if (file.size > 1024 * 1024) {
+      event.target.value = '';
+      showToast('La imagen supera el máximo permitido de 1 MB.');
+    }
+  }
+
+  function generatePdf() {
+    const articuloId = document.getElementById('articleSelect').value;
+    callServer('apiGeneratePdf', { articuloId })
+      .then((file) => {
+        showToast('PDF generado.');
+        window.open(file.url, '_blank');
+      })
+      .catch((error) => showToast(error.message));
+  }
+
+  function createBackup() {
+    callServer('apiCreateBackup')
+      .then((file) => {
+        showToast('Respaldo creado.');
+        window.open(file.url, '_blank');
+      })
+      .catch((error) => showToast(error.message));
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    window.setTimeout(() => toast.classList.remove('show'), 4500);
+  }
+</script>

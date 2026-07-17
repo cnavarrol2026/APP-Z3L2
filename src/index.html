@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><?= appName ?></title>
+  <?!= include('styles'); ?>
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Zona 3 Línea 2</p>
+      <h1><?= appName ?></h1>
+    </div>
+    <div class="user-box">
+      <span id="userEmail">Validando sesión Google...</span>
+    </div>
+  </header>
+
+  <nav class="main-tabs" aria-label="Navegación principal">
+    <button class="tab-button active" data-view="consulta">Consulta</button>
+    <button class="tab-button" data-view="configuracion">Configuración</button>
+    <button class="tab-button" data-view="historial">Historial</button>
+  </nav>
+
+  <main>
+    <section id="view-consulta" class="view active">
+      <div class="selector-panel">
+        <label>Categoría
+          <select id="categorySelect"></select>
+        </label>
+        <label>Botella
+          <select id="bottleSelect"></select>
+        </label>
+        <label>Código de Artículo + Descripción
+          <select id="articleSelect"></select>
+        </label>
+      </div>
+
+      <div class="content-grid">
+        <aside class="visual-panel">
+          <h2>ETQ / CET</h2>
+          <div id="imageSummary" class="empty-state">Selecciona un artículo activo para ver sus códigos ETQ y CET.</div>
+        </aside>
+
+        <section class="detail-panel">
+          <div class="panel-title-row">
+            <h2>Ficha técnica</h2>
+            <button id="pdfButton" class="secondary" disabled>Generar PDF</button>
+          </div>
+          <div id="articleDetail" class="empty-state">La base comienza vacía. Crea catálogos y artículos desde Configuración.</div>
+        </section>
+      </div>
+    </section>
+
+    <section id="view-configuracion" class="view">
+      <div class="panel-title-row">
+        <h2>Configuración</h2>
+        <button id="backupButton">Crear respaldo ZIP</button>
+      </div>
+
+      <div class="admin-grid">
+        <form id="categoryForm" class="admin-card">
+          <h3>Categorías</h3>
+          <input name="nombre" placeholder="Nueva categoría" required>
+          <button>Agregar</button>
+          <div id="categoryList" class="list"></div>
+        </form>
+
+        <form id="bottleForm" class="admin-card">
+          <h3>Botellas</h3>
+          <input name="nombre" placeholder="Nueva botella" required>
+          <button>Agregar</button>
+          <div id="bottleList" class="list"></div>
+        </form>
+
+        <form id="sectionForm" class="admin-card">
+          <h3>Secciones</h3>
+          <input name="nombre" placeholder="Nueva sección" required>
+          <input name="orden" type="number" placeholder="Orden">
+          <button>Agregar</button>
+          <div id="sectionList" class="list"></div>
+        </form>
+
+        <form id="unitForm" class="admin-card">
+          <h3>Unidades</h3>
+          <input name="nombre" placeholder="Nueva unidad" required>
+          <input name="orden" type="number" placeholder="Orden">
+          <button>Agregar</button>
+          <div id="unitList" class="list"></div>
+        </form>
+      </div>
+
+      <section class="wide-panel">
+        <h3>Agregar producto nuevo</h3>
+        <form id="draftForm" class="wizard-grid">
+          <label>Categoría
+            <select name="categoriaId" id="draftCategory"></select>
+          </label>
+          <label>Botella
+            <select name="botellaId" id="draftBottle"></select>
+          </label>
+          <label>Código de artículo
+            <input name="codigoArticulo" required>
+          </label>
+          <label>Descripción
+            <input name="descripcion" required>
+          </label>
+          <label>
+            <input type="checkbox" name="etqAplica"> ETQ aplica
+          </label>
+          <label>Código ETQ
+            <input name="codigoEtq">
+          </label>
+          <label>
+            <input type="checkbox" name="cetAplica"> CET aplica
+          </label>
+          <label>Código CET
+            <input name="codigoCet">
+          </label>
+          <label>Etapa
+            <input name="etapa" value="DATOS_GENERALES">
+          </label>
+          <label>Imagen PNG de prueba
+            <input id="imageInput" type="file" accept="image/png">
+          </label>
+          <p class="help">
+            Para ubicar la Etiqueta (ETQ) o Contraetiqueta (CET), acceda a
+            <a href="https://dsgr.ccu.cl/GBO.pdf" target="_blank" rel="noopener">https://dsgr.ccu.cl/CODIGO.pdf</a>
+            y reemplace GBO por el código exacto. La aplicación no descarga imágenes automáticamente.
+          </p>
+          <div class="actions">
+            <button type="submit">Guardar borrador</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="wide-panel">
+        <h3>Pendientes</h3>
+        <div id="draftList" class="list"></div>
+      </section>
+
+      <section class="wide-panel">
+        <h3>Descartados</h3>
+        <div id="discardedList" class="list"></div>
+      </section>
+    </section>
+
+    <section id="view-historial" class="view">
+      <h2>Historial</h2>
+      <div id="historyList" class="history-list"></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <?!= include('client'); ?>
+</body>
+</html>

@@ -13,6 +13,7 @@ const Api = {
 
 function apiGetInitialData() {
   return Api.withAuth('apiGetInitialData', function(user) {
+    TemplateService.ensureDefaultTechnicalTemplate(user.email);
     return ok({
       user: user,
       lookup: ArticleService.getLookupData(),

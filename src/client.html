@@ -32,6 +32,7 @@
     document.getElementById('bottleForm').addEventListener('submit', submitCatalog('apiCreateBottle'));
     document.getElementById('sectionForm').addEventListener('submit', submitCatalog('apiCreateSection'));
     document.getElementById('unitForm').addEventListener('submit', submitCatalog('apiCreateUnit'));
+    document.getElementById('fieldForm').addEventListener('submit', submitField);
     document.getElementById('draftForm').addEventListener('submit', saveDraft);
     document.getElementById('backupButton').addEventListener('click', createBackup);
     document.getElementById('imageInput').addEventListener('change', validateImageInput);
@@ -68,6 +69,7 @@
   function renderAll() {
     renderCategorySelect();
     renderAdminLists();
+    renderTemplateStructure();
     renderDraftLists();
     renderHistory();
   }
@@ -175,6 +177,47 @@
     select.value = current;
   }
 
+  function renderTemplateStructure() {
+    const container = document.getElementById('templateStructure');
+    if (!container) return;
+    const sections = state.admin.secciones || [];
+    const fields = state.admin.campos || [];
+    const units = state.admin.unidades || [];
+    fillPlainSelect('fieldSection', sections, 'Selecciona sección');
+    fillPlainSelect('fieldUnit', units, 'Sin unidad');
+    container.innerHTML = '';
+    if (!sections.length) {
+      container.innerHTML = '<div class="empty-state">No hay secciones configuradas.</div>';
+      return;
+    }
+    sections.forEach((section) => {
+      const sectionFields = fields
+        .filter((field) => field.seccionId === section.id)
+        .sort((a, b) => Number(a.orden || 0) - Number(b.orden || 0));
+      const block = document.createElement('section');
+      block.className = 'template-section';
+      const title = document.createElement('h4');
+      title.textContent = section.nombre;
+      const grid = document.createElement('div');
+      grid.className = 'field-grid';
+      if (!sectionFields.length) {
+        grid.innerHTML = '<div class="empty-state">Sección sin campos.</div>';
+      }
+      sectionFields.forEach((field) => {
+        const unit = units.find((item) => item.id === field.unidadId);
+        const meta = [field.tipo];
+        if (unit) meta.push(unit.nombre);
+        if (field.obligatorio === true || field.obligatorio === 'TRUE') meta.push('Obligatorio');
+        const card = document.createElement('div');
+        card.className = 'field-card';
+        card.innerHTML = '<strong>' + field.nombre + '</strong><span>' + meta.join(' · ') + '</span>';
+        grid.appendChild(card);
+      });
+      block.append(title, grid);
+      container.appendChild(block);
+    });
+  }
+
   function renderAdminLists() {
     renderList('categoryList', state.admin.categorias || []);
     renderList('bottleList', state.admin.botellas || []);
@@ -230,6 +273,20 @@
         })
         .catch((error) => showToast(error.message));
     };
+  }
+
+  function submitField(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const payload = Object.fromEntries(new FormData(form).entries());
+    payload.obligatorio = form.obligatorio.checked;
+    callServer('apiCreateField', payload)
+      .then(() => {
+        form.reset();
+        showToast('Campo creado.');
+        loadInitialData();
+      })
+      .catch((error) => showToast(error.message));
   }
 
   function saveDraft(event) {

@@ -204,6 +204,17 @@
     grid-column: 1 / -1;
   }
 
+  .inline-check {
+    align-content: end;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+  }
+
+  .inline-check input {
+    width: auto;
+    min-height: auto;
+  }
+
   .help {
     margin: 0;
     color: var(--muted);
@@ -222,6 +233,59 @@
     border: 1px solid var(--line);
     border-radius: 8px;
     background: #fbfcff;
+  }
+
+  .template-panel {
+    margin-top: 0;
+    margin-bottom: 18px;
+  }
+
+  .template-structure,
+  .template-section {
+    display: grid;
+    gap: 14px;
+  }
+
+  .template-section {
+    padding-top: 4px;
+  }
+
+  .template-section + .template-section {
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+  }
+
+  .template-section h4 {
+    margin: 0;
+    color: var(--blue);
+    font-size: 1rem;
+  }
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .field-card {
+    display: grid;
+    gap: 6px;
+    min-height: 78px;
+    padding: 12px;
+    border-left: 4px solid var(--blue);
+    border-radius: 8px;
+    background: #f8fafc;
+  }
+
+  .field-card strong {
+    font-size: 0.95rem;
+  }
+
+  .field-card span {
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
   }
 
   .toast {
@@ -249,7 +313,8 @@
     .selector-panel,
     .content-grid,
     .admin-grid,
-    .wizard-grid {
+    .wizard-grid,
+    .field-grid {
       grid-template-columns: 1fr;
     }
 

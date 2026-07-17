@@ -218,3 +218,15 @@ No fue posible identificar tu cuenta Google.
 Causa: en despliegues Apps Script ejecutados como propietario, `Session.getActiveUser().getEmail()` puede venir vacío según el contexto de acceso y políticas de Workspace.
 
 Solución aplicada: no bloquear el ingreso si el correo viene vacío. Usar un usuario técnico visible como `Usuario Google` y conservar auditoría con `usuario.google.no.identificado` hasta que se defina una estrategia de identidad más estricta.
+
+### Base vacía no significa ficha sin estructura
+
+La decisión de iniciar con base vacía aplica a productos, artículos, categorías operativas, botellas reales y valores técnicos. No debe dejar vacía la plantilla estructural de la ficha.
+
+Para que la aplicación sea entendible desde el primer acceso, conviene precargar de forma idempotente:
+
+- secciones base de la ficha técnica;
+- campos dinámicos esperados;
+- unidades mínimas necesarias.
+
+Eso no contamina la base con datos de ejemplo, porque solo crea la estructura de captura. Los valores de cada artículo siguen naciendo vacíos.

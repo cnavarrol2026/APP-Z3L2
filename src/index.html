@@ -60,6 +60,16 @@
         <button id="backupButton">Crear respaldo ZIP</button>
       </div>
 
+      <section class="wide-panel template-panel">
+        <div class="panel-title-row">
+          <div>
+            <p class="eyebrow">Plantilla de captura</p>
+            <h3>Estructura de ficha técnica</h3>
+          </div>
+        </div>
+        <div id="templateStructure" class="template-structure"></div>
+      </section>
+
       <div class="admin-grid">
         <form id="categoryForm" class="admin-card">
           <h3>Categorías</h3>
@@ -91,6 +101,36 @@
           <div id="unitList" class="list"></div>
         </form>
       </div>
+
+      <section class="wide-panel">
+        <h3>Agregar campo a la ficha técnica</h3>
+        <form id="fieldForm" class="wizard-grid">
+          <label>Sección
+            <select name="seccionId" id="fieldSection" required></select>
+          </label>
+          <label>Nombre del campo
+            <input name="nombre" placeholder="Ej: Presión de aire" required>
+          </label>
+          <label>Tipo
+            <select name="tipo" required>
+              <option value="TEXTO">Texto</option>
+              <option value="NUMERO">Número</option>
+            </select>
+          </label>
+          <label>Unidad
+            <select name="unidadId" id="fieldUnit"></select>
+          </label>
+          <label>Orden
+            <input name="orden" type="number" placeholder="Orden">
+          </label>
+          <label class="inline-check">
+            <input type="checkbox" name="obligatorio"> Obligatorio
+          </label>
+          <div class="actions">
+            <button type="submit">Agregar campo</button>
+          </div>
+        </form>
+      </section>
 
       <section class="wide-panel">
         <h3>Agregar producto nuevo</h3>

@@ -18,3 +18,5 @@
 - Se reducen scopes iniciales a `userinfo.email` y `spreadsheets.currentonly` para evitar una advertencia OAuth más agresiva al iniciar.
 - Se cambia el despliegue web para ejecutar como propietario (`USER_DEPLOYING`) y evitar el bucle de autorización por usuario.
 - Se ajusta seguridad para no bloquear cuando Apps Script no entrega el correo del usuario en despliegue como propietario.
+- Se agrega plantilla base de ficha técnica con secciones y campos iniciales sin cargar artículos ni valores de ejemplo.
+- Se mejora la pantalla de Configuración para mostrar la estructura de ficha técnica agrupada por sección y permitir agregar campos.

@@ -8,13 +8,66 @@
     user: null
   };
 
+  const LOCAL_TEMPLATE = {
+    secciones: [
+      { id: 'sec_botella_insumos', nombre: 'Botella e Insumos', orden: 10 },
+      { id: 'sec_ajustes_etiquetadora', nombre: 'Ajustes Mecánicos de Etiquetadora', orden: 20 },
+      { id: 'sec_ajustes_capsuladora', nombre: 'Ajustes de Capsuladora', orden: 30 }
+    ],
+    unidades: [
+      { id: 'uni_mm', nombre: 'mm', orden: 10 },
+      { id: 'uni_m_min', nombre: 'm/min', orden: 20 }
+    ],
+    campos: [
+      { id: 'cam_tipo_botella', seccionId: 'sec_botella_insumos', nombre: 'Tipo de botella', tipo: 'TEXTO', obligatorio: true, orden: 10 },
+      { id: 'cam_medidas_etiqueta', seccionId: 'sec_botella_insumos', nombre: 'Medidas etiqueta', tipo: 'TEXTO', obligatorio: true, orden: 20 },
+      { id: 'cam_altura_pegado_etiqueta', seccionId: 'sec_botella_insumos', nombre: 'Altura de pegado (etiqueta)', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: true, orden: 30 },
+      { id: 'cam_altura_contra_etiqueta', seccionId: 'sec_botella_insumos', nombre: 'Altura contra-etiqueta', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 40 },
+      { id: 'cam_altura_medalla', seccionId: 'sec_botella_insumos', nombre: 'Altura medalla', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 50 },
+      { id: 'cam_entrada_guia_sin_fin', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Entrada guía sin fin', tipo: 'TEXTO', obligatorio: false, orden: 10 },
+      { id: 'cam_guia_botellas', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Guía de botellas', tipo: 'TEXTO', obligatorio: false, orden: 20 },
+      { id: 'cam_altura_estrella', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Altura de estrella', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 30 },
+      { id: 'cam_levas', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Levas', tipo: 'TEXTO', obligatorio: false, orden: 40 },
+      { id: 'cam_altura_estaciones', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Altura estaciones', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 50 },
+      { id: 'cam_profundidad_estaciones', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Profundidad estaciones', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 60 },
+      { id: 'cam_ajuste_lateral', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Ajuste lateral', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 70 },
+      { id: 'cam_velocidad_emision', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Velocidad emisión', tipo: 'NUMERO', unidadId: 'uni_m_min', obligatorio: false, orden: 80 },
+      { id: 'cam_distancia_etiqueta', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Distancia de etiqueta', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 90 },
+      { id: 'cam_tipo_chaleco', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Tipo de chaleco', tipo: 'TEXTO', obligatorio: false, orden: 100 },
+      { id: 'cam_formato_capsula', seccionId: 'sec_ajustes_capsuladora', nombre: 'N° formato (cápsula)', tipo: 'TEXTO', obligatorio: false, orden: 10 },
+      { id: 'cam_formato_botella', seccionId: 'sec_ajustes_capsuladora', nombre: 'N° formato (botella)', tipo: 'TEXTO', obligatorio: false, orden: 20 },
+      { id: 'cam_color_formato', seccionId: 'sec_ajustes_capsuladora', nombre: 'Color de formato', tipo: 'TEXTO', obligatorio: false, orden: 30 },
+      { id: 'cam_material_capsula', seccionId: 'sec_ajustes_capsuladora', nombre: 'Material (PVC / Complex)', tipo: 'TEXTO', obligatorio: false, orden: 40 },
+      { id: 'cam_sinfin_capsuladora', seccionId: 'sec_ajustes_capsuladora', nombre: 'Sinfín capsuladora', tipo: 'TEXTO', obligatorio: false, orden: 50 }
+    ]
+  };
+
   document.addEventListener('DOMContentLoaded', init);
 
   function init() {
     bindTabs();
     bindConfigTabs();
     bindForms();
+    renderLocalShell();
     loadInitialData();
+  }
+
+  function renderLocalShell() {
+    state.admin = {
+      categorias: [],
+      botellas: [],
+      relaciones: [],
+      secciones: LOCAL_TEMPLATE.secciones,
+      campos: LOCAL_TEMPLATE.campos,
+      unidades: LOCAL_TEMPLATE.unidades
+    };
+    state.lookup = { categorias: [], botellas: [], relaciones: [], articulos: [] };
+    state.drafts = [];
+    state.discarded = [];
+    state.history = [];
+    document.getElementById('userEmail').textContent = 'Listo';
+    setGlobalStatus('Esqueleto cargado. Sincronizando con Sheets...', 'info');
+    renderAll();
   }
 
   function bindTabs() {
@@ -76,8 +129,9 @@
 
   function loadInitialData() {
     const slowLoadTimer = window.setTimeout(() => {
-      document.getElementById('userEmail').textContent = 'Cargando datos...';
-      renderLoadWarnings(['La carga inicial está tardando más de lo esperado. Si no aparecen categorías o campos, recarga la página.']);
+      document.getElementById('userEmail').textContent = 'Modo local';
+      setGlobalStatus('Sheets está tardando en responder. Puedes revisar el esqueleto mientras sincroniza.', 'warning');
+      renderLoadWarnings(['Sheets está tardando en responder. La app mantiene el esqueleto local visible.']);
     }, 8000);
     callServer('apiGetInitialData')
       .then((data) => {
@@ -88,16 +142,26 @@
         state.drafts = data.drafts;
         state.discarded = data.discarded;
         state.history = data.history;
-        document.getElementById('userEmail').textContent = data.user.displayName || data.user.email || 'Usuario Google';
+        document.getElementById('userEmail').textContent = 'Sincronizado';
+        setGlobalStatus('', '');
         renderLoadWarnings(data.warnings || []);
         renderAll();
       })
       .catch((error) => {
         window.clearTimeout(slowLoadTimer);
-        document.getElementById('userEmail').textContent = 'No se pudo cargar la sesión';
-        renderLoadWarnings(['No fue posible cargar datos desde Apps Script: ' + error.message]);
+        document.getElementById('userEmail').textContent = 'Modo local';
+        setGlobalStatus('No se pudo sincronizar con Sheets. El esqueleto queda disponible en modo local.', 'error');
+        renderLoadWarnings(['No fue posible sincronizar con Sheets: ' + error.message]);
         showToast(error.message);
       });
+  }
+
+  function setGlobalStatus(message, tone) {
+    const status = document.getElementById('globalLoadStatus');
+    if (!status) return;
+    status.textContent = message || '';
+    status.className = 'load-status ' + (tone || '');
+    status.hidden = !message;
   }
 
   function renderAll() {

@@ -30,3 +30,5 @@
 - Se agrega aviso visible de carga lenta o fallo de backend en todas las páginas internas de Configuración.
 - Se acelera la carga inicial: ya no ejecuta `ensureDatabase`, no materializa plantilla, no escribe en Sheets y no lee historial al entrar.
 - Se agrega timeout frontend de 20 segundos para evitar espera infinita si Apps Script no responde.
+- Se agrega render local inmediato del esqueleto técnico antes de cualquier llamada a Apps Script.
+- Se cambia scope de Sheets desde `spreadsheets.currentonly` a `spreadsheets` para evitar dependencia frágil del contexto de hoja activa en web app.

@@ -293,3 +293,14 @@ Regla aplicada desde ahora:
 - no debe leer historial completo al inicio;
 - debe usar una plantilla fallback en memoria si las hojas aún no tienen estructura;
 - el frontend debe tener timeout para no quedar esperando indefinidamente.
+
+### La interfaz no debe depender de Sheets para existir
+
+Si el usuario entra a la app y Google Sheets tarda, falla o pide autorización, la pantalla no puede quedar vacía ni bloqueada. Para este proyecto, el esqueleto visual de la ficha debe renderizarse localmente primero, y la sincronización con Sheets debe ocurrir después.
+
+Cambio aplicado:
+
+- render local inmediato de la plantilla técnica;
+- estado superior `Listo`, `Sincronizado`, `Modo local` según corresponda;
+- aviso global visible cuando Sheets tarda o falla;
+- cambio de scope desde `spreadsheets.currentonly` a `spreadsheets` para evitar que la web app dependa del contexto de hoja activa.

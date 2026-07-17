@@ -14,7 +14,7 @@
       <h1><?= appName ?></h1>
     </div>
     <div class="user-box">
-      <span id="userEmail">Validando sesión Google...</span>
+      <span id="userEmail">Abriendo aplicación...</span>
     </div>
   </header>
 
@@ -23,6 +23,8 @@
     <button class="tab-button" data-view="configuracion">Configuración</button>
     <button class="tab-button" data-view="historial">Historial</button>
   </nav>
+
+  <div id="globalLoadStatus" class="load-status" hidden></div>
 
   <main>
     <section id="view-consulta" class="view active">

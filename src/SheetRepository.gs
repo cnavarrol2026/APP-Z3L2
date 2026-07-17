@@ -1,6 +1,6 @@
 const SheetRepository = {
   getSpreadsheet: function() {
-    if (!Config.SPREADSHEET_ID || Config.SPREADSHEET_ID === 'CONFIGURAR_SPREADSHEET_ID') {
+    if (!Config.SPREADSHEET_ID || Config.SPREADSHEET_ID.indexOf('CONFIGURAR_') === 0) {
       throw new Error('Falta configurar SPREADSHEET_ID en Config.gs.');
     }
     return SpreadsheetApp.openById(Config.SPREADSHEET_ID);
@@ -79,5 +79,24 @@ const SheetRepository = {
     return this.list(sheetName).find(function(row) {
       return row.id === id;
     }) || null;
+  },
+
+  updateConfigByKey: function(key, patch) {
+    const sheetName = Config.SHEETS.CONFIG;
+    const sheet = this.getSheet(sheetName);
+    const headers = this.headers(sheetName);
+    const values = sheet.getDataRange().getValues();
+    const keyIndex = headers.indexOf('clave');
+    for (let i = 1; i < values.length; i++) {
+      if (values[i][keyIndex] === key) {
+        const row = asRowObject(headers, values[i]);
+        Object.keys(patch).forEach(function(field) {
+          row[field] = patch[field];
+        });
+        sheet.getRange(i + 1, 1, 1, headers.length).setValues([objectToRow(headers, row)]);
+        return row;
+      }
+    }
+    throw new Error('No se encontró la clave de configuración: ' + key);
   }
 };

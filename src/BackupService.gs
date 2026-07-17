@@ -1,8 +1,5 @@
 const BackupService = {
   createBackup: function(userEmail) {
-    if (!Config.DRIVE_BACKUP_FOLDER_ID || Config.DRIVE_BACKUP_FOLDER_ID === 'CONFIGURAR_CARPETA_RESPALDOS') {
-      throw new Error('Falta configurar la carpeta de respaldos en Config.gs.');
-    }
     const backup = {
       metadata: {
         app: Config.APP_NAME,
@@ -27,7 +24,7 @@ const BackupService = {
     blobs.push(Utilities.newBlob(JSON.stringify(backup, null, 2), 'application/json', 'backup.json'));
     const zipName = 'APP-Z3L2_respaldo_' + Utilities.formatDate(new Date(), Config.TIME_ZONE, 'yyyyMMdd_HHmmss') + '.zip';
     const zipBlob = Utilities.zip(blobs, zipName);
-    const folder = DriveApp.getFolderById(Config.DRIVE_BACKUP_FOLDER_ID);
+    const folder = ConfigService.getBackupFolder();
     const file = folder.createFile(zipBlob);
     const row = {
       id: createId('bak'),

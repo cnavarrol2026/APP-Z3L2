@@ -1,14 +1,11 @@
 const ImageService = {
   uploadArticleImage: function(payload, userEmail) {
     this.validatePayload(payload);
-    if (!Config.DRIVE_IMAGE_FOLDER_ID || Config.DRIVE_IMAGE_FOLDER_ID === 'CONFIGURAR_CARPETA_IMAGENES') {
-      throw new Error('Falta configurar la carpeta de imágenes en Config.gs.');
-    }
     const article = SheetRepository.findById(Config.SHEETS.ARTICLES, payload.articuloId);
     if (!article) {
       throw new Error('No se encontró el artículo asociado a la imagen.');
     }
-    const folder = DriveApp.getFolderById(Config.DRIVE_IMAGE_FOLDER_ID);
+    const folder = ConfigService.getImageFolder();
     const bytes = Utilities.base64Decode(payload.base64);
     const blob = Utilities.newBlob(bytes, Config.IMAGE_MIME_TYPE, sanitizeFileName(payload.nombreArchivo));
     const file = folder.createFile(blob);

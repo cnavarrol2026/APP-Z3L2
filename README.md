@@ -39,9 +39,9 @@ La base de datos comienza completamente vacía. El archivo `referencias/MANUAL Z
 
 ## Preparación con clasp
 
-1. Crear un Google Sheets nuevo y un proyecto de Apps Script nuevo.
-2. Configurar el ID del spreadsheet y carpetas Drive en `src/Config.gs`.
-3. Ejecutar `clasp login` si no existe sesión local.
+1. Google Sheets corporativo creado desde `clasp` con `cnavarrol@vspt.cl`.
+2. Configurar las carpetas Drive corporativas en `src/Config.gs` cuando queden creadas.
+3. Ejecutar `clasp login` con `cnavarrol@vspt.cl` si no existe sesión local.
 4. Crear o asociar el proyecto Apps Script:
 
 ```powershell
@@ -54,8 +54,26 @@ clasp create --type webapp --title "Estándar de Configuración Zona 3 Línea 2"
 clasp push
 ```
 
-6. En Apps Script, ejecutar `setupDatabase()` una vez para crear las hojas vacías.
+6. En Apps Script, ejecutar `setupDatabase()` una vez para validar las hojas vacías.
 7. Desplegar como aplicación web con acceso para usuarios autenticados con Google.
+
+## Propiedad de recursos Google
+
+Todos los recursos definitivos deben pertenecer a la cuenta corporativa `cnavarrol@vspt.cl`.
+
+Los recursos creados por error en Gmail fueron eliminados antes de continuar.
+
+Google Sheets corporativo:
+
+- https://docs.google.com/spreadsheets/d/1vdFkhk0nGzlnX_aZ80l9hmSdHhD3_LSQOVBdXbURH6A/edit
+
+Apps Script corporativo:
+
+- https://script.google.com/d/1mgAMib7TF1n0vjTiuAghftgrqVD-A2sLN5cGZcxoplLwYREKXHsuak2h/edit
+
+Despliegue web inicial:
+
+- https://script.google.com/macros/s/AKfycbyVNTQFjcytiBD-TtvkFmenqjmNqvV4aMVHSFYaF4GrztzxATuzKRRNvW4QMjZi15Q/exec
 
 ## Validación rápida
 

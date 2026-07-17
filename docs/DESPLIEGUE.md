@@ -25,3 +25,17 @@ Usar la URL `/dev` para validar cambios recientes.
 ## Producción
 
 Crear una versión Apps Script y desplegar URL `/exec` con acceso para usuarios autenticados con Google.
+
+## Recursos corporativos creados
+
+- Google Sheets: https://docs.google.com/spreadsheets/d/1vdFkhk0nGzlnX_aZ80l9hmSdHhD3_LSQOVBdXbURH6A/edit
+- Apps Script: https://script.google.com/d/1mgAMib7TF1n0vjTiuAghftgrqVD-A2sLN5cGZcxoplLwYREKXHsuak2h/edit
+- Web app inicial: https://script.google.com/macros/s/AKfycbyVNTQFjcytiBD-TtvkFmenqjmNqvV4aMVHSFYaF4GrztzxATuzKRRNvW4QMjZi15Q/exec
+
+## Inicialización manual completada
+
+Desde el editor Apps Script corporativo se ejecutaron correctamente:
+
+- `INICIALIZAR_APP_Z3L2`
+- `CREAR_CARPETAS_DRIVE_APP_Z3L2`
+- `VER_CONFIG_APP_Z3L2`

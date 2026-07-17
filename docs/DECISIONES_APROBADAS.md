@@ -41,3 +41,7 @@ La aplicación tendrá un botón manual para generar un ZIP con:
 
 - Linear: `VSP-8 APP-Z3L2`.
 - GitHub: `cnavarrol2026/APP-Z3L2`.
+
+## Propiedad Google
+
+Todos los recursos definitivos de Google Sheets, Drive y Apps Script deben quedar bajo la cuenta corporativa `cnavarrol@vspt.cl`.

@@ -503,7 +503,7 @@
     document.getElementById('catalogModalEyebrow').textContent = config.eyebrow;
     document.getElementById('catalogModalTitle').textContent = config.title;
     document.querySelectorAll('.catalog-form').forEach((form) => {
-      form.hidden = form.id !== config.formId;
+      form.hidden = form.getAttribute('id') !== config.formId;
     });
     if (type === 'section') cancelSectionEdit();
     const search = document.getElementById('catalogSearch');

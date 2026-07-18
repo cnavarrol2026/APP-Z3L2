@@ -56,6 +56,44 @@
     return entity;
   },
 
+  updateSimpleEntity: function(sheetName, payload, userEmail) {
+    const id = cleanText(payload && payload.id, 80);
+    const name = toSystemUpperText(payload && payload.nombre, 120);
+    if (!id) {
+      throw new Error('Falta el registro a editar.');
+    }
+    if (!name) {
+      throw new Error('El nombre es obligatorio.');
+    }
+    const current = SheetRepository.findById(sheetName, id);
+    if (!current) {
+      throw new Error('No se encontró el registro seleccionado.');
+    }
+    const normalized = normalizeText(name);
+    const duplicate = SheetRepository.list(sheetName).find(function(row) {
+      return row.id !== id && row.nombreNormalizado === normalized;
+    });
+    if (duplicate) {
+      throw new Error('Ya existe un registro con ese nombre.');
+    }
+    const updated = SheetRepository.updateById(sheetName, id, {
+      nombre: name,
+      nombreNormalizado: normalized,
+      fechaModificacion: nowIso(),
+      modificadoPor: userEmail,
+      version: Number(current.version || 1) + 1
+    });
+    HistoryService.recordEvent({
+      user: userEmail,
+      type: 'MODIFICAR',
+      entity: sheetName,
+      entityId: id,
+      reason: 'Edición de catálogo.',
+      details: [{ field: 'nombre', before: current.nombre || '', after: updated.nombre || '' }]
+    });
+    return updated;
+  },
+
   createOrderedEntity: function(sheetName, prefix, payload, userEmail) {
     const entity = this.createSimpleEntity(sheetName, prefix, payload, userEmail);
     const order = Number(payload && payload.orden) || SheetRepository.list(sheetName).length;

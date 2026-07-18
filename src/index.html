@@ -245,17 +245,25 @@
       </div>
       <div class="catalog-form-slot">
         <form id="categoryForm" class="catalog-form">
+          <input type="hidden" name="id">
           <label>Nombre de categoría
             <input name="nombre" value="CAT-" required>
           </label>
-          <button>Agregar categoría</button>
+          <div class="catalog-form-actions">
+            <button id="categorySubmitButton">Agregar categoría</button>
+            <button id="categoryCancelEdit" class="secondary" type="button" hidden>Cancelar</button>
+          </div>
         </form>
 
         <form id="bottleForm" class="catalog-form">
+          <input type="hidden" name="id">
           <label>Nombre de botella
             <input name="nombre" placeholder="Ej: BORDELESA CÓNICA 750 ML" required>
           </label>
-          <button>Agregar botella</button>
+          <div class="catalog-form-actions">
+            <button id="bottleSubmitButton">Agregar botella</button>
+            <button id="bottleCancelEdit" class="secondary" type="button" hidden>Cancelar</button>
+          </div>
         </form>
 
         <form id="sectionForm" class="catalog-form">

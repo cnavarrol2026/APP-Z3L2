@@ -118,9 +118,21 @@ function apiCreateCategory(payload) {
   });
 }
 
+function apiUpdateCategory(payload) {
+  return Api.withAuth('apiUpdateCategory', function(user) {
+    return ok(CatalogService.updateSimpleEntity(Config.SHEETS.CATEGORIES, payload, user.email), 'Categoría actualizada.');
+  });
+}
+
 function apiCreateBottle(payload) {
   return Api.withAuth('apiCreateBottle', function(user) {
     return ok(CatalogService.createSimpleEntity(Config.SHEETS.BOTTLES, 'bot', payload, user.email), 'Botella creada.');
+  });
+}
+
+function apiUpdateBottle(payload) {
+  return Api.withAuth('apiUpdateBottle', function(user) {
+    return ok(CatalogService.updateSimpleEntity(Config.SHEETS.BOTTLES, payload, user.email), 'Botella actualizada.');
   });
 }
 

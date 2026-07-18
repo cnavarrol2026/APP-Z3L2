@@ -8,13 +8,20 @@
     user: null
   };
 
-  const catalogModalState = { active: '', editingSectionId: '' };
+  const catalogModalState = { active: '', editingId: '' };
 
   const CATALOG_CONFIG = {
     category: {
       eyebrow: 'Catálogo',
       title: 'Agregar categoría',
       formId: 'categoryForm',
+      createFunction: 'apiCreateCategory',
+      updateFunction: 'apiUpdateCategory',
+      submitButtonId: 'categorySubmitButton',
+      cancelButtonId: 'categoryCancelEdit',
+      addLabel: 'Agregar categoría',
+      saveLabel: 'Guardar cambios',
+      defaultName: 'CAT-',
       rowsKey: 'categorias',
       emptyText: 'No hay categorías registradas.'
     },
@@ -22,6 +29,13 @@
       eyebrow: 'Catálogo',
       title: 'Agregar botella',
       formId: 'bottleForm',
+      createFunction: 'apiCreateBottle',
+      updateFunction: 'apiUpdateBottle',
+      submitButtonId: 'bottleSubmitButton',
+      cancelButtonId: 'bottleCancelEdit',
+      addLabel: 'Agregar botella',
+      saveLabel: 'Guardar cambios',
+      defaultName: '',
       rowsKey: 'botellas',
       emptyText: 'No hay botellas registradas.'
     },
@@ -29,6 +43,13 @@
       eyebrow: 'Ficha técnica',
       title: 'Agregar sección',
       formId: 'sectionForm',
+      createFunction: 'apiCreateSection',
+      updateFunction: 'apiUpdateSection',
+      submitButtonId: 'sectionSubmitButton',
+      cancelButtonId: 'sectionCancelEdit',
+      addLabel: 'Agregar sección',
+      saveLabel: 'Guardar cambios',
+      defaultName: '',
       rowsKey: 'secciones',
       emptyText: 'No hay secciones registradas.'
     },
@@ -126,9 +147,11 @@
   }
 
   function bindForms() {
-    document.getElementById('categoryForm').addEventListener('submit', submitCatalog('apiCreateCategory'));
-    document.getElementById('bottleForm').addEventListener('submit', submitCatalog('apiCreateBottle'));
-    document.getElementById('sectionForm').addEventListener('submit', submitSection);
+    document.getElementById('categoryForm').addEventListener('submit', submitEditableCatalog);
+    document.getElementById('bottleForm').addEventListener('submit', submitEditableCatalog);
+    document.getElementById('sectionForm').addEventListener('submit', submitEditableCatalog);
+    document.getElementById('categoryCancelEdit').addEventListener('click', () => cancelCatalogEdit());
+    document.getElementById('bottleCancelEdit').addEventListener('click', () => cancelCatalogEdit());
     document.getElementById('sectionCancelEdit').addEventListener('click', cancelSectionEdit);
     document.getElementById('unitForm').addEventListener('submit', submitCatalog('apiCreateUnit'));
     document.getElementById('fieldForm').addEventListener('submit', submitField);
@@ -505,8 +528,7 @@
     document.querySelectorAll('.catalog-form').forEach((form) => {
       form.hidden = form.getAttribute('id') !== config.formId;
     });
-    if (type === 'category') resetCategoryForm();
-    if (type === 'section') cancelSectionEdit();
+    cancelCatalogEdit();
     const search = document.getElementById('catalogSearch');
     if (search) search.value = '';
     modal.hidden = false;
@@ -552,12 +574,12 @@
       const label = document.createElement('span');
       label.textContent = row.nombre + (row.orden ? ' · Orden ' + row.orden : '');
       item.appendChild(label);
-      if (catalogModalState.active === 'section') {
+      if (['category', 'bottle', 'section'].indexOf(catalogModalState.active) !== -1) {
         const editButton = document.createElement('button');
         editButton.className = 'inline-action';
         editButton.type = 'button';
         editButton.textContent = 'Editar';
-        editButton.addEventListener('click', () => startSectionEdit(row));
+        editButton.addEventListener('click', () => startCatalogEdit(row));
         item.appendChild(editButton);
       }
       container.appendChild(item);
@@ -614,6 +636,7 @@
   function toUpperClientText(value) {
     return String(value || '').trim().replace(/\s+/g, ' ').toUpperCase();
   }
+
   function submitCatalog(functionName) {
     return function(event) {
       event.preventDefault();
@@ -624,7 +647,6 @@
       callServer(functionName, payload)
         .then(() => {
           form.reset();
-          if (form.getAttribute('id') === 'categoryForm') resetCategoryForm();
           showToast('Registro creado.');
           loadInitialData();
         })
@@ -632,51 +654,66 @@
     };
   }
 
-  function resetCategoryForm() {
-    const form = document.getElementById('categoryForm');
-    if (!form || !form.nombre) return;
-    form.nombre.value = 'CAT-';
-  }
-
-  function submitSection(event) {
+  function submitEditableCatalog(event) {
     event.preventDefault();
     const form = event.currentTarget;
+    const config = getCatalogConfigByForm(form.getAttribute('id'));
+    if (!config) return;
     const payload = Object.fromEntries(new FormData(form).entries());
     payload.nombre = toUpperClientText(payload.nombre);
     if (form.nombre) form.nombre.value = payload.nombre;
-    const functionName = payload.id ? 'apiUpdateSection' : 'apiCreateSection';
+    const functionName = payload.id ? config.updateFunction : config.createFunction;
     callServer(functionName, payload)
       .then(() => {
+        const wasEditing = !!payload.id;
         form.reset();
-        cancelSectionEdit(false);
-        showToast(payload.id ? 'Sección actualizada.' : 'Sección creada.');
+        cancelCatalogEdit(false);
+        showToast(wasEditing ? 'Registro actualizado.' : 'Registro creado.');
         loadInitialData();
       })
-      .catch((error) => showToast(getErrorMessage(error, 'No fue posible guardar la sección.')));
+      .catch((error) => showToast(getErrorMessage(error, 'No fue posible guardar el registro.')));
   }
 
-  function startSectionEdit(section) {
-    const form = document.getElementById('sectionForm');
-    if (!form || !section) return;
-    catalogModalState.editingSectionId = section.id;
-    form.elements.id.value = section.id || '';
-    form.nombre.value = section.nombre || '';
-    form.orden.value = section.orden || '';
-    document.getElementById('sectionSubmitButton').textContent = 'Guardar cambios';
-    document.getElementById('sectionCancelEdit').hidden = false;
-    form.nombre.focus();
+  function getCatalogConfigByForm(formId) {
+    return Object.keys(CATALOG_CONFIG)
+      .map((key) => CATALOG_CONFIG[key])
+      .find((config) => config.formId === formId) || null;
+  }
+
+  function startCatalogEdit(row) {
+    const config = CATALOG_CONFIG[catalogModalState.active];
+    if (!config || !row) return;
+    const form = document.getElementById(config.formId);
+    if (!form) return;
+    catalogModalState.editingId = row.id;
+    if (form.elements.id) form.elements.id.value = row.id || '';
+    if (form.nombre) form.nombre.value = row.nombre || config.defaultName || '';
+    if (form.orden) form.orden.value = row.orden || '';
+    const submitButton = document.getElementById(config.submitButtonId);
+    const cancelButton = document.getElementById(config.cancelButtonId);
+    if (submitButton) submitButton.textContent = config.saveLabel;
+    if (cancelButton) cancelButton.hidden = false;
+    if (form.nombre) form.nombre.focus();
+  }
+
+  function cancelCatalogEdit(resetForm) {
+    const config = CATALOG_CONFIG[catalogModalState.active];
+    if (!config) return;
+    const form = document.getElementById(config.formId);
+    if (!form) return;
+    catalogModalState.editingId = '';
+    if (resetForm !== false) form.reset();
+    if (form.elements.id) form.elements.id.value = '';
+    if (form.nombre && config.defaultName) form.nombre.value = config.defaultName;
+    const submitButton = document.getElementById(config.submitButtonId);
+    const cancelButton = document.getElementById(config.cancelButtonId);
+    if (submitButton) submitButton.textContent = config.addLabel;
+    if (cancelButton) cancelButton.hidden = true;
   }
 
   function cancelSectionEdit(resetForm) {
-    const form = document.getElementById('sectionForm');
-    if (!form) return;
-    catalogModalState.editingSectionId = '';
-    if (resetForm !== false) form.reset();
-    form.elements.id.value = '';
-    document.getElementById('sectionSubmitButton').textContent = 'Agregar sección';
-    document.getElementById('sectionCancelEdit').hidden = true;
+    cancelCatalogEdit(resetForm);
   }
-
   function submitField(event) {
     event.preventDefault();
     const form = event.currentTarget;
@@ -759,6 +796,7 @@
     window.setTimeout(() => toast.classList.remove('show'), 4500);
   }
 </script>
+
 
 
 

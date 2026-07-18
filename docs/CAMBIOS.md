@@ -52,4 +52,5 @@
 - Se actualiza el logo embebido del encabezado desde `branding/logo_empresa.png` usando una versión liviana para Apps Script.
 - Se pulen estilos generales: foco visible, encabezado, botones, tarjetas, modal y listados compactos.
 - El modal de Categoría inicia el campo de nombre con el prefijo `CAT-`.
+- Se agrega edición de categorías y botellas desde sus modales de Catálogos, manteniendo buscador y listado con scroll.
 

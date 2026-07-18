@@ -1,4 +1,4 @@
-const CatalogService = {
+﻿const CatalogService = {
   getAdminData: function(showInactive) {
     return {
       categorias: this.filterActive(SheetRepository.list(Config.SHEETS.CATEGORIES), showInactive),
@@ -21,7 +21,7 @@ const CatalogService = {
   },
 
   createSimpleEntity: function(sheetName, prefix, payload, userEmail) {
-    const name = cleanText(payload && payload.nombre, 120);
+    const name = toSystemUpperText(payload && payload.nombre, 120);
     if (!name) {
       throw new Error('El nombre es obligatorio.');
     }
@@ -67,7 +67,7 @@ const CatalogService = {
   },
 
   createField: function(payload, userEmail) {
-    const name = cleanText(payload && payload.nombre, 120);
+    const name = toSystemUpperText(payload && payload.nombre, 120);
     const sectionId = cleanText(payload && payload.seccionId, 80);
     const type = cleanText(payload && payload.tipo, 20);
     if (!name || !sectionId) {
@@ -193,3 +193,4 @@ const CatalogService = {
     return updated;
   }
 };
+

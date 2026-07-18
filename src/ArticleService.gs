@@ -1,10 +1,22 @@
-const ArticleService = {
+﻿const ArticleService = {
   getLookupData: function() {
     const categories = SheetRepository.list(Config.SHEETS.CATEGORIES).filter(function(row) { return toBoolean(row.activo); });
     const bottles = SheetRepository.list(Config.SHEETS.BOTTLES).filter(function(row) { return toBoolean(row.activo); });
     const relations = SheetRepository.list(Config.SHEETS.CATEGORY_BOTTLE).filter(function(row) { return toBoolean(row.activo); });
     const articles = SheetRepository.list(Config.SHEETS.ARTICLES).filter(function(row) { return row.estado === Config.STATES.ACTIVE; });
     return { categorias: categories, botellas: bottles, relaciones: relations, articulos: articles };
+  },
+
+  normalizeDraftPayload: function(data) {
+    const copy = JSON.parse(JSON.stringify(data || {}));
+    if (Array.isArray(copy.valores)) {
+      copy.valores = copy.valores.map(function(item) {
+        const next = Object.assign({}, item);
+        next.valor = toSystemUpperText(next.valor, 500);
+        return next;
+      });
+    }
+    return copy;
   },
 
   validateUniqueCode: function(code, ignoreId) {
@@ -31,20 +43,21 @@ const ArticleService = {
       const current = payload.id ? SheetRepository.findById(Config.SHEETS.DRAFTS, payload.id) : null;
       this.validateDraftPayload(payload, current ? current.id : '');
       const date = nowIso();
+      const technicalPayload = this.normalizeDraftPayload(payload.payload || {});
       const row = {
         id: draftId,
         categoriaId: payload.categoriaId || '',
         botellaId: payload.botellaId || '',
-        codigoArticulo: cleanText(payload.codigoArticulo, 80),
+        codigoArticulo: toSystemUpperText(payload.codigoArticulo, 80),
         codigoNormalizado: normalizeText(payload.codigoArticulo),
-        descripcion: cleanText(payload.descripcion, 240),
+        descripcion: toSystemUpperText(payload.descripcion, 240),
         estado: Config.STATES.DRAFT,
         etqAplica: !!payload.etqAplica,
-        codigoEtq: cleanText(payload.codigoEtq, 80),
+        codigoEtq: toSystemUpperText(payload.codigoEtq, 80),
         cetAplica: !!payload.cetAplica,
-        codigoCet: cleanText(payload.codigoCet, 80),
+        codigoCet: toSystemUpperText(payload.codigoCet, 80),
         etapa: cleanText(payload.etapa || 'DATOS_GENERALES', 80),
-        payloadJson: JSON.stringify(payload.payload || {}),
+        payloadJson: JSON.stringify(technicalPayload),
         fechaCreacion: current ? current.fechaCreacion : date,
         creadoPor: current ? current.creadoPor : userEmail,
         fechaModificacion: date,
@@ -153,3 +166,4 @@ const ArticleService = {
     });
   }
 };
+

@@ -1,4 +1,4 @@
-# Cambios
+﻿# Cambios
 
 ## 2026-07-17
 
@@ -46,3 +46,6 @@
 - El aviso global de conexión ahora incluye el detalle técnico visible.
 - Se separa la carga inicial de la sincronización con Sheets: `apiGetInitialData` entrega una base técnica liviana y `apiGetSavedData` lee los datos guardados después.
 - Se serializan los valores leídos desde Sheets antes de enviarlos al frontend para evitar respuestas inválidas en `google.script.run`.
+- Se rediseña Catálogos como selector de acciones con modal por tipo de registro, buscador y listado compacto con scroll.
+- Se normaliza el guardado de catálogos, campos y productos a mayúsculas desde frontend y backend.
+

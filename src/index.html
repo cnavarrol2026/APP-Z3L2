@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <base target="_top">
@@ -88,71 +88,31 @@
       </section>
 
       <section id="config-page-catalogos" class="config-page">
-      <div class="admin-grid">
-        <form id="categoryForm" class="admin-card">
-          <div class="admin-card-head">
-            <div>
-              <p class="eyebrow">Catálogo</p>
-              <h3>Categorías</h3>
-            </div>
+        <section class="catalog-launcher wide-panel">
+          <div class="catalog-launcher-head">
+            <p class="eyebrow">Catálogo del sistema</p>
+            <h3>¿Qué desea agregar?</h3>
           </div>
-          <label>Nueva categoría
-            <input name="nombre" placeholder="Ej: Vinos 750 ml" required>
-          </label>
-          <button>Agregar categoría</button>
-          <div id="categoryList" class="list"></div>
-        </form>
-
-        <form id="bottleForm" class="admin-card">
-          <div class="admin-card-head">
-            <div>
-              <p class="eyebrow">Catálogo</p>
-              <h3>Botellas</h3>
-            </div>
+          <div class="catalog-action-grid">
+            <button class="catalog-action category" type="button" data-catalog="category">
+              <span>Categoría</span>
+              <small>Familias para consulta y productos</small>
+            </button>
+            <button class="catalog-action bottle" type="button" data-catalog="bottle">
+              <span>Botella</span>
+              <small>Formatos disponibles</small>
+            </button>
+            <button class="catalog-action section" type="button" data-catalog="section">
+              <span>Sección</span>
+              <small>Bloques de la ficha técnica</small>
+            </button>
+            <button class="catalog-action unit" type="button" data-catalog="unit">
+              <span>Unidad</span>
+              <small>mm, m/min u otras unidades</small>
+            </button>
           </div>
-          <label>Nueva botella
-            <input name="nombre" placeholder="Ej: Bordelesa cónica 750 ml" required>
-          </label>
-          <button>Agregar botella</button>
-          <div id="bottleList" class="list"></div>
-        </form>
-
-        <form id="sectionForm" class="admin-card">
-          <div class="admin-card-head">
-            <div>
-              <p class="eyebrow">Ficha técnica</p>
-              <h3>Secciones</h3>
-            </div>
-          </div>
-          <label>Nueva sección
-            <input name="nombre" placeholder="Ej: Ajustes de cabezal" required>
-          </label>
-          <label>Orden
-            <input name="orden" type="number" placeholder="Orden">
-          </label>
-          <button>Agregar sección</button>
-          <div id="sectionList" class="list"></div>
-        </form>
-
-        <form id="unitForm" class="admin-card">
-          <div class="admin-card-head">
-            <div>
-              <p class="eyebrow">Ficha técnica</p>
-              <h3>Unidades</h3>
-            </div>
-          </div>
-          <label>Nueva unidad
-            <input name="nombre" placeholder="Ej: mm" required>
-          </label>
-          <label>Orden
-            <input name="orden" type="number" placeholder="Orden">
-          </label>
-          <button>Agregar unidad</button>
-          <div id="unitList" class="list"></div>
-        </form>
-      </div>
+        </section>
       </section>
-
       <section id="config-page-campos" class="config-page">
       <section class="wide-panel">
         <h3>Agregar campo a la ficha técnica</h3>
@@ -275,6 +235,58 @@
   </main>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="catalogModal" class="modal-shell" hidden>
+    <div class="modal-backdrop" data-close-modal></div>
+    <section class="catalog-modal" role="dialog" aria-modal="true" aria-labelledby="catalogModalTitle">
+      <button class="modal-close" type="button" aria-label="Cerrar" data-close-modal>×</button>
+      <div class="modal-heading">
+        <p id="catalogModalEyebrow" class="eyebrow">Catálogo</p>
+        <h3 id="catalogModalTitle">Agregar registro</h3>
+      </div>
+      <div class="catalog-form-slot">
+        <form id="categoryForm" class="catalog-form">
+          <label>Nombre de categoría
+            <input name="nombre" placeholder="Ej: VINOS 750 ML" required>
+          </label>
+          <button>Agregar categoría</button>
+        </form>
+
+        <form id="bottleForm" class="catalog-form">
+          <label>Nombre de botella
+            <input name="nombre" placeholder="Ej: BORDELESA CÓNICA 750 ML" required>
+          </label>
+          <button>Agregar botella</button>
+        </form>
+
+        <form id="sectionForm" class="catalog-form">
+          <label>Nombre de sección
+            <input name="nombre" placeholder="Ej: AJUSTES DE CABEZAL" required>
+          </label>
+          <label>Orden
+            <input name="orden" type="number" placeholder="Orden">
+          </label>
+          <button>Agregar sección</button>
+        </form>
+
+        <form id="unitForm" class="catalog-form">
+          <label>Nombre de unidad
+            <input name="nombre" placeholder="Ej: MM" required>
+          </label>
+          <label>Orden
+            <input name="orden" type="number" placeholder="Orden">
+          </label>
+          <button>Agregar unidad</button>
+        </form>
+      </div>
+      <div class="catalog-records">
+        <label>Buscar registros existentes
+          <input id="catalogSearch" type="search" placeholder="Escribe para buscar">
+        </label>
+        <div id="catalogModalList" class="catalog-modal-list"></div>
+      </div>
+    </section>
+  </div>
   <?!= include('client'); ?>
 </body>
 </html>
+

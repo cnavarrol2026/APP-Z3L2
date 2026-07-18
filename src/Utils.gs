@@ -1,4 +1,4 @@
-function nowIso() {
+﻿function nowIso() {
   return Utilities.formatDate(new Date(), Config.TIME_ZONE, "yyyy-MM-dd'T'HH:mm:ss");
 }
 
@@ -18,6 +18,10 @@ function normalizeText(value) {
 function cleanText(value, maxLength) {
   const text = String(value || '').trim().replace(/\s+/g, ' ');
   return maxLength ? text.slice(0, maxLength) : text;
+}
+
+function toSystemUpperText(value, maxLength) {
+  return cleanText(value, maxLength).toUpperCase();
 }
 
 function toBoolean(value) {
@@ -78,3 +82,4 @@ function sanitizeFileName(name) {
 function include(filename) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
+

@@ -1,4 +1,4 @@
-<script>
+﻿<script>
   const state = {
     lookup: { categorias: [], botellas: [], relaciones: [], articulos: [] },
     admin: {},
@@ -8,6 +8,38 @@
     user: null
   };
 
+  const catalogModalState = { active: '' };
+
+  const CATALOG_CONFIG = {
+    category: {
+      eyebrow: 'Catálogo',
+      title: 'Agregar categoría',
+      formId: 'categoryForm',
+      rowsKey: 'categorias',
+      emptyText: 'No hay categorías registradas.'
+    },
+    bottle: {
+      eyebrow: 'Catálogo',
+      title: 'Agregar botella',
+      formId: 'bottleForm',
+      rowsKey: 'botellas',
+      emptyText: 'No hay botellas registradas.'
+    },
+    section: {
+      eyebrow: 'Ficha técnica',
+      title: 'Agregar sección',
+      formId: 'sectionForm',
+      rowsKey: 'secciones',
+      emptyText: 'No hay secciones registradas.'
+    },
+    unit: {
+      eyebrow: 'Ficha técnica',
+      title: 'Agregar unidad',
+      formId: 'unitForm',
+      rowsKey: 'unidades',
+      emptyText: 'No hay unidades registradas.'
+    }
+  };
   const LOCAL_TEMPLATE = {
     secciones: [
       { id: 'sec_botella_insumos', nombre: 'Botella e Insumos', orden: 10 },
@@ -108,6 +140,7 @@
     document.getElementById('bottleSelect').addEventListener('change', renderArticleSelect);
     document.getElementById('articleSelect').addEventListener('change', renderArticleDetail);
     document.getElementById('pdfButton').addEventListener('click', generatePdf);
+    bindCatalogModal();
   }
 
   function callServer(functionName, payload) {
@@ -447,15 +480,91 @@
     });
   }
 
+  function bindCatalogModal() {
+    document.querySelectorAll('.catalog-action').forEach((button) => {
+      button.addEventListener('click', () => openCatalogModal(button.dataset.catalog));
+    });
+    document.querySelectorAll('[data-close-modal]').forEach((item) => {
+      item.addEventListener('click', closeCatalogModal);
+    });
+    const search = document.getElementById('catalogSearch');
+    if (search) search.addEventListener('input', renderCatalogModalList);
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeCatalogModal();
+    });
+  }
+
+  function openCatalogModal(type) {
+    const config = CATALOG_CONFIG[type];
+    const modal = document.getElementById('catalogModal');
+    if (!config || !modal) return;
+    catalogModalState.active = type;
+    document.getElementById('catalogModalEyebrow').textContent = config.eyebrow;
+    document.getElementById('catalogModalTitle').textContent = config.title;
+    document.querySelectorAll('.catalog-form').forEach((form) => {
+      form.hidden = form.id !== config.formId;
+    });
+    const search = document.getElementById('catalogSearch');
+    if (search) search.value = '';
+    modal.hidden = false;
+    document.body.classList.add('modal-open');
+    renderCatalogModalList();
+    const firstInput = document.querySelector('#' + config.formId + ' input');
+    if (firstInput) window.setTimeout(() => firstInput.focus(), 60);
+  }
+
+  function closeCatalogModal() {
+    const modal = document.getElementById('catalogModal');
+    if (!modal || modal.hidden) return;
+    modal.hidden = true;
+    catalogModalState.active = '';
+    document.body.classList.remove('modal-open');
+  }
+
+  function renderCatalogModalList() {
+    const config = CATALOG_CONFIG[catalogModalState.active];
+    const container = document.getElementById('catalogModalList');
+    if (!config || !container) return;
+    const search = document.getElementById('catalogSearch');
+    const query = normalizeClientText(search ? search.value : '');
+    const rows = (state.admin[config.rowsKey] || [])
+      .slice()
+      .sort((a, b) => String(a.nombre || '').localeCompare(String(b.nombre || ''), 'es'));
+    const filtered = rows.filter((row) => normalizeClientText(row.nombre).includes(query));
+    container.innerHTML = '';
+    const summary = document.createElement('div');
+    summary.className = 'catalog-list-summary';
+    summary.textContent = filtered.length + ' de ' + rows.length + ' registros';
+    container.appendChild(summary);
+    if (!filtered.length) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.textContent = query ? 'No hay coincidencias.' : config.emptyText;
+      container.appendChild(empty);
+      return;
+    }
+    filtered.forEach((row) => {
+      const item = document.createElement('div');
+      item.className = 'list-item';
+      item.textContent = row.nombre;
+      container.appendChild(item);
+    });
+  }
+
+  function normalizeClientText(value) {
+    return String(value || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+  }
   function renderAdminLists() {
-    renderList('categoryList', state.admin.categorias || []);
-    renderList('bottleList', state.admin.botellas || []);
-    renderList('sectionList', state.admin.secciones || []);
-    renderList('unitList', state.admin.unidades || []);
+    renderCatalogModalList();
   }
 
   function renderList(id, rows) {
     const container = document.getElementById(id);
+    if (!container) return;
     container.innerHTML = '';
     if (!rows.length) {
       container.innerHTML = '<div class="empty-state">Sin registros.</div>';
@@ -489,11 +598,16 @@
     });
   }
 
+  function toUpperClientText(value) {
+    return String(value || '').trim().replace(/\s+/g, ' ').toUpperCase();
+  }
   function submitCatalog(functionName) {
     return function(event) {
       event.preventDefault();
       const form = event.currentTarget;
       const payload = Object.fromEntries(new FormData(form).entries());
+      payload.nombre = toUpperClientText(payload.nombre);
+      if (form.nombre) form.nombre.value = payload.nombre;
       callServer(functionName, payload)
         .then(() => {
           form.reset();
@@ -503,11 +617,12 @@
         .catch((error) => showToast(getErrorMessage(error, 'No fue posible crear el registro.')));
     };
   }
-
   function submitField(event) {
     event.preventDefault();
     const form = event.currentTarget;
     const payload = Object.fromEntries(new FormData(form).entries());
+    payload.nombre = toUpperClientText(payload.nombre);
+    if (form.nombre) form.nombre.value = payload.nombre;
     payload.obligatorio = form.obligatorio.checked;
     callServer('apiCreateField', payload)
       .then(() => {
@@ -517,11 +632,14 @@
       })
       .catch((error) => showToast(getErrorMessage(error, 'No fue posible crear el campo.')));
   }
-
   function saveDraft(event) {
     event.preventDefault();
     const form = event.currentTarget;
     const payload = Object.fromEntries(new FormData(form).entries());
+    ['codigoArticulo', 'descripcion', 'codigoEtq', 'codigoCet'].forEach((key) => {
+      payload[key] = toUpperClientText(payload[key]);
+      if (form[key]) form[key].value = payload[key];
+    });
     payload.etqAplica = form.etqAplica.checked;
     payload.cetAplica = form.cetAplica.checked;
     payload.etapa = 'FICHA_TECNICA';
@@ -529,7 +647,7 @@
       valores: Array.from(document.querySelectorAll('.draft-field')).map((input) => ({
         campoId: input.dataset.fieldId,
         campo: input.dataset.fieldName,
-        valor: input.value
+        valor: toUpperClientText(input.value)
       }))
     };
     callServer('apiSaveDraft', payload)
@@ -540,7 +658,6 @@
       })
       .catch((error) => showToast(getErrorMessage(error, 'No fue posible guardar el producto.')));
   }
-
   function validateImageInput(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -582,3 +699,7 @@
     window.setTimeout(() => toast.classList.remove('show'), 4500);
   }
 </script>
+
+
+
+

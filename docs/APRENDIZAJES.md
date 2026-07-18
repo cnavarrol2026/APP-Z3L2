@@ -1,4 +1,4 @@
-# Aprendizajes Operativos
+﻿# Aprendizajes Operativos
 
 ## 2026-07-17 - Creación de recursos Google
 
@@ -387,3 +387,17 @@ Decisión aplicada:
 - usar esa conversión dentro de `asRowObject`, que es el punto común de lectura de Sheets.
 
 Aprendizaje: todo dato que sale de Google Sheets hacia HTML Service debe quedar serializado como valores simples antes de retornar por `google.script.run`.
+### Catálogos simples con acciones progresivas
+
+La pantalla de Catálogos no debe mostrar todos los formularios al mismo tiempo, aunque estén ordenados visualmente. Para usuarios no técnicos, cuatro tarjetas permanentes pueden comunicar que hay que completar todo o que hay demasiado por configurar.
+
+Decisión aplicada:
+
+- mostrar primero la pregunta `¿Qué desea agregar?`;
+- usar botones grandes por tipo de catálogo;
+- abrir un modal específico solo para la acción elegida;
+- incluir buscador y listado con scroll dentro del modal;
+- mantener validación de duplicados en backend;
+- guardar nombres en mayúsculas para mantener consistencia visual y de datos.
+
+Aprendizaje: en pantallas administrativas pequeñas conviene revelar una sola tarea a la vez. El backend debe seguir protegiendo duplicados y formato aunque el frontend facilite la captura.

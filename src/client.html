@@ -505,6 +505,7 @@
     document.querySelectorAll('.catalog-form').forEach((form) => {
       form.hidden = form.getAttribute('id') !== config.formId;
     });
+    if (type === 'category') resetCategoryForm();
     if (type === 'section') cancelSectionEdit();
     const search = document.getElementById('catalogSearch');
     if (search) search.value = '';
@@ -623,11 +624,18 @@
       callServer(functionName, payload)
         .then(() => {
           form.reset();
+          if (form.getAttribute('id') === 'categoryForm') resetCategoryForm();
           showToast('Registro creado.');
           loadInitialData();
         })
         .catch((error) => showToast(getErrorMessage(error, 'No fue posible crear el registro.')));
     };
+  }
+
+  function resetCategoryForm() {
+    const form = document.getElementById('categoryForm');
+    if (!form || !form.nombre) return;
+    form.nombre.value = 'CAT-';
   }
 
   function submitSection(event) {

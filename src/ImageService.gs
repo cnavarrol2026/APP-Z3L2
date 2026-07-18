@@ -28,7 +28,7 @@ const ImageService = {
     });
     const date = nowIso();
     const imageRow = {
-      id: createId('img'),
+      id: previous ? previous.id : createId('img'),
       articuloId: ownerId,
       tipoImagen: payload.tipoImagen,
       codigo: cleanText(payload.codigo, 80),
@@ -38,25 +38,21 @@ const ImageService = {
       tamanoBytes: bytes.length,
       url: file.getUrl(),
       activo: true,
-      fechaCreacion: date,
-      creadoPor: userEmail,
+      fechaCreacion: previous ? previous.fechaCreacion : date,
+      creadoPor: previous ? previous.creadoPor : userEmail,
       fechaModificacion: date,
       modificadoPor: userEmail,
-      version: 1
+      version: previous ? Number(previous.version || 1) + 1 : 1
     };
-    SheetRepository.append(Config.SHEETS.ARTICLE_IMAGES, imageRow);
     if (previous) {
-      SheetRepository.updateById(Config.SHEETS.ARTICLE_IMAGES, previous.id, {
-        activo: false,
-        fechaModificacion: date,
-        modificadoPor: userEmail,
-        version: Number(previous.version || 1) + 1
-      });
+      SheetRepository.updateById(Config.SHEETS.ARTICLE_IMAGES, previous.id, imageRow);
       try {
         DriveApp.getFileById(previous.driveFileId).setTrashed(true);
       } catch (error) {
         ErrorService.record('ImageService.uploadImageForOwner.cleanup', error);
       }
+    } else {
+      SheetRepository.append(Config.SHEETS.ARTICLE_IMAGES, imageRow);
     }
     HistoryService.recordEvent({
       user: userEmail,

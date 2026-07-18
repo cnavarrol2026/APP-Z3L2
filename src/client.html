@@ -5,7 +5,8 @@
     drafts: [],
     discarded: [],
     history: [],
-    user: null
+    user: null,
+    editingDraftId: ''
   };
 
   const catalogModalState = { active: '', editingId: '' };
@@ -138,12 +139,19 @@
   function bindConfigTabs() {
     document.querySelectorAll('.config-tab').forEach((button) => {
       button.addEventListener('click', () => {
-        document.querySelectorAll('.config-tab').forEach((item) => item.classList.remove('active'));
-        document.querySelectorAll('.config-page').forEach((item) => item.classList.remove('active'));
-        button.classList.add('active');
-        document.getElementById('config-page-' + button.dataset.configPage).classList.add('active');
+        openConfigPage(button.dataset.configPage);
       });
     });
+  }
+
+  function openConfigPage(pageName) {
+    const button = document.querySelector('.config-tab[data-config-page="' + pageName + '"]');
+    const page = document.getElementById('config-page-' + pageName);
+    if (!button || !page) return;
+    document.querySelectorAll('.config-tab').forEach((item) => item.classList.remove('active'));
+    document.querySelectorAll('.config-page').forEach((item) => item.classList.remove('active'));
+    button.classList.add('active');
+    page.classList.add('active');
   }
 
   function bindForms() {
@@ -635,6 +643,15 @@
         '<strong>' + (draft.codigoArticulo || 'SIN CÓDIGO') + '</strong>' +
         '<span>' + (draft.descripcion || 'Sin descripción') + '</span>' +
         '<small>' + [draft.estado || 'BORRADOR', etq, cet, draft.fechaModificacion || ''].filter(Boolean).join(' · ') + '</small>';
+      const actions = document.createElement('div');
+      actions.className = 'draft-card-actions';
+      const editButton = document.createElement('button');
+      editButton.type = 'button';
+      editButton.className = 'small-button';
+      editButton.textContent = 'Completar / revisar';
+      editButton.addEventListener('click', () => continueDraft(draft.id));
+      actions.appendChild(editButton);
+      item.appendChild(actions);
       container.appendChild(item);
     });
   }
@@ -660,6 +677,56 @@
 
   function toBooleanClient(value) {
     return value === true || value === 'TRUE' || value === 'true' || value === '1';
+  }
+
+  function continueDraft(draftId) {
+    const draft = (state.drafts || []).find((item) => item.id === draftId);
+    if (!draft) {
+      showToast('No fue posible encontrar el borrador seleccionado.');
+      return;
+    }
+    callServer('apiAcquireDraftLock', { borradorId: draftId })
+      .then(() => {
+        loadDraftIntoForm(draft);
+        openConfigPage('producto');
+        showToast('Borrador cargado para edición.');
+      })
+      .catch((error) => showToast(getErrorMessage(error, 'No fue posible abrir el borrador.')));
+  }
+
+  function loadDraftIntoForm(draft) {
+    const form = document.getElementById('draftForm');
+    if (!form) return;
+    state.editingDraftId = draft.id || '';
+    if (form.elements.id) form.elements.id.value = draft.id || '';
+    if (form.categoriaId) form.categoriaId.value = draft.categoriaId || '';
+    if (form.botellaId) form.botellaId.value = draft.botellaId || '';
+    if (form.codigoArticulo) form.codigoArticulo.value = draft.codigoArticulo || '';
+    if (form.descripcion) form.descripcion.value = draft.descripcion || '';
+    if (form.etqAplica) form.etqAplica.checked = toBooleanClient(draft.etqAplica);
+    if (form.codigoEtq) form.codigoEtq.value = draft.codigoEtq || '';
+    if (form.cetAplica) form.cetAplica.checked = toBooleanClient(draft.cetAplica);
+    if (form.codigoCet) form.codigoCet.value = draft.codigoCet || '';
+    fillDraftTechnicalValues(draft);
+  }
+
+  function fillDraftTechnicalValues(draft) {
+    const data = safeParseClientJson(draft.payloadJson);
+    const values = Array.isArray(data.valores) ? data.valores : [];
+    document.querySelectorAll('.draft-field').forEach((input) => {
+      const match = values.find((item) => item.campoId === input.dataset.fieldId);
+      input.value = match ? (match.valor || '') : '';
+    });
+  }
+
+  function safeParseClientJson(value) {
+    if (!value) return {};
+    if (typeof value === 'object') return value;
+    try {
+      return JSON.parse(value);
+    } catch (ignored) {
+      return {};
+    }
   }
 
   function renderHistory() {
@@ -777,6 +844,7 @@
     event.preventDefault();
     const form = event.currentTarget;
     const payload = Object.fromEntries(new FormData(form).entries());
+    const action = event.submitter && event.submitter.dataset.action === 'activate' ? 'activate' : 'draft';
     ['codigoArticulo', 'descripcion', 'codigoEtq', 'codigoCet'].forEach((key) => {
       payload[key] = toUpperClientText(payload[key]);
       if (form[key]) form[key].value = payload[key];
@@ -792,10 +860,26 @@
       }))
     };
     callServer('apiSaveDraft', payload)
-      .then(() => {
-        form.reset();
-        showToast('Borrador guardado.');
-        loadInitialData();
+      .then((savedDraft) => {
+        if (action !== 'activate') {
+          return callServer('apiReleaseDraftLock', { borradorId: savedDraft.id })
+            .catch(() => null)
+            .then(() => {
+              form.reset();
+              state.editingDraftId = '';
+              showToast('Borrador guardado.');
+              loadInitialData();
+              return null;
+            });
+        }
+        return callServer('apiActivateDraft', { borradorId: savedDraft.id })
+          .then(() => {
+            form.reset();
+            state.editingDraftId = '';
+            showToast('Producto guardado y activado.');
+            loadInitialData();
+            return null;
+          });
       })
       .catch((error) => showToast(getErrorMessage(error, 'No fue posible guardar el producto.')));
   }

@@ -55,4 +55,5 @@
 - Se agrega edición de categorías y botellas desde sus modales de Catálogos, manteniendo buscador y listado con scroll.
 - Se cargan borradores reales en Pendientes y descartados reales en Descartados desde Sheets.
 - Se mejora la visualización de Pendientes y Descartados con tarjetas compactas.
-
+- Se agrega acción `Completar / revisar` en Pendientes para cargar un borrador en el formulario, continuar su edición y guardar como borrador o guardar y activar.
+- Al activar un borrador se copian sus valores técnicos a `VALORES_ARTICULO` y al guardar como borrador se libera el bloqueo de edición.

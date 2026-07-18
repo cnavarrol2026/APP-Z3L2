@@ -126,6 +126,7 @@
         version: 1
       };
       SheetRepository.append(Config.SHEETS.ARTICLES, article);
+      this.saveArticleValuesFromDraft(draft, article.id, userEmail, date);
       SheetRepository.updateById(Config.SHEETS.DRAFTS, draft.id, {
         estado: Config.STATES.ACTIVE,
         fechaModificacion: date,
@@ -146,6 +147,28 @@
     } finally {
       lock.releaseLock();
     }
+  },
+
+  saveArticleValuesFromDraft: function(draft, articleId, userEmail, date) {
+    const data = safeJsonParse(draft.payloadJson, {});
+    const values = Array.isArray(data.valores) ? data.valores : [];
+    values.forEach(function(item) {
+      const fieldId = cleanText(item.campoId, 80);
+      const value = cleanText(item.valor, 500);
+      if (!fieldId || !value) return;
+      SheetRepository.append(Config.SHEETS.ARTICLE_VALUES, {
+        id: createId('val'),
+        articuloId: articleId,
+        campoId: fieldId,
+        valor: toSystemUpperText(value, 500),
+        unidadId: cleanText(item.unidadId, 80),
+        fechaCreacion: date,
+        creadoPor: userEmail,
+        fechaModificacion: date,
+        modificadoPor: userEmail,
+        version: 1
+      });
+    });
   },
 
   validateActivation: function(draft) {

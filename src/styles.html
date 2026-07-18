@@ -164,6 +164,12 @@
     opacity: 0.55;
   }
 
+  input:disabled,
+  select:disabled {
+    cursor: wait;
+    opacity: 0.72;
+  }
+
   button.secondary,
   .tab-button,
   .config-tab {
@@ -404,6 +410,23 @@
   .draft-card small {
     color: var(--muted);
     font-weight: 700;
+  }
+
+  .image-status {
+    min-height: 22px;
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  .image-status.saved {
+    color: var(--green-dark);
+  }
+
+  .image-status a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   .draft-card-actions {

@@ -304,6 +304,23 @@
     status.hidden = !message;
   }
 
+  function setOperationStatus(message, tone) {
+    setGlobalStatus(message, tone || 'info');
+  }
+
+  function setFormBusy(form, isBusy, message) {
+    if (form) {
+      form.querySelectorAll('button, input, select').forEach((control) => {
+        control.disabled = !!isBusy;
+      });
+    }
+    if (isBusy) {
+      setOperationStatus(message || 'Procesando solicitud...', 'info');
+    } else {
+      setOperationStatus('', '');
+    }
+  }
+
   function renderAll() {
     renderCategorySelect();
     renderAdminLists();
@@ -708,6 +725,7 @@
     if (form.cetAplica) form.cetAplica.checked = toBooleanClient(draft.cetAplica);
     if (form.codigoCet) form.codigoCet.value = draft.codigoCet || '';
     fillDraftTechnicalValues(draft);
+    renderDraftImageStatus(draft);
   }
 
   function fillDraftTechnicalValues(draft) {
@@ -727,6 +745,28 @@
     } catch (ignored) {
       return {};
     }
+  }
+
+  function renderDraftImageStatus(draft) {
+    const images = draft && Array.isArray(draft.imagenes) ? draft.imagenes : [];
+    ['ETQ', 'CET'].forEach((type) => {
+      const status = document.querySelector('[data-image-status="' + type + '"]');
+      if (!status) return;
+      const image = images.find((item) => item.tipoImagen === type);
+      status.innerHTML = '';
+      if (!image) {
+        status.textContent = 'Sin imagen guardada.';
+        status.className = 'image-status';
+        return;
+      }
+      status.className = 'image-status saved';
+      const link = document.createElement('a');
+      link.href = image.url || '#';
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.textContent = 'Imagen ' + type + ' guardada: ' + (image.nombreArchivo || image.codigo || 'archivo PNG');
+      status.appendChild(link);
+    });
   }
 
   function renderHistory() {
@@ -755,13 +795,15 @@
       const payload = Object.fromEntries(new FormData(form).entries());
       payload.nombre = toUpperClientText(payload.nombre);
       if (form.nombre) form.nombre.value = payload.nombre;
+      setFormBusy(form, true, 'Creando registro...');
       callServer(functionName, payload)
         .then(() => {
           form.reset();
           showToast('Registro creado.');
           loadInitialData();
         })
-        .catch((error) => showToast(getErrorMessage(error, 'No fue posible crear el registro.')));
+        .catch((error) => showToast(getErrorMessage(error, 'No fue posible crear el registro.')))
+        .finally(() => setFormBusy(form, false));
     };
   }
 
@@ -774,6 +816,7 @@
     payload.nombre = toUpperClientText(payload.nombre);
     if (form.nombre) form.nombre.value = payload.nombre;
     const functionName = payload.id ? config.updateFunction : config.createFunction;
+    setFormBusy(form, true, payload.id ? 'Guardando cambios del catálogo...' : 'Creando registro de catálogo...');
     callServer(functionName, payload)
       .then(() => {
         const wasEditing = !!payload.id;
@@ -782,7 +825,8 @@
         showToast(wasEditing ? 'Registro actualizado.' : 'Registro creado.');
         loadInitialData();
       })
-      .catch((error) => showToast(getErrorMessage(error, 'No fue posible guardar el registro.')));
+      .catch((error) => showToast(getErrorMessage(error, 'No fue posible guardar el registro.')))
+      .finally(() => setFormBusy(form, false));
   }
 
   function getCatalogConfigByForm(formId) {
@@ -832,14 +876,57 @@
     payload.nombre = toUpperClientText(payload.nombre);
     if (form.nombre) form.nombre.value = payload.nombre;
     payload.obligatorio = form.obligatorio.checked;
+    setFormBusy(form, true, 'Creando campo de ficha técnica...');
     callServer('apiCreateField', payload)
       .then(() => {
         form.reset();
         showToast('Campo creado.');
         loadInitialData();
       })
-      .catch((error) => showToast(getErrorMessage(error, 'No fue posible crear el campo.')));
+      .catch((error) => showToast(getErrorMessage(error, 'No fue posible crear el campo.')))
+      .finally(() => setFormBusy(form, false));
   }
+
+  function readImageInput(form, type, draftId) {
+    const input = form.querySelector('.image-input[data-image-type="' + type + '"]');
+    const file = input && input.files ? input.files[0] : null;
+    if (!file) return Promise.resolve(null);
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = String(reader.result || '');
+        resolve({
+          borradorId: draftId,
+          tipoImagen: type,
+          codigo: type === 'ETQ' ? form.codigoEtq.value : form.codigoCet.value,
+          nombreArchivo: file.name,
+          mimeType: file.type,
+          base64: result.split(',')[1] || ''
+        });
+      };
+      reader.onerror = () => reject(new Error('No fue posible leer la imagen ' + type + '.'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function uploadDraftImages(draftId, form) {
+    return Promise.all([
+      readImageInput(form, 'ETQ', draftId),
+      readImageInput(form, 'CET', draftId)
+    ])
+      .then((payloads) => payloads.filter(Boolean))
+      .then((payloads) => payloads.reduce((chain, payload) => (
+        chain.then(() => callServer('apiUploadDraftImage', payload))
+      ), Promise.resolve()));
+  }
+
+  function clearImageInputs(form) {
+    form.querySelectorAll('.image-input').forEach((input) => {
+      input.value = '';
+    });
+    renderDraftImageStatus(null);
+  }
+
   function saveDraft(event) {
     event.preventDefault();
     const form = event.currentTarget;
@@ -859,7 +946,9 @@
         valor: toUpperClientText(input.value)
       }))
     };
+    setFormBusy(form, true, action === 'activate' ? 'Guardando y activando producto...' : 'Guardando borrador...');
     callServer('apiSaveDraft', payload)
+      .then((savedDraft) => uploadDraftImages(savedDraft.id, form).then(() => savedDraft))
       .then((savedDraft) => {
         if (action !== 'activate') {
           return callServer('apiReleaseDraftLock', { borradorId: savedDraft.id })
@@ -867,6 +956,7 @@
             .then(() => {
               form.reset();
               state.editingDraftId = '';
+              clearImageInputs(form);
               showToast('Borrador guardado.');
               loadInitialData();
               return null;
@@ -876,12 +966,14 @@
           .then(() => {
             form.reset();
             state.editingDraftId = '';
+            clearImageInputs(form);
             showToast('Producto guardado y activado.');
             loadInitialData();
             return null;
           });
       })
-      .catch((error) => showToast(getErrorMessage(error, 'No fue posible guardar el producto.')));
+      .catch((error) => showToast(getErrorMessage(error, 'No fue posible guardar el producto.')))
+      .finally(() => setFormBusy(form, false));
   }
   function validateImageInput(event) {
     const file = event.target.files[0];
@@ -900,21 +992,25 @@
 
   function generatePdf() {
     const articuloId = document.getElementById('articleSelect').value;
+    setOperationStatus('Generando PDF...', 'info');
     callServer('apiGeneratePdf', { articuloId })
       .then((file) => {
         showToast('PDF generado.');
         window.open(file.url, '_blank');
       })
-      .catch((error) => showToast(getErrorMessage(error, 'No fue posible generar el PDF.')));
+      .catch((error) => showToast(getErrorMessage(error, 'No fue posible generar el PDF.')))
+      .finally(() => setOperationStatus('', ''));
   }
 
   function createBackup() {
+    setOperationStatus('Generando respaldo...', 'info');
     callServer('apiCreateBackup')
       .then((file) => {
         showToast('Respaldo creado.');
         window.open(file.url, '_blank');
       })
-      .catch((error) => showToast(getErrorMessage(error, 'No fue posible crear el respaldo.')));
+      .catch((error) => showToast(getErrorMessage(error, 'No fue posible crear el respaldo.')))
+      .finally(() => setOperationStatus('', ''));
   }
 
   function showToast(message) {

@@ -1,21 +1,35 @@
 const ImageService = {
   uploadArticleImage: function(payload, userEmail) {
-    this.validatePayload(payload);
-    const article = SheetRepository.findById(Config.SHEETS.ARTICLES, payload.articuloId);
-    if (!article) {
-      throw new Error('No se encontró el artículo asociado a la imagen.');
+    this.validatePayload(payload, true);
+    return this.uploadImageForOwner(payload.articuloId, payload, userEmail);
+  },
+
+  uploadDraftImage: function(payload, userEmail) {
+    this.validatePayload(payload, false);
+    const draft = SheetRepository.findById(Config.SHEETS.DRAFTS, payload.borradorId);
+    if (!draft) {
+      throw new Error('No se encontró el borrador asociado a la imagen.');
+    }
+    return this.uploadImageForOwner(payload.borradorId, payload, userEmail);
+  },
+
+  uploadImageForOwner: function(ownerId, payload, userEmail) {
+    const article = SheetRepository.findById(Config.SHEETS.ARTICLES, ownerId);
+    const draft = SheetRepository.findById(Config.SHEETS.DRAFTS, ownerId);
+    if (!article && !draft) {
+      throw new Error('No se encontró el registro asociado a la imagen.');
     }
     const folder = ConfigService.getImageFolder();
     const bytes = Utilities.base64Decode(payload.base64);
     const blob = Utilities.newBlob(bytes, Config.IMAGE_MIME_TYPE, sanitizeFileName(payload.nombreArchivo));
     const file = folder.createFile(blob);
     const previous = SheetRepository.list(Config.SHEETS.ARTICLE_IMAGES).find(function(row) {
-      return row.articuloId === payload.articuloId && row.tipoImagen === payload.tipoImagen && toBoolean(row.activo);
+      return row.articuloId === ownerId && row.tipoImagen === payload.tipoImagen && toBoolean(row.activo);
     });
     const date = nowIso();
     const imageRow = {
       id: createId('img'),
-      articuloId: payload.articuloId,
+      articuloId: ownerId,
       tipoImagen: payload.tipoImagen,
       codigo: cleanText(payload.codigo, 80),
       driveFileId: file.getId(),
@@ -41,7 +55,7 @@ const ImageService = {
       try {
         DriveApp.getFileById(previous.driveFileId).setTrashed(true);
       } catch (error) {
-        ErrorService.record('ImageService.uploadArticleImage.cleanup', error);
+        ErrorService.record('ImageService.uploadImageForOwner.cleanup', error);
       }
     }
     HistoryService.recordEvent({
@@ -49,7 +63,7 @@ const ImageService = {
       type: previous ? 'REEMPLAZAR_IMAGEN' : 'CARGAR_IMAGEN',
       entity: Config.SHEETS.ARTICLE_IMAGES,
       entityId: imageRow.id,
-      productId: payload.articuloId,
+      productId: ownerId,
       reason: payload.motivo || 'Carga de imagen ' + payload.tipoImagen,
       details: [
         { field: 'tipoImagen', before: previous ? previous.tipoImagen : '', after: imageRow.tipoImagen },
@@ -59,8 +73,23 @@ const ImageService = {
     return imageRow;
   },
 
-  validatePayload: function(payload) {
-    if (!payload || !payload.articuloId) throw new Error('Falta el artículo de la imagen.');
+  moveDraftImagesToArticle: function(draftId, articleId, userEmail, date) {
+    SheetRepository.list(Config.SHEETS.ARTICLE_IMAGES).forEach(function(row) {
+      if (row.articuloId === draftId && toBoolean(row.activo)) {
+        SheetRepository.updateById(Config.SHEETS.ARTICLE_IMAGES, row.id, {
+          articuloId: articleId,
+          fechaModificacion: date,
+          modificadoPor: userEmail,
+          version: Number(row.version || 1) + 1
+        });
+      }
+    });
+  },
+
+  validatePayload: function(payload, requireArticle) {
+    if (!payload) throw new Error('Falta la imagen.');
+    if (requireArticle && !payload.articuloId) throw new Error('Falta el artículo de la imagen.');
+    if (!requireArticle && !payload.borradorId) throw new Error('Falta el borrador de la imagen.');
     if ([Config.IMAGE_TYPES.ETQ, Config.IMAGE_TYPES.CET].indexOf(payload.tipoImagen) === -1) {
       throw new Error('El tipo de imagen no es válido.');
     }

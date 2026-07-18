@@ -127,6 +127,7 @@
       };
       SheetRepository.append(Config.SHEETS.ARTICLES, article);
       this.saveArticleValuesFromDraft(draft, article.id, userEmail, date);
+      ImageService.moveDraftImagesToArticle(draft.id, article.id, userEmail, date);
       SheetRepository.updateById(Config.SHEETS.DRAFTS, draft.id, {
         estado: Config.STATES.ACTIVE,
         fechaModificacion: date,

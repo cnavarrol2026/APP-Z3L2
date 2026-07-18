@@ -83,6 +83,10 @@ function apiGetSavedData() {
     const fields = SheetRepository.listSafe(Config.SHEETS.FIELDS).filter(function(row) { return toBoolean(row.activo); }).sort(CatalogService.byOrder);
     const units = SheetRepository.listSafe(Config.SHEETS.UNITS).filter(function(row) { return toBoolean(row.activo); }).sort(CatalogService.byOrder);
     const drafts = DraftService.listPendingDrafts();
+    const images = SheetRepository.listSafe(Config.SHEETS.ARTICLE_IMAGES).filter(function(row) { return toBoolean(row.activo); });
+    drafts.forEach(function(draft) {
+      draft.imagenes = images.filter(function(image) { return image.articuloId === draft.id; });
+    });
     const discarded = DraftService.listDiscardedDrafts();
     return ok({
       user: user,
@@ -213,6 +217,12 @@ function apiRecoverDraft(payload) {
 function apiUploadImage(payload) {
   return Api.withAuth('apiUploadImage', function(user) {
     return ok(ImageService.uploadArticleImage(payload, user.email), 'Imagen cargada.');
+  });
+}
+
+function apiUploadDraftImage(payload) {
+  return Api.withAuth('apiUploadDraftImage', function(user) {
+    return ok(ImageService.uploadDraftImage(payload, user.email), 'Imagen de borrador cargada.');
   });
 }
 

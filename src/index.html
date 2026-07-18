@@ -259,13 +259,17 @@
         </form>
 
         <form id="sectionForm" class="catalog-form">
+          <input type="hidden" name="id">
           <label>Nombre de sección
             <input name="nombre" placeholder="Ej: AJUSTES DE CABEZAL" required>
           </label>
           <label>Orden
             <input name="orden" type="number" placeholder="Orden">
           </label>
-          <button>Agregar sección</button>
+          <div class="catalog-form-actions">
+            <button id="sectionSubmitButton">Agregar sección</button>
+            <button id="sectionCancelEdit" class="secondary" type="button" hidden>Cancelar</button>
+          </div>
         </form>
 
         <form id="unitForm" class="catalog-form">

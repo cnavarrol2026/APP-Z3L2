@@ -66,6 +66,52 @@
     });
   },
 
+  updateSection: function(payload, userEmail) {
+    const id = cleanText(payload && payload.id, 80);
+    const name = toSystemUpperText(payload && payload.nombre, 120);
+    const order = Number(payload && payload.orden) || '';
+    if (!id) {
+      throw new Error('Falta la sección a editar.');
+    }
+    if (!name) {
+      throw new Error('El nombre de la sección es obligatorio.');
+    }
+    const current = SheetRepository.findById(Config.SHEETS.SECTIONS, id);
+    if (!current) {
+      throw new Error('No se encontró la sección seleccionada.');
+    }
+    const normalized = normalizeText(name);
+    const duplicate = SheetRepository.list(Config.SHEETS.SECTIONS).find(function(row) {
+      return row.id !== id && row.nombreNormalizado === normalized;
+    });
+    if (duplicate) {
+      throw new Error('Ya existe una sección con ese nombre.');
+    }
+    const patch = {
+      nombre: name,
+      nombreNormalizado: normalized,
+      orden: order,
+      fechaModificacion: nowIso(),
+      modificadoPor: userEmail,
+      version: Number(current.version || 1) + 1
+    };
+    const updated = SheetRepository.updateById(Config.SHEETS.SECTIONS, id, patch);
+    HistoryService.recordEvent({
+      user: userEmail,
+      type: 'MODIFICAR',
+      entity: Config.SHEETS.SECTIONS,
+      entityId: id,
+      reason: 'Edición de sección.',
+      details: [
+        { field: 'nombre', before: current.nombre || '', after: updated.nombre || '' },
+        { field: 'orden', before: current.orden || '', after: updated.orden || '' }
+      ].filter(function(detail) {
+        return String(detail.before) !== String(detail.after);
+      })
+    });
+    return updated;
+  },
+
   createField: function(payload, userEmail) {
     const name = toSystemUpperText(payload && payload.nombre, 120);
     const sectionId = cleanText(payload && payload.seccionId, 80);

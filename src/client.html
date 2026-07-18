@@ -8,7 +8,7 @@
     user: null
   };
 
-  const catalogModalState = { active: '' };
+  const catalogModalState = { active: '', editingSectionId: '' };
 
   const CATALOG_CONFIG = {
     category: {
@@ -128,7 +128,8 @@
   function bindForms() {
     document.getElementById('categoryForm').addEventListener('submit', submitCatalog('apiCreateCategory'));
     document.getElementById('bottleForm').addEventListener('submit', submitCatalog('apiCreateBottle'));
-    document.getElementById('sectionForm').addEventListener('submit', submitCatalog('apiCreateSection'));
+    document.getElementById('sectionForm').addEventListener('submit', submitSection);
+    document.getElementById('sectionCancelEdit').addEventListener('click', cancelSectionEdit);
     document.getElementById('unitForm').addEventListener('submit', submitCatalog('apiCreateUnit'));
     document.getElementById('fieldForm').addEventListener('submit', submitField);
     document.getElementById('draftForm').addEventListener('submit', saveDraft);
@@ -504,6 +505,7 @@
     document.querySelectorAll('.catalog-form').forEach((form) => {
       form.hidden = form.id !== config.formId;
     });
+    if (type === 'section') cancelSectionEdit();
     const search = document.getElementById('catalogSearch');
     if (search) search.value = '';
     modal.hidden = false;
@@ -546,7 +548,17 @@
     filtered.forEach((row) => {
       const item = document.createElement('div');
       item.className = 'list-item';
-      item.textContent = row.nombre;
+      const label = document.createElement('span');
+      label.textContent = row.nombre + (row.orden ? ' · Orden ' + row.orden : '');
+      item.appendChild(label);
+      if (catalogModalState.active === 'section') {
+        const editButton = document.createElement('button');
+        editButton.className = 'inline-action';
+        editButton.type = 'button';
+        editButton.textContent = 'Editar';
+        editButton.addEventListener('click', () => startSectionEdit(row));
+        item.appendChild(editButton);
+      }
       container.appendChild(item);
     });
   }
@@ -617,6 +629,46 @@
         .catch((error) => showToast(getErrorMessage(error, 'No fue posible crear el registro.')));
     };
   }
+
+  function submitSection(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const payload = Object.fromEntries(new FormData(form).entries());
+    payload.nombre = toUpperClientText(payload.nombre);
+    if (form.nombre) form.nombre.value = payload.nombre;
+    const functionName = payload.id ? 'apiUpdateSection' : 'apiCreateSection';
+    callServer(functionName, payload)
+      .then(() => {
+        form.reset();
+        cancelSectionEdit(false);
+        showToast(payload.id ? 'Sección actualizada.' : 'Sección creada.');
+        loadInitialData();
+      })
+      .catch((error) => showToast(getErrorMessage(error, 'No fue posible guardar la sección.')));
+  }
+
+  function startSectionEdit(section) {
+    const form = document.getElementById('sectionForm');
+    if (!form || !section) return;
+    catalogModalState.editingSectionId = section.id;
+    form.elements.id.value = section.id || '';
+    form.nombre.value = section.nombre || '';
+    form.orden.value = section.orden || '';
+    document.getElementById('sectionSubmitButton').textContent = 'Guardar cambios';
+    document.getElementById('sectionCancelEdit').hidden = false;
+    form.nombre.focus();
+  }
+
+  function cancelSectionEdit(resetForm) {
+    const form = document.getElementById('sectionForm');
+    if (!form) return;
+    catalogModalState.editingSectionId = '';
+    if (resetForm !== false) form.reset();
+    form.elements.id.value = '';
+    document.getElementById('sectionSubmitButton').textContent = 'Agregar sección';
+    document.getElementById('sectionCancelEdit').hidden = true;
+  }
+
   function submitField(event) {
     event.preventDefault();
     const form = event.currentTarget;

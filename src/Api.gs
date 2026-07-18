@@ -136,6 +136,12 @@ function apiCreateSection(payload) {
   });
 }
 
+function apiUpdateSection(payload) {
+  return Api.withAuth('apiUpdateSection', function(user) {
+    return ok(CatalogService.updateSection(payload, user.email), 'Sección actualizada.');
+  });
+}
+
 function apiCreateField(payload) {
   return Api.withAuth('apiCreateField', function(user) {
     return ok(CatalogService.createField(payload, user.email), 'Campo creado.');

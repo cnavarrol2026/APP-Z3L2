@@ -48,4 +48,5 @@
 - Se serializan los valores leídos desde Sheets antes de enviarlos al frontend para evitar respuestas inválidas en `google.script.run`.
 - Se rediseña Catálogos como selector de acciones con modal por tipo de registro, buscador y listado compacto con scroll.
 - Se normaliza el guardado de catálogos, campos y productos a mayúsculas desde frontend y backend.
+- Se agrega edición de secciones existentes desde el modal de Catálogos, con validación backend de duplicados e historial de cambios.
 

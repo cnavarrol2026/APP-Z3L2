@@ -49,4 +49,6 @@
 - Se rediseña Catálogos como selector de acciones con modal por tipo de registro, buscador y listado compacto con scroll.
 - Se normaliza el guardado de catálogos, campos y productos a mayúsculas desde frontend y backend.
 - Se agrega edición de secciones existentes desde el modal de Catálogos, con validación backend de duplicados e historial de cambios.
+- Se actualiza el logo embebido del encabezado desde `branding/logo_empresa.png` usando una versión liviana para Apps Script.
+- Se pulen estilos generales: foco visible, encabezado, botones, tarjetas, modal y listados compactos.
 

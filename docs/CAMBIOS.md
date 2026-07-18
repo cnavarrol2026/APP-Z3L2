@@ -53,4 +53,6 @@
 - Se pulen estilos generales: foco visible, encabezado, botones, tarjetas, modal y listados compactos.
 - El modal de Categoría inicia el campo de nombre con el prefijo `CAT-`.
 - Se agrega edición de categorías y botellas desde sus modales de Catálogos, manteniendo buscador y listado con scroll.
+- Se cargan borradores reales en Pendientes y descartados reales en Descartados desde Sheets.
+- Se mejora la visualización de Pendientes y Descartados con tarjetas compactas.
 

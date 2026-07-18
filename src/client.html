@@ -614,8 +614,52 @@
   }
 
   function renderDraftLists() {
-    renderList('draftList', state.drafts.map((draft) => ({ nombre: draft.codigoArticulo + ' - ' + draft.descripcion })));
-    renderList('discardedList', state.discarded.map((draft) => ({ nombre: draft.borradorId + ' - ' + draft.motivo })));
+    renderDraftCards('draftList', state.drafts || [], 'No hay productos pendientes.');
+    renderDiscardedCards('discardedList', state.discarded || []);
+  }
+
+  function renderDraftCards(id, rows, emptyText) {
+    const container = document.getElementById(id);
+    if (!container) return;
+    container.innerHTML = '';
+    if (!rows.length) {
+      container.innerHTML = '<div class="empty-state">' + emptyText + '</div>';
+      return;
+    }
+    rows.forEach((draft) => {
+      const item = document.createElement('div');
+      item.className = 'draft-card';
+      const etq = toBooleanClient(draft.etqAplica) ? 'ETQ aplica' : 'ETQ no aplica';
+      const cet = toBooleanClient(draft.cetAplica) ? 'CET aplica' : 'CET no aplica';
+      item.innerHTML =
+        '<strong>' + (draft.codigoArticulo || 'SIN CÓDIGO') + '</strong>' +
+        '<span>' + (draft.descripcion || 'Sin descripción') + '</span>' +
+        '<small>' + [draft.estado || 'BORRADOR', etq, cet, draft.fechaModificacion || ''].filter(Boolean).join(' · ') + '</small>';
+      container.appendChild(item);
+    });
+  }
+
+  function renderDiscardedCards(id, rows) {
+    const container = document.getElementById(id);
+    if (!container) return;
+    container.innerHTML = '';
+    if (!rows.length) {
+      container.innerHTML = '<div class="empty-state">No hay productos descartados.</div>';
+      return;
+    }
+    rows.forEach((draft) => {
+      const item = document.createElement('div');
+      item.className = 'draft-card';
+      item.innerHTML =
+        '<strong>' + (draft.borradorId || draft.id || 'SIN ID') + '</strong>' +
+        '<span>' + (draft.motivo || 'Sin motivo registrado') + '</span>' +
+        '<small>' + [draft.estado || 'DESCARTADO', draft.fechaDescarte || ''].filter(Boolean).join(' · ') + '</small>';
+      container.appendChild(item);
+    });
+  }
+
+  function toBooleanClient(value) {
+    return value === true || value === 'TRUE' || value === 'true' || value === '1';
   }
 
   function renderHistory() {

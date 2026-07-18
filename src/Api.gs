@@ -82,6 +82,8 @@ function apiGetSavedData() {
     const sections = SheetRepository.listSafe(Config.SHEETS.SECTIONS).filter(function(row) { return toBoolean(row.activo); }).sort(CatalogService.byOrder);
     const fields = SheetRepository.listSafe(Config.SHEETS.FIELDS).filter(function(row) { return toBoolean(row.activo); }).sort(CatalogService.byOrder);
     const units = SheetRepository.listSafe(Config.SHEETS.UNITS).filter(function(row) { return toBoolean(row.activo); }).sort(CatalogService.byOrder);
+    const drafts = DraftService.listPendingDrafts();
+    const discarded = DraftService.listDiscardedDrafts();
     return ok({
       user: user,
       lookup: {
@@ -98,8 +100,8 @@ function apiGetSavedData() {
         campos: fields.length ? fields : fallback.campos,
         unidades: units.length ? units : fallback.unidades
       },
-      drafts: [],
-      discarded: [],
+      drafts: drafts,
+      discarded: discarded,
       history: [],
       warnings: []
     });

@@ -151,10 +151,14 @@
         <form id="draftForm" class="wizard-grid">
           <input type="hidden" name="id">
           <label>Categoría
-            <select name="categoriaId" id="draftCategory"></select>
+            <input id="draftCategorySearch" class="search-combo-input" list="draftCategoryOptions" placeholder="Escribe para buscar categoría" autocomplete="off">
+            <input type="hidden" name="categoriaId" id="draftCategory">
+            <datalist id="draftCategoryOptions"></datalist>
           </label>
           <label>Botella
-            <select name="botellaId" id="draftBottle"></select>
+            <input id="draftBottleSearch" class="search-combo-input" list="draftBottleOptions" placeholder="Escribe para buscar botella" autocomplete="off">
+            <input type="hidden" name="botellaId" id="draftBottle">
+            <datalist id="draftBottleOptions"></datalist>
           </label>
           <label>Código de artículo
             <input name="codigoArticulo" required>

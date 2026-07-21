@@ -164,6 +164,8 @@
     document.getElementById('unitForm').addEventListener('submit', submitCatalog('apiCreateUnit'));
     document.getElementById('fieldForm').addEventListener('submit', submitField);
     document.getElementById('draftForm').addEventListener('submit', saveDraft);
+    document.getElementById('draftCategorySearch').addEventListener('input', () => syncDraftSearchField('category'));
+    document.getElementById('draftBottleSearch').addEventListener('input', () => syncDraftSearchField('bottle'));
     document.getElementById('backupButton').addEventListener('click', createBackup);
     document.querySelectorAll('.image-input').forEach((input) => {
       input.addEventListener('change', validateImageInput);
@@ -429,8 +431,58 @@
   }
 
   function fillDraftSelects() {
-    fillPlainSelect('draftCategory', state.admin.categorias || [], 'Selecciona categoría');
-    fillPlainSelect('draftBottle', state.admin.botellas || [], 'Selecciona botella');
+    fillSearchComboOptions('draftCategoryOptions', state.admin.categorias || []);
+    fillSearchComboOptions('draftBottleOptions', state.admin.botellas || []);
+    syncDraftSearchField('category', true);
+    syncDraftSearchField('bottle', true);
+  }
+
+  function fillSearchComboOptions(id, rows) {
+    const datalist = document.getElementById(id);
+    if (!datalist) return;
+    datalist.innerHTML = '';
+    rows.forEach((row) => {
+      const option = document.createElement('option');
+      option.value = row.nombre;
+      option.dataset.id = row.id;
+      datalist.appendChild(option);
+    });
+  }
+
+  function syncDraftSearchField(type, keepExistingId) {
+    const config = type === 'category'
+      ? { inputId: 'draftCategorySearch', hiddenId: 'draftCategory', rows: state.admin.categorias || [] }
+      : { inputId: 'draftBottleSearch', hiddenId: 'draftBottle', rows: state.admin.botellas || [] };
+    const input = document.getElementById(config.inputId);
+    const hidden = document.getElementById(config.hiddenId);
+    if (!input || !hidden) return;
+    if (keepExistingId && hidden.value) {
+      const current = config.rows.find((row) => row.id === hidden.value);
+      if (current) input.value = current.nombre;
+      return;
+    }
+    const normalized = normalizeClientText(input.value);
+    const match = config.rows.find((row) => normalizeClientText(row.nombre) === normalized);
+    hidden.value = match ? match.id : '';
+  }
+
+  function setDraftSearchValue(type, id) {
+    const rows = type === 'category' ? (state.admin.categorias || []) : (state.admin.botellas || []);
+    const input = document.getElementById(type === 'category' ? 'draftCategorySearch' : 'draftBottleSearch');
+    const hidden = document.getElementById(type === 'category' ? 'draftCategory' : 'draftBottle');
+    const row = rows.find((item) => item.id === id);
+    if (!input || !hidden) return;
+    hidden.value = row ? row.id : '';
+    input.value = row ? row.nombre : '';
+  }
+
+  function normalizeClientText(value) {
+    return String(value || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ');
   }
 
   function fillPlainSelect(id, rows, emptyText) {
@@ -716,8 +768,8 @@
     if (!form) return;
     state.editingDraftId = draft.id || '';
     if (form.elements.id) form.elements.id.value = draft.id || '';
-    if (form.categoriaId) form.categoriaId.value = draft.categoriaId || '';
-    if (form.botellaId) form.botellaId.value = draft.botellaId || '';
+    setDraftSearchValue('category', draft.categoriaId || '');
+    setDraftSearchValue('bottle', draft.botellaId || '');
     if (form.codigoArticulo) form.codigoArticulo.value = draft.codigoArticulo || '';
     if (form.descripcion) form.descripcion.value = draft.descripcion || '';
     if (form.etqAplica) form.etqAplica.checked = toBooleanClient(draft.etqAplica);
@@ -932,6 +984,18 @@
     const form = event.currentTarget;
     const payload = Object.fromEntries(new FormData(form).entries());
     const action = event.submitter && event.submitter.dataset.action === 'activate' ? 'activate' : 'draft';
+    syncDraftSearchField('category');
+    syncDraftSearchField('bottle');
+    payload.categoriaId = form.categoriaId.value;
+    payload.botellaId = form.botellaId.value;
+    if (!payload.categoriaId) {
+      showToast('Selecciona una categoría válida desde la lista.');
+      return;
+    }
+    if (!payload.botellaId) {
+      showToast('Selecciona una botella válida desde la lista.');
+      return;
+    }
     ['codigoArticulo', 'descripcion', 'codigoEtq', 'codigoCet'].forEach((key) => {
       payload[key] = toUpperClientText(payload[key]);
       if (form[key]) form[key].value = payload[key];

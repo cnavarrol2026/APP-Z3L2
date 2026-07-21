@@ -64,3 +64,6 @@
 - Si falla la carga de imagen después de guardar un borrador, el sistema recarga Pendientes igualmente y muestra advertencia separada; Pendientes también incluye borradores con estado no activo/no descartado para evitar registros fantasma.
 - Se agrega buscador de código en Pendientes para ubicar registros en `BORRADORES`, `ARTICULOS` o `BORRADORES_DESCARTADOS`, y se mejoran mensajes de duplicado indicando dónde existe el código.
 - Se refuerza el flujo de Producto nuevo para limpiar IDs ocultos al salir del modo edición y evitar que un registro nuevo sobrescriba accidentalmente un borrador existente.
+- Se reestructura la ficha técnica: `Botella e Insumos` incorpora `Programa de máquina`, `Programa de estación` y `Tipo de chaleco`; las alturas quedan renombradas y ordenadas como `Altura de Etiquetado`, `Altura ContraEtiqueta (CET)` y `Altura medalla`.
+- Se reestructura `Ajustes Mecánicos de Etiquetadora` con tres bloques compactos (`Ajuste sinfín`, `Guía botellas`, `Altura estrella`) y matriz por `Estación 1`, `Estación 2` y `Estación 3` para `Altura`, `Profundidad`, `Inclinación`, `VE`, `RS` y `DF`.
+- Se agrega sincronización segura de plantilla técnica: crea campos nuevos, actualiza nombres/secciones/órdenes existentes y marca como inactivos los campos antiguos de Ajustes Mecánicos sin borrar datos históricos.

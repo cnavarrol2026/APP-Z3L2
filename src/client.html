@@ -75,26 +75,71 @@
     campos: [
       { id: 'cam_tipo_botella', seccionId: 'sec_botella_insumos', nombre: 'Tipo de botella', tipo: 'TEXTO', obligatorio: true, orden: 10 },
       { id: 'cam_medidas_etiqueta', seccionId: 'sec_botella_insumos', nombre: 'Medidas etiqueta', tipo: 'TEXTO', obligatorio: true, orden: 20 },
-      { id: 'cam_altura_pegado_etiqueta', seccionId: 'sec_botella_insumos', nombre: 'Altura de pegado (etiqueta)', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: true, orden: 30 },
-      { id: 'cam_altura_contra_etiqueta', seccionId: 'sec_botella_insumos', nombre: 'Altura contra-etiqueta', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 40 },
-      { id: 'cam_altura_medalla', seccionId: 'sec_botella_insumos', nombre: 'Altura medalla', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 50 },
-      { id: 'cam_entrada_guia_sin_fin', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Entrada guía sin fin', tipo: 'TEXTO', obligatorio: false, orden: 10 },
-      { id: 'cam_guia_botellas', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Guía de botellas', tipo: 'TEXTO', obligatorio: false, orden: 20 },
-      { id: 'cam_altura_estrella', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Altura de estrella', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 30 },
-      { id: 'cam_levas', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Levas', tipo: 'TEXTO', obligatorio: false, orden: 40 },
-      { id: 'cam_altura_estaciones', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Altura estaciones', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 50 },
-      { id: 'cam_profundidad_estaciones', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Profundidad estaciones', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 60 },
-      { id: 'cam_ajuste_lateral', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Ajuste lateral', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 70 },
-      { id: 'cam_velocidad_emision', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Velocidad emisión', tipo: 'NUMERO', unidadId: 'uni_m_min', obligatorio: false, orden: 80 },
-      { id: 'cam_distancia_etiqueta', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Distancia de etiqueta', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 90 },
-      { id: 'cam_tipo_chaleco', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Tipo de chaleco', tipo: 'TEXTO', obligatorio: false, orden: 100 },
-      { id: 'cam_formato_capsula', seccionId: 'sec_ajustes_capsuladora', nombre: 'N° formato (cápsula)', tipo: 'TEXTO', obligatorio: false, orden: 10 },
-      { id: 'cam_formato_botella', seccionId: 'sec_ajustes_capsuladora', nombre: 'N° formato (botella)', tipo: 'TEXTO', obligatorio: false, orden: 20 },
+      { id: 'cam_programa_maquina', seccionId: 'sec_botella_insumos', nombre: 'Programa de máquina', tipo: 'TEXTO', obligatorio: true, orden: 30 },
+      { id: 'cam_programa_estacion', seccionId: 'sec_botella_insumos', nombre: 'Programa de estación', tipo: 'TEXTO', obligatorio: true, orden: 40 },
+      { id: 'cam_tipo_chaleco', seccionId: 'sec_botella_insumos', nombre: 'Tipo de chaleco', tipo: 'TEXTO', obligatorio: false, orden: 50 },
+      { id: 'cam_altura_pegado_etiqueta', seccionId: 'sec_botella_insumos', nombre: 'Altura de Etiquetado', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: true, orden: 60 },
+      { id: 'cam_altura_contra_etiqueta', seccionId: 'sec_botella_insumos', nombre: 'Altura ContraEtiqueta (CET)', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 70 },
+      { id: 'cam_altura_medalla', seccionId: 'sec_botella_insumos', nombre: 'Altura medalla', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 80 },
+      { id: 'cam_ajuste_sinfin_a', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Ajuste sinfín A', tipo: 'TEXTO', obligatorio: false, orden: 10 },
+      { id: 'cam_ajuste_sinfin_b', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Ajuste sinfín B', tipo: 'TEXTO', obligatorio: false, orden: 20 },
+      { id: 'cam_guia_botellas_a', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Guía botellas A', tipo: 'TEXTO', obligatorio: false, orden: 30 },
+      { id: 'cam_guia_botellas_h', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Guía botellas H', tipo: 'TEXTO', obligatorio: false, orden: 40 },
+      { id: 'cam_altura_estrella_entrada', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Altura estrella entrada', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 50 },
+      { id: 'cam_altura_estrella_salida', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Altura estrella salida', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 60 },
+      { id: 'cam_est1_altura', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 1 - Altura', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 110 },
+      { id: 'cam_est2_altura', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 2 - Altura', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 120 },
+      { id: 'cam_est3_altura', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 3 - Altura', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 130 },
+      { id: 'cam_est1_profundidad', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 1 - Profundidad', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 140 },
+      { id: 'cam_est2_profundidad', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 2 - Profundidad', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 150 },
+      { id: 'cam_est3_profundidad', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 3 - Profundidad', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 160 },
+      { id: 'cam_est1_inclinacion', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 1 - Inclinación', tipo: 'NUMERO', obligatorio: false, orden: 170 },
+      { id: 'cam_est2_inclinacion', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 2 - Inclinación', tipo: 'NUMERO', obligatorio: false, orden: 180 },
+      { id: 'cam_est3_inclinacion', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 3 - Inclinación', tipo: 'NUMERO', obligatorio: false, orden: 190 },
+      { id: 'cam_est1_ve', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 1 - VE', tipo: 'TEXTO', obligatorio: false, orden: 200 },
+      { id: 'cam_est2_ve', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 2 - VE', tipo: 'TEXTO', obligatorio: false, orden: 210 },
+      { id: 'cam_est3_ve', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 3 - VE', tipo: 'TEXTO', obligatorio: false, orden: 220 },
+      { id: 'cam_est1_rs', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 1 - RS', tipo: 'TEXTO', obligatorio: false, orden: 230 },
+      { id: 'cam_est2_rs', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 2 - RS', tipo: 'TEXTO', obligatorio: false, orden: 240 },
+      { id: 'cam_est3_rs', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 3 - RS', tipo: 'TEXTO', obligatorio: false, orden: 250 },
+      { id: 'cam_est1_df', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 1 - DF', tipo: 'TEXTO', obligatorio: false, orden: 260 },
+      { id: 'cam_est2_df', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 2 - DF', tipo: 'TEXTO', obligatorio: false, orden: 270 },
+      { id: 'cam_est3_df', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 3 - DF', tipo: 'TEXTO', obligatorio: false, orden: 280 },
+      { id: 'cam_formato_capsula', seccionId: 'sec_ajustes_capsuladora', nombre: 'Número formato (cápsula)', tipo: 'TEXTO', obligatorio: false, orden: 10 },
+      { id: 'cam_formato_botella', seccionId: 'sec_ajustes_capsuladora', nombre: 'Número formato (botella)', tipo: 'TEXTO', obligatorio: false, orden: 20 },
       { id: 'cam_color_formato', seccionId: 'sec_ajustes_capsuladora', nombre: 'Color de formato', tipo: 'TEXTO', obligatorio: false, orden: 30 },
       { id: 'cam_material_capsula', seccionId: 'sec_ajustes_capsuladora', nombre: 'Material (PVC / Complex)', tipo: 'TEXTO', obligatorio: false, orden: 40 },
       { id: 'cam_sinfin_capsuladora', seccionId: 'sec_ajustes_capsuladora', nombre: 'Sinfín capsuladora', tipo: 'TEXTO', obligatorio: false, orden: 50 }
     ]
   };
+  const MECHANICAL_SECTION_ID = 'sec_ajustes_etiquetadora';
+  const MECHANICAL_GROUPS = [
+    { title: 'Ajuste sinfín', fields: [
+      { label: 'A', id: 'cam_ajuste_sinfin_a' },
+      { label: 'B', id: 'cam_ajuste_sinfin_b' }
+    ] },
+    { title: 'Guía botellas', fields: [
+      { label: 'A', id: 'cam_guia_botellas_a' },
+      { label: 'H', id: 'cam_guia_botellas_h' }
+    ] },
+    { title: 'Altura estrella', fields: [
+      { label: 'Entrada', id: 'cam_altura_estrella_entrada' },
+      { label: 'Salida', id: 'cam_altura_estrella_salida' }
+    ] }
+  ];
+  const MECHANICAL_STATIONS = [
+    { title: 'Estación 1', key: 'est1' },
+    { title: 'Estación 2', key: 'est2' },
+    { title: 'Estación 3', key: 'est3' }
+  ];
+  const MECHANICAL_MATRIX_ROWS = [
+    { title: 'Altura', suffix: 'altura' },
+    { title: 'Profundidad', suffix: 'profundidad' },
+    { title: 'Inclinación', suffix: 'inclinacion' },
+    { title: 'VE', suffix: 've' },
+    { title: 'RS', suffix: 'rs' },
+    { title: 'DF', suffix: 'df' }
+  ];
 
   document.addEventListener('DOMContentLoaded', init);
 
@@ -515,6 +560,51 @@
     select.value = current;
   }
 
+  function getUnit(field, units) {
+    return units.find((item) => item.id === field.unidadId) || null;
+  }
+
+  function getFieldById(fields, id) {
+    return fields.find((field) => field.id === id) || null;
+  }
+
+  function fieldMetaText(field, units) {
+    const unit = getUnit(field, units);
+    const meta = [field.tipo];
+    if (unit) meta.push(unit.nombre);
+    if (field.obligatorio === true || field.obligatorio === 'TRUE') meta.push('Obligatorio');
+    return meta.join(' · ');
+  }
+
+  function createFieldCard(field, units) {
+    const card = document.createElement('div');
+    card.className = 'field-card';
+    card.innerHTML = '<strong>' + field.nombre + '</strong><span>' + fieldMetaText(field, units) + '</span>';
+    return card;
+  }
+
+  function createDraftField(field, units, labelText) {
+    const unit = getUnit(field, units);
+    const label = document.createElement('label');
+    const hasCustomLabel = arguments.length >= 3;
+    const visibleLabel = hasCustomLabel ? labelText : field.nombre;
+    if (visibleLabel) {
+      label.textContent = visibleLabel + (unit ? ' (' + unit.nombre + ')' : '');
+    } else {
+      label.className = 'matrix-input-label';
+      label.title = field.nombre + (unit ? ' (' + unit.nombre + ')' : '');
+    }
+    const input = document.createElement('input');
+    input.className = 'draft-field';
+    input.dataset.fieldId = field.id;
+    input.dataset.fieldName = field.nombre;
+    input.type = field.tipo === 'NUMERO' ? 'number' : 'text';
+    input.required = field.obligatorio === true || field.obligatorio === 'TRUE';
+    if (field.tipo === 'NUMERO') input.step = 'any';
+    label.appendChild(input);
+    return label;
+  }
+
   function renderTemplateStructure() {
     const container = document.getElementById('templateStructure');
     if (!container) return;
@@ -537,23 +627,75 @@
       const title = document.createElement('h4');
       title.textContent = section.nombre;
       const grid = document.createElement('div');
-      grid.className = 'field-grid';
+      grid.className = section.id === MECHANICAL_SECTION_ID ? 'mechanical-preview' : 'field-grid';
       if (!sectionFields.length) {
         grid.innerHTML = '<div class="empty-state">Sección sin campos.</div>';
       }
-      sectionFields.forEach((field) => {
-        const unit = units.find((item) => item.id === field.unidadId);
-        const meta = [field.tipo];
-        if (unit) meta.push(unit.nombre);
-        if (field.obligatorio === true || field.obligatorio === 'TRUE') meta.push('Obligatorio');
-        const card = document.createElement('div');
-        card.className = 'field-card';
-        card.innerHTML = '<strong>' + field.nombre + '</strong><span>' + meta.join(' · ') + '</span>';
-        grid.appendChild(card);
-      });
+      if (section.id === MECHANICAL_SECTION_ID) {
+        renderMechanicalTemplatePreview(grid, sectionFields, units);
+      } else {
+        sectionFields.forEach((field) => {
+          grid.appendChild(createFieldCard(field, units));
+        });
+      }
       block.append(title, grid);
       container.appendChild(block);
     });
+  }
+
+  function renderMechanicalTemplatePreview(container, fields, units) {
+    const groupGrid = document.createElement('div');
+    groupGrid.className = 'mechanical-mini-grid';
+    MECHANICAL_GROUPS.forEach((group) => {
+      const groupBlock = document.createElement('div');
+      groupBlock.className = 'mechanical-mini-card';
+      const title = document.createElement('h5');
+      title.textContent = group.title;
+      const row = document.createElement('div');
+      row.className = 'mechanical-mini-fields';
+      group.fields.forEach((item) => {
+        const field = getFieldById(fields, item.id);
+        if (!field) return;
+        const card = createFieldCard(field, units);
+        card.querySelector('strong').textContent = item.label;
+        row.appendChild(card);
+      });
+      groupBlock.append(title, row);
+      groupGrid.appendChild(groupBlock);
+    });
+    container.appendChild(groupGrid);
+
+    const matrix = document.createElement('div');
+    matrix.className = 'mechanical-matrix-preview';
+    matrix.appendChild(createMatrixHeaderCell('Posicionadores'));
+    MECHANICAL_STATIONS.forEach((station) => {
+      matrix.appendChild(createMatrixHeaderCell(station.title));
+    });
+    MECHANICAL_MATRIX_ROWS.forEach((rowConfig) => {
+      matrix.appendChild(createMatrixRowHeader(rowConfig.title));
+      MECHANICAL_STATIONS.forEach((station) => {
+        const field = getFieldById(fields, 'cam_' + station.key + '_' + rowConfig.suffix);
+        const cell = document.createElement('div');
+        cell.className = 'mechanical-matrix-cell';
+        if (field) cell.appendChild(createFieldCard(field, units));
+        matrix.appendChild(cell);
+      });
+    });
+    container.appendChild(matrix);
+  }
+
+  function createMatrixHeaderCell(text) {
+    const cell = document.createElement('div');
+    cell.className = 'mechanical-matrix-head';
+    cell.textContent = text;
+    return cell;
+  }
+
+  function createMatrixRowHeader(text) {
+    const cell = document.createElement('div');
+    cell.className = 'mechanical-matrix-row-head';
+    cell.textContent = text;
+    return cell;
   }
 
   function renderDraftTechnicalFields() {
@@ -573,28 +715,61 @@
         .sort((a, b) => Number(a.orden || 0) - Number(b.orden || 0));
       if (!sectionFields.length) return;
       const block = document.createElement('section');
-      block.className = 'draft-section';
+      block.className = section.id === MECHANICAL_SECTION_ID ? 'draft-section mechanical-entry-section' : 'draft-section';
       const title = document.createElement('h4');
       title.textContent = section.nombre;
-      const grid = document.createElement('div');
-      grid.className = 'draft-field-grid';
-      sectionFields.forEach((field) => {
-        const unit = units.find((item) => item.id === field.unidadId);
-        const label = document.createElement('label');
-        label.textContent = field.nombre + (unit ? ' (' + unit.nombre + ')' : '');
-        const input = document.createElement('input');
-        input.className = 'draft-field';
-        input.dataset.fieldId = field.id;
-        input.dataset.fieldName = field.nombre;
-        input.type = field.tipo === 'NUMERO' ? 'number' : 'text';
-        input.required = field.obligatorio === true || field.obligatorio === 'TRUE';
-        if (field.tipo === 'NUMERO') input.step = 'any';
-        label.appendChild(input);
-        grid.appendChild(label);
-      });
-      block.append(title, grid);
+      if (section.id === MECHANICAL_SECTION_ID) {
+        block.append(title);
+        renderMechanicalDraftFields(block, sectionFields, units);
+      } else {
+        const grid = document.createElement('div');
+        grid.className = section.id === 'sec_botella_insumos' ? 'draft-field-grid bottle-insumos-grid' : 'draft-field-grid';
+        sectionFields.forEach((field) => {
+          grid.appendChild(createDraftField(field, units));
+        });
+        block.append(title, grid);
+      }
       container.appendChild(block);
     });
+  }
+
+  function renderMechanicalDraftFields(block, fields, units) {
+    const groupGrid = document.createElement('div');
+    groupGrid.className = 'mechanical-mini-grid';
+    MECHANICAL_GROUPS.forEach((group) => {
+      const groupBlock = document.createElement('div');
+      groupBlock.className = 'mechanical-mini-card';
+      const title = document.createElement('h5');
+      title.textContent = group.title;
+      const row = document.createElement('div');
+      row.className = 'mechanical-mini-fields';
+      group.fields.forEach((item) => {
+        const field = getFieldById(fields, item.id);
+        if (!field) return;
+        row.appendChild(createDraftField(field, units, item.label));
+      });
+      groupBlock.append(title, row);
+      groupGrid.appendChild(groupBlock);
+    });
+    block.appendChild(groupGrid);
+
+    const matrix = document.createElement('div');
+    matrix.className = 'mechanical-matrix-entry';
+    matrix.appendChild(createMatrixHeaderCell('Posicionadores'));
+    MECHANICAL_STATIONS.forEach((station) => {
+      matrix.appendChild(createMatrixHeaderCell(station.title));
+    });
+    MECHANICAL_MATRIX_ROWS.forEach((rowConfig) => {
+      matrix.appendChild(createMatrixRowHeader(rowConfig.title));
+      MECHANICAL_STATIONS.forEach((station) => {
+        const field = getFieldById(fields, 'cam_' + station.key + '_' + rowConfig.suffix);
+        const cell = document.createElement('div');
+        cell.className = 'mechanical-matrix-cell';
+        if (field) cell.appendChild(createDraftField(field, units, ''));
+        matrix.appendChild(cell);
+      });
+    });
+    block.appendChild(matrix);
   }
 
   function bindCatalogModal() {

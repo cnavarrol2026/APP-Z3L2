@@ -636,6 +636,99 @@
     gap: 12px;
   }
 
+  .bottle-insumos-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .mechanical-entry-section {
+    gap: 18px;
+  }
+
+  .mechanical-preview,
+  .mechanical-mini-grid {
+    display: grid;
+    gap: 14px;
+  }
+
+  .mechanical-mini-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .mechanical-mini-card {
+    display: grid;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #f8fafc;
+  }
+
+  .mechanical-mini-card h5 {
+    margin: 0;
+    color: var(--blue-dark);
+    font-size: 0.95rem;
+    text-align: center;
+  }
+
+  .mechanical-mini-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(72px, 1fr));
+    gap: 10px;
+  }
+
+  .mechanical-mini-fields .field-card,
+  .mechanical-mini-fields label {
+    min-height: 64px;
+  }
+
+  .mechanical-matrix-entry,
+  .mechanical-matrix-preview {
+    display: grid;
+    grid-template-columns: minmax(124px, 0.72fr) repeat(3, minmax(120px, 1fr));
+    gap: 8px;
+    overflow-x: auto;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #ffffff;
+  }
+
+  .mechanical-matrix-head,
+  .mechanical-matrix-row-head {
+    display: grid;
+    min-height: 44px;
+    align-items: center;
+    padding: 10px;
+    border-radius: 8px;
+    background: #e9eef8;
+    color: var(--blue-dark);
+    font-weight: 900;
+    text-align: center;
+  }
+
+  .mechanical-matrix-row-head {
+    justify-items: start;
+    background: #f1f5f9;
+    color: var(--ink);
+    text-align: left;
+  }
+
+  .mechanical-matrix-cell {
+    min-width: 120px;
+  }
+
+  .mechanical-matrix-cell .field-card {
+    min-height: 64px;
+  }
+
+  .mechanical-matrix-cell label {
+    min-height: 40px;
+  }
+
+  .matrix-input-label {
+    gap: 0;
+  }
+
   .toast {
     position: fixed;
     right: 20px;
@@ -867,6 +960,7 @@
     .image-choice-grid,
     .draft-field-grid,
     .catalog-action-grid,
+    .mechanical-mini-grid,
     .catalog-form {
       grid-template-columns: 1fr;
     }

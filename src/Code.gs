@@ -10,6 +10,7 @@ function doGet() {
 function setupDatabase() {
   return Api.withAuth('setupDatabase', function(user) {
     SheetRepository.ensureDatabase();
+    TemplateService.ensureDefaultTechnicalTemplate(user.email || user.effectiveEmail || 'usuario.google');
     HistoryService.recordEvent({
       user: user.email,
       type: 'SETUP_DATABASE',

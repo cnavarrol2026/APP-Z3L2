@@ -1159,14 +1159,6 @@
       container.appendChild(item);
     });
   }
-
-  function normalizeClientText(value) {
-    return String(value || '')
-      .trim()
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '');
-  }
   function renderAdminLists() {
     renderCatalogModalList();
   }
@@ -1370,7 +1362,10 @@
     const data = safeParseClientJson(draft.payloadJson);
     const values = Array.isArray(data.valores) ? data.valores : [];
     document.querySelectorAll('.draft-field').forEach((input) => {
-      const match = values.find((item) => item.campoId === input.dataset.fieldId);
+      const match = values.find((item) => (
+        item.campoId === input.dataset.fieldId ||
+        normalizeClientText(item.campo) === normalizeClientText(input.dataset.fieldName)
+      ));
       input.value = match ? (match.valor || '') : '';
     });
     const levasField = getLevasPlatosField(state.admin.campos || []);

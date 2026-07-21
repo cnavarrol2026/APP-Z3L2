@@ -73,14 +73,14 @@
       { id: 'uni_m_min', nombre: 'm/min', orden: 20 }
     ],
     campos: [
-      { id: 'cam_tipo_botella', seccionId: 'sec_botella_insumos', nombre: 'Tipo de botella', tipo: 'TEXTO', obligatorio: true, orden: 10 },
-      { id: 'cam_medidas_etiqueta', seccionId: 'sec_botella_insumos', nombre: 'Medidas etiqueta', tipo: 'TEXTO', obligatorio: true, orden: 20 },
-      { id: 'cam_programa_maquina', seccionId: 'sec_botella_insumos', nombre: 'Programa de máquina', tipo: 'TEXTO', obligatorio: true, orden: 30 },
-      { id: 'cam_programa_estacion', seccionId: 'sec_botella_insumos', nombre: 'Programa de estación', tipo: 'TEXTO', obligatorio: true, orden: 40 },
-      { id: 'cam_tipo_chaleco', seccionId: 'sec_botella_insumos', nombre: 'Tipo de chaleco', tipo: 'TEXTO', obligatorio: false, orden: 50 },
-      { id: 'cam_altura_pegado_etiqueta', seccionId: 'sec_botella_insumos', nombre: 'Altura de Etiquetado', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: true, orden: 60 },
-      { id: 'cam_altura_contra_etiqueta', seccionId: 'sec_botella_insumos', nombre: 'Altura ContraEtiqueta (CET)', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 70 },
-      { id: 'cam_altura_medalla', seccionId: 'sec_botella_insumos', nombre: 'Altura medalla', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 80 },
+      { id: 'cam_programa_maquina', seccionId: 'sec_botella_insumos', nombre: 'Programa de máquina', tipo: 'TEXTO', obligatorio: true, orden: 10 },
+      { id: 'cam_programa_estacion', seccionId: 'sec_botella_insumos', nombre: 'Programa de estación', tipo: 'TEXTO', obligatorio: true, orden: 20 },
+      { id: 'cam_tipo_botella', seccionId: 'sec_botella_insumos', nombre: 'Tipo de botella', tipo: 'TEXTO', obligatorio: true, orden: 30 },
+      { id: 'cam_altura_pegado_etiqueta', seccionId: 'sec_botella_insumos', nombre: 'Altura de Etiquetado', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: true, orden: 40 },
+      { id: 'cam_altura_contra_etiqueta', seccionId: 'sec_botella_insumos', nombre: 'Altura ContraEtiqueta (CET)', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 50 },
+      { id: 'cam_altura_medalla', seccionId: 'sec_botella_insumos', nombre: 'Altura medalla', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 60 },
+      { id: 'cam_medidas_etiqueta', seccionId: 'sec_botella_insumos', nombre: 'Medidas etiqueta', tipo: 'TEXTO', obligatorio: true, orden: 70 },
+      { id: 'cam_tipo_chaleco', seccionId: 'sec_botella_insumos', nombre: 'Tipo de chaleco', tipo: 'TEXTO', obligatorio: false, orden: 80 },
       { id: 'cam_ajuste_sinfin_a', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Ajuste sinfín A', tipo: 'TEXTO', obligatorio: false, orden: 10 },
       { id: 'cam_ajuste_sinfin_b', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Ajuste sinfín B', tipo: 'TEXTO', obligatorio: false, orden: 20 },
       { id: 'cam_guia_botellas_a', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Guía botellas A', tipo: 'TEXTO', obligatorio: false, orden: 30 },
@@ -113,6 +113,7 @@
     ]
   };
   const MECHANICAL_SECTION_ID = 'sec_ajustes_etiquetadora';
+  const FEATURED_BOTTLE_FIELD_IDS = ['cam_programa_maquina', 'cam_programa_estacion'];
   const MECHANICAL_GROUPS = [
     { title: 'Ajuste sinfín', fields: [
       { label: 'A', id: 'cam_ajuste_sinfin_a' },
@@ -568,6 +569,10 @@
     return fields.find((field) => field.id === id) || null;
   }
 
+  function isFeaturedBottleField(field) {
+    return field && FEATURED_BOTTLE_FIELD_IDS.indexOf(field.id) !== -1;
+  }
+
   function fieldMetaText(field, units) {
     const unit = getUnit(field, units);
     const meta = [field.tipo];
@@ -578,7 +583,7 @@
 
   function createFieldCard(field, units) {
     const card = document.createElement('div');
-    card.className = 'field-card';
+    card.className = isFeaturedBottleField(field) ? 'field-card featured-bottle-field' : 'field-card';
     card.innerHTML = '<strong>' + field.nombre + '</strong><span>' + fieldMetaText(field, units) + '</span>';
     return card;
   }
@@ -590,6 +595,7 @@
     const visibleLabel = hasCustomLabel ? labelText : field.nombre;
     if (visibleLabel) {
       label.textContent = visibleLabel + (unit ? ' (' + unit.nombre + ')' : '');
+      if (isFeaturedBottleField(field)) label.classList.add('featured-bottle-input');
     } else {
       label.className = 'matrix-input-label';
       label.title = field.nombre + (unit ? ' (' + unit.nombre + ')' : '');

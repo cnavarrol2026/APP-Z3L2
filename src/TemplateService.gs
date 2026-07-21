@@ -5,14 +5,14 @@ const TemplateService = {
       nombre: 'Botella e Insumos',
       orden: 10,
       fields: [
-        { id: 'cam_tipo_botella', nombre: 'Tipo de botella', tipo: 'TEXTO', obligatorio: true, orden: 10 },
-        { id: 'cam_medidas_etiqueta', nombre: 'Medidas etiqueta', tipo: 'TEXTO', obligatorio: true, orden: 20 },
-        { id: 'cam_programa_maquina', nombre: 'Programa de máquina', tipo: 'TEXTO', obligatorio: true, orden: 30 },
-        { id: 'cam_programa_estacion', nombre: 'Programa de estación', tipo: 'TEXTO', obligatorio: true, orden: 40 },
-        { id: 'cam_tipo_chaleco', nombre: 'Tipo de chaleco', tipo: 'TEXTO', obligatorio: false, orden: 50 },
-        { id: 'cam_altura_pegado_etiqueta', nombre: 'Altura de Etiquetado', tipo: 'NUMERO', unidad: 'mm', obligatorio: true, orden: 60 },
-        { id: 'cam_altura_contra_etiqueta', nombre: 'Altura ContraEtiqueta (CET)', tipo: 'NUMERO', unidad: 'mm', obligatorio: false, orden: 70 },
-        { id: 'cam_altura_medalla', nombre: 'Altura medalla', tipo: 'NUMERO', unidad: 'mm', obligatorio: false, orden: 80 }
+        { id: 'cam_programa_maquina', nombre: 'Programa de máquina', tipo: 'TEXTO', obligatorio: true, orden: 10 },
+        { id: 'cam_programa_estacion', nombre: 'Programa de estación', tipo: 'TEXTO', obligatorio: true, orden: 20 },
+        { id: 'cam_tipo_botella', nombre: 'Tipo de botella', tipo: 'TEXTO', obligatorio: true, orden: 30 },
+        { id: 'cam_altura_pegado_etiqueta', nombre: 'Altura de Etiquetado', tipo: 'NUMERO', unidad: 'mm', obligatorio: true, orden: 40 },
+        { id: 'cam_altura_contra_etiqueta', nombre: 'Altura ContraEtiqueta (CET)', tipo: 'NUMERO', unidad: 'mm', obligatorio: false, orden: 50 },
+        { id: 'cam_altura_medalla', nombre: 'Altura medalla', tipo: 'NUMERO', unidad: 'mm', obligatorio: false, orden: 60 },
+        { id: 'cam_medidas_etiqueta', nombre: 'Medidas etiqueta', tipo: 'TEXTO', obligatorio: true, orden: 70 },
+        { id: 'cam_tipo_chaleco', nombre: 'Tipo de chaleco', tipo: 'TEXTO', obligatorio: false, orden: 80 }
       ]
     },
     {

@@ -91,6 +91,9 @@
     try {
       const draftId = payload.id || createId('bor');
       const current = payload.id ? SheetRepository.findById(Config.SHEETS.DRAFTS, payload.id) : null;
+      if (payload.id && !current) {
+        throw new Error('El borrador que intentas editar ya no existe. Abre Pendientes nuevamente o inicia un producto nuevo.');
+      }
       this.validateDraftPayload(payload, current ? current.id : '');
       const date = nowIso();
       const technicalPayload = this.normalizeDraftPayload(payload.payload || {});

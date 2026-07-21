@@ -139,15 +139,23 @@
   function bindConfigTabs() {
     document.querySelectorAll('.config-tab').forEach((button) => {
       button.addEventListener('click', () => {
-        openConfigPage(button.dataset.configPage);
+        openConfigPage(button.dataset.configPage, { fromTab: true });
       });
     });
   }
 
-  function openConfigPage(pageName) {
+  function openConfigPage(pageName, options) {
+    const configOptions = options || {};
     const button = document.querySelector('.config-tab[data-config-page="' + pageName + '"]');
     const page = document.getElementById('config-page-' + pageName);
     if (!button || !page) return;
+    if (pageName === 'producto' && !configOptions.preserveDraft) {
+      const draftForm = document.getElementById('draftForm');
+      const hiddenId = draftForm && draftForm.elements.id ? draftForm.elements.id.value : '';
+      if (state.editingDraftId || hiddenId) {
+        resetDraftForm(draftForm);
+      }
+    }
     document.querySelectorAll('.config-tab').forEach((item) => item.classList.remove('active'));
     document.querySelectorAll('.config-page').forEach((item) => item.classList.remove('active'));
     button.classList.add('active');
@@ -810,7 +818,7 @@
     callServer('apiAcquireDraftLock', { borradorId: draftId })
       .then(() => {
         loadDraftIntoForm(draft);
-        openConfigPage('producto');
+        openConfigPage('producto', { preserveDraft: true });
         showToast('Borrador cargado para edición.');
       })
       .catch((error) => showToast(getErrorMessage(error, 'No fue posible abrir el borrador.')));
@@ -1080,6 +1088,10 @@
     const form = event.currentTarget;
     const payload = Object.fromEntries(new FormData(form).entries());
     const action = event.submitter && event.submitter.dataset.action === 'activate' ? 'activate' : 'draft';
+    if (!state.editingDraftId || payload.id !== state.editingDraftId) {
+      payload.id = '';
+      if (form.elements.id) form.elements.id.value = '';
+    }
     syncDraftSearchField('category');
     syncDraftSearchField('bottle');
     payload.categoriaId = form.categoriaId.value;

@@ -32,6 +32,24 @@ const PdfService = {
     values.forEach(function(value) {
       const field = fields.find(function(row) { return row.id === value.campoId; }) || {};
       const unit = units.find(function(row) { return row.id === value.unidadId; }) || {};
+      if (value.campoId === 'cam_levas_platos') {
+        const rows = safeJsonParse(value.valor, []);
+        body.appendParagraph('Levas Platos:');
+        if (!Array.isArray(rows) || !rows.length) {
+          body.appendParagraph('Sin registros.');
+          return;
+        }
+        rows.forEach(function(row) {
+          body.appendParagraph(
+            'N° ' + row.numeroElemento +
+            ' | Acción: Posicionando' +
+            ' | Inicio Master: ' + (row.inicioMaster || '') +
+            ' | Final Master: ' + (row.finalMaster || '') +
+            ' | Posición Relativa Slave: ' + (row.posicionRelativaSlave || '')
+          );
+        });
+        return;
+      }
       body.appendParagraph((field.nombre || value.campoId) + ': ' + value.valor + (unit.nombre ? ' ' + unit.nombre : ''));
     });
     doc.saveAndClose();

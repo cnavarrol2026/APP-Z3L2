@@ -8,15 +8,41 @@
   },
 
   normalizeDraftPayload: function(data) {
+    const self = this;
     const copy = JSON.parse(JSON.stringify(data || {}));
     if (Array.isArray(copy.valores)) {
       copy.valores = copy.valores.map(function(item) {
         const next = Object.assign({}, item);
+        next.campoId = cleanText(next.campoId, 80);
+        if (next.campoId === 'cam_levas_platos') {
+          next.valor = JSON.stringify(self.normalizeLevasPlatos(next.valor));
+          next.campo = 'Levas Platos';
+          return next;
+        }
         next.valor = toSystemUpperText(next.valor, 500);
         return next;
       });
     }
     return copy;
+  },
+
+  normalizeLevasPlatos: function(value) {
+    let rows = value;
+    if (typeof rows === 'string') {
+      rows = safeJsonParse(rows, []);
+    }
+    if (!Array.isArray(rows) || !rows.length) {
+      rows = [{}];
+    }
+    return rows.map(function(row, index) {
+      return {
+        numeroElemento: index,
+        accion: 'Posicionando',
+        inicioMaster: toSystemUpperText(row && row.inicioMaster, 80),
+        finalMaster: toSystemUpperText(row && row.finalMaster, 80),
+        posicionRelativaSlave: toSystemUpperText(row && row.posicionRelativaSlave, 80)
+      };
+    });
   },
 
   validateUniqueCode: function(code, ignoreId) {
@@ -208,13 +234,14 @@
     const values = Array.isArray(data.valores) ? data.valores : [];
     values.forEach(function(item) {
       const fieldId = cleanText(item.campoId, 80);
-      const value = cleanText(item.valor, 500);
+      const maxLength = fieldId === 'cam_levas_platos' ? 20000 : 500;
+      const value = cleanText(item.valor, maxLength);
       if (!fieldId || !value) return;
       SheetRepository.append(Config.SHEETS.ARTICLE_VALUES, {
         id: createId('val'),
         articuloId: articleId,
         campoId: fieldId,
-        valor: toSystemUpperText(value, 500),
+        valor: fieldId === 'cam_levas_platos' ? value : toSystemUpperText(value, 500),
         unidadId: cleanText(item.unidadId, 80),
         fechaCreacion: date,
         creadoPor: userEmail,

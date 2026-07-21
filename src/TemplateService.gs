@@ -20,7 +20,11 @@ const TemplateService = {
       nombre: 'FORMATOS',
       orden: 20,
       fields: [
-        { id: 'cam_tipo_chaleco', nombre: 'Tipo de chaleco', tipo: 'TEXTO', obligatorio: false, orden: 10 }
+        { id: 'cam_tipo_chaleco', nombre: 'Tipo de chaleco', tipo: 'TEXTO', obligatorio: false, orden: 10 },
+        { id: 'cam_antares_luz', nombre: 'LUZ', tipo: 'TEXTO', obligatorio: false, orden: 20 },
+        { id: 'cam_antares_focus_radial', nombre: 'FOCUS RADIAL', tipo: 'TEXTO', obligatorio: false, orden: 30 },
+        { id: 'cam_antares_camara', nombre: 'CÁMARA', tipo: 'TEXTO', obligatorio: false, orden: 40 },
+        { id: 'cam_levas_platos', nombre: 'Levas Platos', tipo: 'TEXTO', obligatorio: false, orden: 100 }
       ]
     },
     {

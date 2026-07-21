@@ -678,8 +678,29 @@
     background: #f8fafc;
   }
 
+  .formatos-fixed-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .antares-mini-card,
+  .levas-platos-block {
+    display: grid;
+    grid-column: 1 / -1;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #ffffff;
+  }
+
+  .antares-mini-card {
+    background: #f8fafc;
+  }
+
   .mechanical-mini-card h5,
-  .bottle-mini-card h5 {
+  .bottle-mini-card h5,
+  .antares-mini-card h5,
+  .levas-platos-head h5 {
     margin: 0;
     color: var(--blue-dark);
     font-size: 0.95rem;
@@ -687,17 +708,71 @@
   }
 
   .mechanical-mini-fields,
-  .bottle-mini-fields {
+  .bottle-mini-fields,
+  .antares-mini-fields {
     display: grid;
     grid-template-columns: repeat(2, minmax(72px, 1fr));
     gap: 10px;
   }
 
+  .antares-mini-fields {
+    grid-template-columns: repeat(3, minmax(120px, 1fr));
+  }
+
   .mechanical-mini-fields .field-card,
   .mechanical-mini-fields label,
   .bottle-mini-fields .field-card,
-  .bottle-mini-fields label {
+  .bottle-mini-fields label,
+  .antares-mini-fields .field-card,
+  .antares-mini-fields label {
     min-height: 64px;
+  }
+
+  .levas-platos-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .levas-platos-table {
+    display: grid;
+    grid-template-columns: minmax(92px, 0.7fr) minmax(140px, 1fr) repeat(3, minmax(150px, 1fr));
+    gap: 8px;
+    overflow-x: auto;
+  }
+
+  .levas-platos-header,
+  .levas-platos-number,
+  .levas-platos-action,
+  .levas-platos-preview-cell {
+    display: grid;
+    min-height: 42px;
+    align-items: center;
+    padding: 9px 10px;
+    border-radius: 8px;
+    font-weight: 800;
+  }
+
+  .levas-platos-header {
+    background: #e9eef8;
+    color: var(--blue-dark);
+    text-align: center;
+  }
+
+  .levas-platos-number,
+  .levas-platos-action,
+  .levas-platos-preview-cell {
+    background: #f8fafc;
+    color: var(--ink);
+  }
+
+  .levas-platos-number {
+    justify-items: center;
+  }
+
+  .levas-platos-input {
+    width: 100%;
   }
 
   .mechanical-matrix-entry,

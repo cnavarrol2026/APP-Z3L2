@@ -70,3 +70,4 @@
 - Se reordena `Botella e Insumos` para comenzar con `Programa de máquina` y `Programa de estación`, ambos con resaltado visual, seguido por botella, alturas, medidas de etiqueta y tipo de chaleco.
 - Se corrige la doble flecha en los campos buscables de categoría y botella eliminando el indicador manual de CSS y dejando el control nativo del navegador.
 - Se corrige la estructura de secciones para mantener `FORMATOS` como sección independiente entre `Botella e Insumos` y `Ajustes Mecánicos de Etiquetadora`; `Tipo de chaleco` se mueve a `FORMATOS` y `Ajustes de Capsuladora` vuelve a quedar como sección propia.
+- Se agrega a `FORMATOS` el mini-bloque `Antares` con campos `LUZ`, `FOCUS RADIAL` y `CÁMARA`, y la tabla dinámica `Levas Platos` al final de la sección con numeración automática desde `0` y acción fija `Posicionando`.

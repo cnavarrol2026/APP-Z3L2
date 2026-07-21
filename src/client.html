@@ -83,6 +83,10 @@
       { id: 'cam_medidas_etiqueta', seccionId: 'sec_botella_insumos', nombre: 'Medidas ETQ', tipo: 'TEXTO', obligatorio: true, orden: 70 },
       { id: 'cam_medidas_etiqueta_cet', seccionId: 'sec_botella_insumos', nombre: 'Medidas CET', tipo: 'TEXTO', obligatorio: false, orden: 80 },
       { id: 'cam_tipo_chaleco', seccionId: 'sec_formatos', nombre: 'Tipo de chaleco', tipo: 'TEXTO', obligatorio: false, orden: 10 },
+      { id: 'cam_antares_luz', seccionId: 'sec_formatos', nombre: 'LUZ', tipo: 'TEXTO', obligatorio: false, orden: 20 },
+      { id: 'cam_antares_focus_radial', seccionId: 'sec_formatos', nombre: 'FOCUS RADIAL', tipo: 'TEXTO', obligatorio: false, orden: 30 },
+      { id: 'cam_antares_camara', seccionId: 'sec_formatos', nombre: 'CÁMARA', tipo: 'TEXTO', obligatorio: false, orden: 40 },
+      { id: 'cam_levas_platos', seccionId: 'sec_formatos', nombre: 'Levas Platos', tipo: 'TEXTO', obligatorio: false, orden: 100 },
       { id: 'cam_ajuste_sinfin_a', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Ajuste sinfín A', tipo: 'TEXTO', obligatorio: false, orden: 10 },
       { id: 'cam_ajuste_sinfin_b', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Ajuste sinfín B', tipo: 'TEXTO', obligatorio: false, orden: 20 },
       { id: 'cam_guia_botellas_a', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Guía botellas A', tipo: 'TEXTO', obligatorio: false, orden: 30 },
@@ -115,7 +119,15 @@
     ]
   };
   const MECHANICAL_SECTION_ID = 'sec_ajustes_etiquetadora';
+  const FORMATOS_SECTION_ID = 'sec_formatos';
+  const LEVAS_PLATOS_FIELD_ID = 'cam_levas_platos';
+  const LEVAS_PLATOS_ACTION = 'Posicionando';
   const FEATURED_BOTTLE_FIELD_IDS = ['cam_programa_maquina', 'cam_programa_estacion'];
+  const FORMATOS_ANTARES_FIELDS = [
+    { label: 'LUZ', id: 'cam_antares_luz' },
+    { label: 'FOCUS RADIAL', id: 'cam_antares_focus_radial' },
+    { label: 'CÁMARA', id: 'cam_antares_camara' }
+  ];
   const BOTTLE_FIELD_GROUPS = [
     { title: 'Medidas', fields: [
       { label: 'ETQ', id: 'cam_medidas_etiqueta' },
@@ -588,6 +600,12 @@
     ));
   }
 
+  function isFormatosSpecialField(field) {
+    if (!field) return false;
+    if (field.id === LEVAS_PLATOS_FIELD_ID) return true;
+    return FORMATOS_ANTARES_FIELDS.some((item) => item.id === field.id);
+  }
+
   function fieldMetaText(field, units) {
     const unit = getUnit(field, units);
     const meta = [field.tipo];
@@ -656,6 +674,8 @@
         renderMechanicalTemplatePreview(grid, sectionFields, units);
       } else if (section.id === 'sec_botella_insumos') {
         renderBottleTemplatePreview(grid, sectionFields, units);
+      } else if (section.id === FORMATOS_SECTION_ID) {
+        renderFormatosTemplatePreview(grid, sectionFields, units);
       } else {
         sectionFields.forEach((field) => {
           grid.appendChild(createFieldCard(field, units));
@@ -715,6 +735,15 @@
     renderBottleFieldGroups(container, fields, units, false);
   }
 
+  function renderFormatosTemplatePreview(container, fields, units) {
+    fields.forEach((field) => {
+      if (isFormatosSpecialField(field)) return;
+      container.appendChild(createFieldCard(field, units));
+    });
+    renderAntaresGroup(container, fields, units, false);
+    renderLevasPlatosPreview(container);
+  }
+
   function createMatrixHeaderCell(text) {
     const cell = document.createElement('div');
     cell.className = 'mechanical-matrix-head';
@@ -761,6 +790,9 @@
         });
         renderBottleFieldGroups(grid, sectionFields, units, true);
         block.append(title, grid);
+      } else if (section.id === FORMATOS_SECTION_ID) {
+        block.append(title);
+        renderFormatosDraftFields(block, sectionFields, units);
       } else {
         const grid = document.createElement('div');
         grid.className = 'draft-field-grid';
@@ -834,6 +866,179 @@
       groupBlock.append(title, row);
       container.appendChild(groupBlock);
     });
+  }
+
+  function renderFormatosDraftFields(block, fields, units) {
+    const fixedGrid = document.createElement('div');
+    fixedGrid.className = 'draft-field-grid formatos-fixed-grid';
+    fields.forEach((field) => {
+      if (isFormatosSpecialField(field)) return;
+      fixedGrid.appendChild(createDraftField(field, units));
+    });
+    if (fixedGrid.children.length) block.appendChild(fixedGrid);
+    renderAntaresGroup(block, fields, units, true);
+    renderLevasPlatosTable(block, []);
+  }
+
+  function renderAntaresGroup(container, fields, units, editable) {
+    const groupBlock = document.createElement('div');
+    groupBlock.className = 'antares-mini-card';
+    const title = document.createElement('h5');
+    title.textContent = 'Antares';
+    const row = document.createElement('div');
+    row.className = 'antares-mini-fields';
+    FORMATOS_ANTARES_FIELDS.forEach((item) => {
+      const field = getFieldById(fields, item.id);
+      if (!field) return;
+      if (editable) {
+        row.appendChild(createDraftField(field, units, item.label));
+        return;
+      }
+      const card = createFieldCard(field, units);
+      card.querySelector('strong').textContent = item.label;
+      row.appendChild(card);
+    });
+    if (!row.children.length) return;
+    groupBlock.append(title, row);
+    container.appendChild(groupBlock);
+  }
+
+  function renderLevasPlatosPreview(container) {
+    const block = document.createElement('div');
+    block.className = 'levas-platos-block levas-platos-preview';
+    const head = document.createElement('div');
+    head.className = 'levas-platos-head';
+    const title = document.createElement('h5');
+    title.textContent = 'Levas Platos';
+    head.appendChild(title);
+    const table = document.createElement('div');
+    table.className = 'levas-platos-table';
+    ['N° Elementos', 'Acción', 'Inicio Master', 'Final Master', 'Posición Relativa Slave'].forEach((label) => {
+      const cell = document.createElement('div');
+      cell.className = 'levas-platos-header';
+      cell.textContent = label;
+      table.appendChild(cell);
+    });
+    ['0', LEVAS_PLATOS_ACTION, '', '', ''].forEach((value) => {
+      const cell = document.createElement('div');
+      cell.className = 'levas-platos-preview-cell';
+      cell.textContent = value;
+      table.appendChild(cell);
+    });
+    block.append(head, table);
+    container.appendChild(block);
+  }
+
+  function renderLevasPlatosTable(container, rows) {
+    const block = document.createElement('div');
+    block.className = 'levas-platos-block';
+    const head = document.createElement('div');
+    head.className = 'levas-platos-head';
+    const title = document.createElement('h5');
+    title.textContent = 'Levas Platos';
+    const addButton = document.createElement('button');
+    addButton.type = 'button';
+    addButton.className = 'small-button levas-add-button';
+    addButton.textContent = 'Agregar Leva';
+    addButton.addEventListener('click', () => addLevasPlatosRow());
+    head.append(title, addButton);
+
+    const table = document.createElement('div');
+    table.id = 'levasPlatosTable';
+    table.className = 'levas-platos-table';
+    ['N° Elementos', 'Acción', 'Inicio Master', 'Final Master', 'Posición Relativa Slave'].forEach((label) => {
+      const cell = document.createElement('div');
+      cell.className = 'levas-platos-header';
+      cell.textContent = label;
+      table.appendChild(cell);
+    });
+    block.append(head, table);
+    container.appendChild(block);
+    setLevasPlatosRows(rows);
+  }
+
+  function setLevasPlatosRows(rows) {
+    const table = document.getElementById('levasPlatosTable');
+    if (!table) return;
+    Array.from(table.querySelectorAll('[data-levas-row]')).forEach((row) => row.remove());
+    const safeRows = Array.isArray(rows) && rows.length ? rows : [{}];
+    safeRows.forEach((row, index) => appendLevasPlatosRow(index, row));
+  }
+
+  function addLevasPlatosRow() {
+    const table = document.getElementById('levasPlatosTable');
+    if (!table) return;
+    const nextIndex = table.querySelectorAll('.levas-platos-number').length;
+    appendLevasPlatosRow(nextIndex, {});
+  }
+
+  function appendLevasPlatosRow(index, data) {
+    const table = document.getElementById('levasPlatosTable');
+    if (!table) return;
+    const rowData = data || {};
+    const numberCell = document.createElement('div');
+    numberCell.className = 'levas-platos-number';
+    numberCell.dataset.levasRow = String(index);
+    numberCell.textContent = String(index);
+
+    const actionCell = document.createElement('div');
+    actionCell.className = 'levas-platos-action';
+    actionCell.dataset.levasRow = String(index);
+    actionCell.textContent = LEVAS_PLATOS_ACTION;
+
+    const inicio = createLevasInput(index, 'inicioMaster', rowData.inicioMaster);
+    const final = createLevasInput(index, 'finalMaster', rowData.finalMaster);
+    const posicion = createLevasInput(index, 'posicionRelativaSlave', rowData.posicionRelativaSlave);
+    table.append(numberCell, actionCell, inicio, final, posicion);
+  }
+
+  function createLevasInput(rowIndex, key, value) {
+    const wrap = document.createElement('div');
+    wrap.dataset.levasRow = String(rowIndex);
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'levas-platos-input';
+    input.dataset.levasKey = key;
+    input.value = value || '';
+    wrap.appendChild(input);
+    return wrap;
+  }
+
+  function collectLevasPlatosRows() {
+    const table = document.getElementById('levasPlatosTable');
+    if (!table) {
+      return [{ numeroElemento: 0, accion: LEVAS_PLATOS_ACTION, inicioMaster: '', finalMaster: '', posicionRelativaSlave: '' }];
+    }
+    const rowCount = table.querySelectorAll('.levas-platos-number').length || 1;
+    const rows = [];
+    for (let index = 0; index < rowCount; index += 1) {
+      const row = {
+        numeroElemento: index,
+        accion: LEVAS_PLATOS_ACTION,
+        inicioMaster: '',
+        finalMaster: '',
+        posicionRelativaSlave: ''
+      };
+      table.querySelectorAll('[data-levas-row="' + index + '"] input').forEach((input) => {
+        row[input.dataset.levasKey] = toUpperClientText(input.value);
+        input.value = row[input.dataset.levasKey];
+      });
+      rows.push(row);
+    }
+    return rows;
+  }
+
+  function parseLevasPlatosRows(value) {
+    let rows = value;
+    if (typeof rows === 'string') rows = safeParseClientJson(rows);
+    if (!Array.isArray(rows) || !rows.length) return [{}];
+    return rows.map((row, index) => ({
+      numeroElemento: index,
+      accion: LEVAS_PLATOS_ACTION,
+      inicioMaster: row && row.inicioMaster ? row.inicioMaster : '',
+      finalMaster: row && row.finalMaster ? row.finalMaster : '',
+      posicionRelativaSlave: row && row.posicionRelativaSlave ? row.posicionRelativaSlave : ''
+    }));
   }
 
   function bindCatalogModal() {
@@ -1119,6 +1324,7 @@
     if (form.elements.id) form.elements.id.value = '';
     setDraftSearchValue('category', '');
     setDraftSearchValue('bottle', '');
+    setLevasPlatosRows([]);
     clearImageInputs(form);
     renderDraftMode(null);
   }
@@ -1130,6 +1336,8 @@
       const match = values.find((item) => item.campoId === input.dataset.fieldId);
       input.value = match ? (match.valor || '') : '';
     });
+    const levas = values.find((item) => item.campoId === LEVAS_PLATOS_FIELD_ID);
+    setLevasPlatosRows(parseLevasPlatosRows(levas ? levas.valor : []));
   }
 
   function safeParseClientJson(value) {
@@ -1355,7 +1563,11 @@
         campoId: input.dataset.fieldId,
         campo: input.dataset.fieldName,
         valor: toUpperClientText(input.value)
-      }))
+      })).concat([{
+        campoId: LEVAS_PLATOS_FIELD_ID,
+        campo: 'Levas Platos',
+        valor: JSON.stringify(collectLevasPlatosRows())
+      }])
     };
     setFormBusy(form, true, action === 'activate' ? 'Guardando y activando producto...' : 'Guardando borrador...');
     callServer('apiSaveDraft', payload)

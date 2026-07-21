@@ -1056,14 +1056,30 @@
     };
     setFormBusy(form, true, action === 'activate' ? 'Guardando y activando producto...' : 'Guardando borrador...');
     callServer('apiSaveDraft', payload)
-      .then((savedDraft) => uploadDraftImages(savedDraft.id, form).then(() => savedDraft))
-      .then((savedDraft) => {
+      .then((savedDraft) => uploadDraftImages(savedDraft.id, form)
+        .then(() => ({ savedDraft: savedDraft, imageWarning: '' }))
+        .catch((error) => ({
+          savedDraft: savedDraft,
+          imageWarning: getErrorMessage(error, 'El borrador quedó guardado, pero la imagen no pudo guardarse.')
+        })))
+      .then((result) => {
+        const savedDraft = result.savedDraft;
+        if (result.imageWarning && action === 'activate') {
+          return callServer('apiReleaseDraftLock', { borradorId: savedDraft.id })
+            .catch(() => null)
+            .then(() => {
+              resetDraftForm(form);
+              showToast('Borrador guardado. No se activó porque la imagen no pudo guardarse: ' + result.imageWarning);
+              loadInitialData();
+              return null;
+            });
+        }
         if (action !== 'activate') {
           return callServer('apiReleaseDraftLock', { borradorId: savedDraft.id })
             .catch(() => null)
             .then(() => {
               resetDraftForm(form);
-              showToast('Borrador guardado.');
+              showToast(result.imageWarning ? 'Borrador guardado. Imagen pendiente: ' + result.imageWarning : 'Borrador guardado.');
               loadInitialData();
               return null;
             });

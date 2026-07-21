@@ -61,3 +61,4 @@
 - El reemplazo de imagen ETQ/CET actualiza la misma fila existente en `IMAGENES_ARTICULO` y elimina el archivo anterior de Drive, evitando crecimiento innecesario de la base.
 - En Producto nuevo, Categoría y Botella se reemplazan por campos de búsqueda con lista filtrable, manteniendo IDs internos para el guardado.
 - Se agrega aviso de modo edición al retomar un pendiente y botón `Crear producto nuevo` para limpiar el formulario y evitar sobrescribir borradores por accidente.
+- Si falla la carga de imagen después de guardar un borrador, el sistema recarga Pendientes igualmente y muestra advertencia separada; Pendientes también incluye borradores con estado no activo/no descartado para evitar registros fantasma.

@@ -30,9 +30,59 @@
     const existsInDrafts = SheetRepository.list(Config.SHEETS.DRAFTS).find(function(row) {
       return row.codigoNormalizado === normalized && row.id !== ignoreId && row.estado !== Config.STATES.DISCARDED;
     });
-    if (existsInArticles || existsInDrafts) {
-      throw new Error('Ya existe un artículo o borrador con ese código.');
+    if (existsInArticles) {
+      throw new Error('El código ya existe como artículo activo: ' + existsInArticles.codigoArticulo + ' - ' + existsInArticles.descripcion + '.');
     }
+    if (existsInDrafts) {
+      throw new Error('El código ya existe en borradores con estado ' + (existsInDrafts.estado || 'SIN ESTADO') + ': ' + existsInDrafts.codigoArticulo + ' - ' + existsInDrafts.descripcion + '.');
+    }
+  },
+
+  findCodeLocations: function(code) {
+    const normalized = normalizeText(code);
+    if (!normalized) throw new Error('Ingresa un código para buscar.');
+    const results = [];
+    SheetRepository.list(Config.SHEETS.DRAFTS).forEach(function(row) {
+      if (row.codigoNormalizado === normalized || normalizeText(row.codigoArticulo) === normalized) {
+        results.push({
+          origen: 'BORRADORES',
+          id: row.id,
+          codigoArticulo: row.codigoArticulo,
+          descripcion: row.descripcion,
+          estado: row.estado,
+          fechaModificacion: row.fechaModificacion
+        });
+      }
+    });
+    SheetRepository.list(Config.SHEETS.ARTICLES).forEach(function(row) {
+      if (row.codigoNormalizado === normalized || normalizeText(row.codigoArticulo) === normalized) {
+        results.push({
+          origen: 'ARTICULOS',
+          id: row.id,
+          codigoArticulo: row.codigoArticulo,
+          descripcion: row.descripcion,
+          estado: row.estado,
+          fechaModificacion: row.fechaModificacion
+        });
+      }
+    });
+    SheetRepository.list(Config.SHEETS.DISCARDED_DRAFTS).forEach(function(row) {
+      const data = safeJsonParse(row.datosJson, {});
+      const draftCode = data.codigoArticulo || '';
+      if (normalizeText(draftCode) === normalized) {
+        results.push({
+          origen: 'BORRADORES_DESCARTADOS',
+          id: row.id,
+          borradorId: row.borradorId,
+          codigoArticulo: draftCode,
+          descripcion: data.descripcion || '',
+          estado: row.estado,
+          fechaModificacion: row.fechaDescarte,
+          motivo: row.motivo
+        });
+      }
+    });
+    return results;
   },
 
   saveDraft: function(payload, userEmail) {

@@ -172,6 +172,12 @@ function apiCreateRelation(payload) {
   });
 }
 
+function apiFindProductCode(payload) {
+  return Api.withSessionOnly('apiFindProductCode', function() {
+    return ok(ArticleService.findCodeLocations(payload && payload.codigoArticulo), 'Busqueda realizada.');
+  });
+}
+
 function apiToggleEntity(payload) {
   return Api.withAuth('apiToggleEntity', function(user) {
     return ok(CatalogService.toggleEntity(payload, user.email), 'Estado actualizado.');

@@ -220,6 +220,13 @@
       <section id="config-page-pendientes" class="config-page">
       <section class="wide-panel">
         <h3>Pendientes</h3>
+        <div class="code-search-panel">
+          <label>Buscar código en la base
+            <input id="pendingCodeSearch" placeholder="Ej: VE820633" autocomplete="off">
+          </label>
+          <button id="pendingCodeSearchButton" type="button">Buscar</button>
+        </div>
+        <div id="pendingCodeSearchResult" class="code-search-result" hidden></div>
         <div id="draftList" class="list"></div>
       </section>
       </section>

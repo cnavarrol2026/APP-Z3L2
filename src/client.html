@@ -167,6 +167,13 @@
     document.getElementById('draftCategorySearch').addEventListener('input', () => syncDraftSearchField('category'));
     document.getElementById('draftBottleSearch').addEventListener('input', () => syncDraftSearchField('bottle'));
     document.getElementById('newDraftButton').addEventListener('click', startNewDraft);
+    document.getElementById('pendingCodeSearchButton').addEventListener('click', findPendingCode);
+    document.getElementById('pendingCodeSearch').addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        findPendingCode();
+      }
+    });
     document.getElementById('backupButton').addEventListener('click', createBackup);
     document.querySelectorAll('.image-input').forEach((input) => {
       input.addEventListener('change', validateImageInput);
@@ -742,6 +749,51 @@
         '<span>' + (draft.motivo || 'Sin motivo registrado') + '</span>' +
         '<small>' + [draft.estado || 'DESCARTADO', draft.fechaDescarte || ''].filter(Boolean).join(' · ') + '</small>';
       container.appendChild(item);
+    });
+  }
+
+  function findPendingCode() {
+    const input = document.getElementById('pendingCodeSearch');
+    const result = document.getElementById('pendingCodeSearchResult');
+    const code = toUpperClientText(input ? input.value : '');
+    if (!result) return;
+    if (!code) {
+      showToast('Ingresa un código para buscar.');
+      return;
+    }
+    result.hidden = false;
+    result.className = 'code-search-result';
+    result.textContent = 'Buscando código...';
+    callServer('apiFindProductCode', { codigoArticulo: code })
+      .then((rows) => renderCodeSearchResult(rows || [], code))
+      .catch((error) => {
+        result.className = 'code-search-result error';
+        result.textContent = getErrorMessage(error, 'No fue posible buscar el código.');
+      });
+  }
+
+  function renderCodeSearchResult(rows, code) {
+    const result = document.getElementById('pendingCodeSearchResult');
+    if (!result) return;
+    result.hidden = false;
+    result.innerHTML = '';
+    if (!rows.length) {
+      result.className = 'code-search-result';
+      result.textContent = 'No se encontró el código ' + code + ' en borradores, artículos activos ni descartados.';
+      return;
+    }
+    result.className = 'code-search-result found';
+    const title = document.createElement('strong');
+    title.textContent = 'Resultado para ' + code;
+    result.appendChild(title);
+    rows.forEach((row) => {
+      const item = document.createElement('div');
+      item.className = 'code-search-item';
+      item.innerHTML =
+        '<span>' + (row.origen || 'SIN ORIGEN') + ' · ' + (row.estado || 'SIN ESTADO') + '</span>' +
+        '<strong>' + (row.codigoArticulo || code) + '</strong>' +
+        '<small>' + [row.descripcion || '', row.fechaModificacion || '', row.motivo || ''].filter(Boolean).join(' · ') + '</small>';
+      result.appendChild(item);
     });
   }
 

@@ -48,7 +48,7 @@ const TemplateService = {
     },
     {
       id: 'sec_ajustes_capsuladora',
-      nombre: 'Ajustes de Capsuladora',
+      nombre: 'Formatos',
       orden: 30,
       fields: [
         { id: 'cam_formato_capsula', nombre: 'Número formato (cápsula)', tipo: 'TEXTO', obligatorio: false, orden: 10 },

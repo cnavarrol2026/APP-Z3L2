@@ -69,4 +69,4 @@
 - Se agrega sincronización segura de plantilla técnica: crea campos nuevos, actualiza nombres/secciones/órdenes existentes y marca como inactivos los campos antiguos de Ajustes Mecánicos sin borrar datos históricos.
 - Se reordena `Botella e Insumos` para comenzar con `Programa de máquina` y `Programa de estación`, ambos con resaltado visual, seguido por botella, alturas, medidas de etiqueta y tipo de chaleco.
 - Se corrige la doble flecha en los campos buscables de categoría y botella eliminando el indicador manual de CSS y dejando el control nativo del navegador.
-- Se mueve `Tipo de chaleco` a la sección de formatos/capsuladora y `Medidas etiqueta` se transforma en un bloque visual `Medidas` con campos `ETQ` y `CET`.
+- Se renombra la sección `Ajustes de Capsuladora` a `Formatos`, se ubica allí `Tipo de chaleco` y `Medidas etiqueta` se transforma en un bloque visual `Medidas` con campos `ETQ` y `CET`.

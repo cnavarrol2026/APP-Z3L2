@@ -68,3 +68,4 @@
 - Se reestructura `Ajustes Mecánicos de Etiquetadora` con tres bloques compactos (`Ajuste sinfín`, `Guía botellas`, `Altura estrella`) y matriz por `Estación 1`, `Estación 2` y `Estación 3` para `Altura`, `Profundidad`, `Inclinación`, `VE`, `RS` y `DF`.
 - Se agrega sincronización segura de plantilla técnica: crea campos nuevos, actualiza nombres/secciones/órdenes existentes y marca como inactivos los campos antiguos de Ajustes Mecánicos sin borrar datos históricos.
 - Se reordena `Botella e Insumos` para comenzar con `Programa de máquina` y `Programa de estación`, ambos con resaltado visual, seguido por botella, alturas, medidas de etiqueta y tipo de chaleco.
+- Se corrige la doble flecha en los campos buscables de categoría y botella eliminando el indicador manual de CSS y dejando el control nativo del navegador.

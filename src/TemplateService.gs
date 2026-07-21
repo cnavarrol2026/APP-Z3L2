@@ -236,9 +236,12 @@ const TemplateService = {
   },
 
   ensureDefaultFields: function(userEmail, date, unitsByName, sectionIdMap) {
+    const fields = SheetRepository.list(Config.SHEETS.FIELDS);
     const fieldsById = {};
-    SheetRepository.list(Config.SHEETS.FIELDS).forEach(function(field) {
+    const fieldsBySectionAndName = {};
+    fields.forEach(function(field) {
       fieldsById[field.id] = field;
+      fieldsBySectionAndName[normalizeText(field.seccionId + '|' + field.nombre)] = field;
     });
 
     this.DEFAULT_SECTIONS.forEach(function(section) {
@@ -255,7 +258,7 @@ const TemplateService = {
           orden: field.orden,
           activo: true
         };
-        const current = fieldsById[field.id];
+        const current = fieldsById[field.id] || fieldsBySectionAndName[expected.nombreNormalizado];
         if (!current) {
           SheetRepository.append(Config.SHEETS.FIELDS, Object.assign({
             id: field.id,

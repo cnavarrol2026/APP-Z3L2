@@ -32,7 +32,7 @@ const PdfService = {
     values.forEach(function(value) {
       const field = fields.find(function(row) { return row.id === value.campoId; }) || {};
       const unit = units.find(function(row) { return row.id === value.unidadId; }) || {};
-      if (value.campoId === 'cam_levas_platos') {
+      if (value.campoId === 'cam_levas_platos' || normalizeText(field.nombre) === normalizeText('Levas Platos')) {
         const rows = safeJsonParse(value.valor, []);
         body.appendParagraph('Levas Platos:');
         if (!Array.isArray(rows) || !rows.length) {

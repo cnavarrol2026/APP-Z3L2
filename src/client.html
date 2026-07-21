@@ -600,10 +600,33 @@
     ));
   }
 
+  function isFormatosSection(section) {
+    return section && (section.id === FORMATOS_SECTION_ID || normalizeClientText(section.nombre) === 'formatos');
+  }
+
+  function isAntaresField(field) {
+    if (!field) return false;
+    return FORMATOS_ANTARES_FIELDS.some((item) => (
+      item.id === field.id || normalizeClientText(item.label) === normalizeClientText(field.nombre)
+    ));
+  }
+
+  function isLevasPlatosField(field) {
+    return field && (field.id === LEVAS_PLATOS_FIELD_ID || normalizeClientText(field.nombre) === 'levas platos');
+  }
+
   function isFormatosSpecialField(field) {
     if (!field) return false;
-    if (field.id === LEVAS_PLATOS_FIELD_ID) return true;
-    return FORMATOS_ANTARES_FIELDS.some((item) => item.id === field.id);
+    return isLevasPlatosField(field) || isAntaresField(field);
+  }
+
+  function getFormatosFieldByName(fields, label) {
+    const normalized = normalizeClientText(label);
+    return fields.find((field) => normalizeClientText(field.nombre) === normalized) || null;
+  }
+
+  function getLevasPlatosField(fields) {
+    return fields.find((field) => isLevasPlatosField(field)) || null;
   }
 
   function fieldMetaText(field, units) {
@@ -674,7 +697,7 @@
         renderMechanicalTemplatePreview(grid, sectionFields, units);
       } else if (section.id === 'sec_botella_insumos') {
         renderBottleTemplatePreview(grid, sectionFields, units);
-      } else if (section.id === FORMATOS_SECTION_ID) {
+      } else if (isFormatosSection(section)) {
         renderFormatosTemplatePreview(grid, sectionFields, units);
       } else {
         sectionFields.forEach((field) => {
@@ -790,7 +813,7 @@
         });
         renderBottleFieldGroups(grid, sectionFields, units, true);
         block.append(title, grid);
-      } else if (section.id === FORMATOS_SECTION_ID) {
+      } else if (isFormatosSection(section)) {
         block.append(title);
         renderFormatosDraftFields(block, sectionFields, units);
       } else {
@@ -888,7 +911,7 @@
     const row = document.createElement('div');
     row.className = 'antares-mini-fields';
     FORMATOS_ANTARES_FIELDS.forEach((item) => {
-      const field = getFieldById(fields, item.id);
+      const field = getFieldById(fields, item.id) || getFormatosFieldByName(fields, item.label);
       if (!field) return;
       if (editable) {
         row.appendChild(createDraftField(field, units, item.label));
@@ -930,8 +953,12 @@
   }
 
   function renderLevasPlatosTable(container, rows) {
+    const fields = state.admin.campos || [];
+    const levasField = getLevasPlatosField(fields) || { id: LEVAS_PLATOS_FIELD_ID, nombre: 'Levas Platos' };
     const block = document.createElement('div');
     block.className = 'levas-platos-block';
+    block.dataset.fieldId = levasField.id;
+    block.dataset.fieldName = levasField.nombre || 'Levas Platos';
     const head = document.createElement('div');
     head.className = 'levas-platos-head';
     const title = document.createElement('h5');
@@ -1026,6 +1053,16 @@
       rows.push(row);
     }
     return rows;
+  }
+
+  function getLevasPlatosPayloadField() {
+    const block = document.querySelector('.levas-platos-block[data-field-id]');
+    const fields = state.admin.campos || [];
+    const levasField = getLevasPlatosField(fields);
+    return {
+      id: block ? block.dataset.fieldId : (levasField ? levasField.id : LEVAS_PLATOS_FIELD_ID),
+      name: block ? block.dataset.fieldName : (levasField ? levasField.nombre : 'Levas Platos')
+    };
   }
 
   function parseLevasPlatosRows(value) {
@@ -1336,7 +1373,12 @@
       const match = values.find((item) => item.campoId === input.dataset.fieldId);
       input.value = match ? (match.valor || '') : '';
     });
-    const levas = values.find((item) => item.campoId === LEVAS_PLATOS_FIELD_ID);
+    const levasField = getLevasPlatosField(state.admin.campos || []);
+    const levas = values.find((item) => (
+      item.campoId === LEVAS_PLATOS_FIELD_ID ||
+      (levasField && item.campoId === levasField.id) ||
+      normalizeClientText(item.campo) === 'levas platos'
+    ));
     setLevasPlatosRows(parseLevasPlatosRows(levas ? levas.valor : []));
   }
 
@@ -1558,14 +1600,15 @@
     payload.etqAplica = form.etqAplica.checked;
     payload.cetAplica = form.cetAplica.checked;
     payload.etapa = 'FICHA_TECNICA';
+    const levasPayloadField = getLevasPlatosPayloadField();
     payload.payload = {
       valores: Array.from(document.querySelectorAll('.draft-field')).map((input) => ({
         campoId: input.dataset.fieldId,
         campo: input.dataset.fieldName,
         valor: toUpperClientText(input.value)
       })).concat([{
-        campoId: LEVAS_PLATOS_FIELD_ID,
-        campo: 'Levas Platos',
+        campoId: levasPayloadField.id,
+        campo: levasPayloadField.name,
         valor: JSON.stringify(collectLevasPlatosRows())
       }])
     };

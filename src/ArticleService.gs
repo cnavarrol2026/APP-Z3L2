@@ -14,7 +14,7 @@
       copy.valores = copy.valores.map(function(item) {
         const next = Object.assign({}, item);
         next.campoId = cleanText(next.campoId, 80);
-        if (next.campoId === 'cam_levas_platos') {
+        if (self.isLevasPlatosValue(next)) {
           next.valor = JSON.stringify(self.normalizeLevasPlatos(next.valor));
           next.campo = 'Levas Platos';
           return next;
@@ -24,6 +24,13 @@
       });
     }
     return copy;
+  },
+
+  isLevasPlatosValue: function(item) {
+    return item && (
+      cleanText(item.campoId, 80) === 'cam_levas_platos' ||
+      normalizeText(item.campo) === normalizeText('Levas Platos')
+    );
   },
 
   normalizeLevasPlatos: function(value) {
@@ -234,14 +241,15 @@
     const values = Array.isArray(data.valores) ? data.valores : [];
     values.forEach(function(item) {
       const fieldId = cleanText(item.campoId, 80);
-      const maxLength = fieldId === 'cam_levas_platos' ? 20000 : 500;
+      const isLevasPlatos = ArticleService.isLevasPlatosValue(item);
+      const maxLength = isLevasPlatos ? 20000 : 500;
       const value = cleanText(item.valor, maxLength);
       if (!fieldId || !value) return;
       SheetRepository.append(Config.SHEETS.ARTICLE_VALUES, {
         id: createId('val'),
         articuloId: articleId,
         campoId: fieldId,
-        valor: fieldId === 'cam_levas_platos' ? value : toSystemUpperText(value, 500),
+        valor: isLevasPlatos ? value : toSystemUpperText(value, 500),
         unidadId: cleanText(item.unidadId, 80),
         fechaCreacion: date,
         creadoPor: userEmail,

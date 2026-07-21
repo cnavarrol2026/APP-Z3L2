@@ -79,8 +79,8 @@
       { id: 'cam_altura_pegado_etiqueta', seccionId: 'sec_botella_insumos', nombre: 'Altura de Etiquetado', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: true, orden: 40 },
       { id: 'cam_altura_contra_etiqueta', seccionId: 'sec_botella_insumos', nombre: 'Altura ContraEtiqueta (CET)', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 50 },
       { id: 'cam_altura_medalla', seccionId: 'sec_botella_insumos', nombre: 'Altura medalla', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 60 },
-      { id: 'cam_medidas_etiqueta', seccionId: 'sec_botella_insumos', nombre: 'Medidas etiqueta', tipo: 'TEXTO', obligatorio: true, orden: 70 },
-      { id: 'cam_tipo_chaleco', seccionId: 'sec_botella_insumos', nombre: 'Tipo de chaleco', tipo: 'TEXTO', obligatorio: false, orden: 80 },
+      { id: 'cam_medidas_etiqueta', seccionId: 'sec_botella_insumos', nombre: 'Medidas ETQ', tipo: 'TEXTO', obligatorio: true, orden: 70 },
+      { id: 'cam_medidas_etiqueta_cet', seccionId: 'sec_botella_insumos', nombre: 'Medidas CET', tipo: 'TEXTO', obligatorio: false, orden: 80 },
       { id: 'cam_ajuste_sinfin_a', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Ajuste sinfín A', tipo: 'TEXTO', obligatorio: false, orden: 10 },
       { id: 'cam_ajuste_sinfin_b', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Ajuste sinfín B', tipo: 'TEXTO', obligatorio: false, orden: 20 },
       { id: 'cam_guia_botellas_a', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Guía botellas A', tipo: 'TEXTO', obligatorio: false, orden: 30 },
@@ -109,11 +109,18 @@
       { id: 'cam_formato_botella', seccionId: 'sec_ajustes_capsuladora', nombre: 'Número formato (botella)', tipo: 'TEXTO', obligatorio: false, orden: 20 },
       { id: 'cam_color_formato', seccionId: 'sec_ajustes_capsuladora', nombre: 'Color de formato', tipo: 'TEXTO', obligatorio: false, orden: 30 },
       { id: 'cam_material_capsula', seccionId: 'sec_ajustes_capsuladora', nombre: 'Material (PVC / Complex)', tipo: 'TEXTO', obligatorio: false, orden: 40 },
-      { id: 'cam_sinfin_capsuladora', seccionId: 'sec_ajustes_capsuladora', nombre: 'Sinfín capsuladora', tipo: 'TEXTO', obligatorio: false, orden: 50 }
+      { id: 'cam_sinfin_capsuladora', seccionId: 'sec_ajustes_capsuladora', nombre: 'Sinfín capsuladora', tipo: 'TEXTO', obligatorio: false, orden: 50 },
+      { id: 'cam_tipo_chaleco', seccionId: 'sec_ajustes_capsuladora', nombre: 'Tipo de chaleco', tipo: 'TEXTO', obligatorio: false, orden: 60 }
     ]
   };
   const MECHANICAL_SECTION_ID = 'sec_ajustes_etiquetadora';
   const FEATURED_BOTTLE_FIELD_IDS = ['cam_programa_maquina', 'cam_programa_estacion'];
+  const BOTTLE_FIELD_GROUPS = [
+    { title: 'Medidas', fields: [
+      { label: 'ETQ', id: 'cam_medidas_etiqueta' },
+      { label: 'CET', id: 'cam_medidas_etiqueta_cet' }
+    ] }
+  ];
   const MECHANICAL_GROUPS = [
     { title: 'Ajuste sinfín', fields: [
       { label: 'A', id: 'cam_ajuste_sinfin_a' },
@@ -573,6 +580,13 @@
     return field && FEATURED_BOTTLE_FIELD_IDS.indexOf(field.id) !== -1;
   }
 
+  function isGroupedBottleField(field) {
+    if (!field) return false;
+    return BOTTLE_FIELD_GROUPS.some((group) => (
+      group.fields.some((item) => item.id === field.id)
+    ));
+  }
+
   function fieldMetaText(field, units) {
     const unit = getUnit(field, units);
     const meta = [field.tipo];
@@ -639,6 +653,8 @@
       }
       if (section.id === MECHANICAL_SECTION_ID) {
         renderMechanicalTemplatePreview(grid, sectionFields, units);
+      } else if (section.id === 'sec_botella_insumos') {
+        renderBottleTemplatePreview(grid, sectionFields, units);
       } else {
         sectionFields.forEach((field) => {
           grid.appendChild(createFieldCard(field, units));
@@ -690,6 +706,14 @@
     container.appendChild(matrix);
   }
 
+  function renderBottleTemplatePreview(container, fields, units) {
+    fields.forEach((field) => {
+      if (isGroupedBottleField(field)) return;
+      container.appendChild(createFieldCard(field, units));
+    });
+    renderBottleFieldGroups(container, fields, units, false);
+  }
+
   function createMatrixHeaderCell(text) {
     const cell = document.createElement('div');
     cell.className = 'mechanical-matrix-head';
@@ -727,9 +751,18 @@
       if (section.id === MECHANICAL_SECTION_ID) {
         block.append(title);
         renderMechanicalDraftFields(block, sectionFields, units);
+      } else if (section.id === 'sec_botella_insumos') {
+        const grid = document.createElement('div');
+        grid.className = 'draft-field-grid bottle-insumos-grid';
+        sectionFields.forEach((field) => {
+          if (isGroupedBottleField(field)) return;
+          grid.appendChild(createDraftField(field, units));
+        });
+        renderBottleFieldGroups(grid, sectionFields, units, true);
+        block.append(title, grid);
       } else {
         const grid = document.createElement('div');
-        grid.className = section.id === 'sec_botella_insumos' ? 'draft-field-grid bottle-insumos-grid' : 'draft-field-grid';
+        grid.className = 'draft-field-grid';
         sectionFields.forEach((field) => {
           grid.appendChild(createDraftField(field, units));
         });
@@ -776,6 +809,30 @@
       });
     });
     block.appendChild(matrix);
+  }
+
+  function renderBottleFieldGroups(container, fields, units, editable) {
+    BOTTLE_FIELD_GROUPS.forEach((group) => {
+      const groupBlock = document.createElement('div');
+      groupBlock.className = 'bottle-mini-card';
+      const title = document.createElement('h5');
+      title.textContent = group.title;
+      const row = document.createElement('div');
+      row.className = 'bottle-mini-fields';
+      group.fields.forEach((item) => {
+        const field = getFieldById(fields, item.id);
+        if (!field) return;
+        if (editable) {
+          row.appendChild(createDraftField(field, units, item.label));
+          return;
+        }
+        const card = createFieldCard(field, units);
+        card.querySelector('strong').textContent = item.label;
+        row.appendChild(card);
+      });
+      groupBlock.append(title, row);
+      container.appendChild(groupBlock);
+    });
   }
 
   function bindCatalogModal() {

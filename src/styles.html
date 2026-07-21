@@ -669,21 +669,34 @@
     background: #f8fafc;
   }
 
-  .mechanical-mini-card h5 {
+  .bottle-mini-card {
+    display: grid;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #f8fafc;
+  }
+
+  .mechanical-mini-card h5,
+  .bottle-mini-card h5 {
     margin: 0;
     color: var(--blue-dark);
     font-size: 0.95rem;
     text-align: center;
   }
 
-  .mechanical-mini-fields {
+  .mechanical-mini-fields,
+  .bottle-mini-fields {
     display: grid;
     grid-template-columns: repeat(2, minmax(72px, 1fr));
     gap: 10px;
   }
 
   .mechanical-mini-fields .field-card,
-  .mechanical-mini-fields label {
+  .mechanical-mini-fields label,
+  .bottle-mini-fields .field-card,
+  .bottle-mini-fields label {
     min-height: 64px;
   }
 

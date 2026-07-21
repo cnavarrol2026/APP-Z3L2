@@ -11,8 +11,8 @@ const TemplateService = {
         { id: 'cam_altura_pegado_etiqueta', nombre: 'Altura de Etiquetado', tipo: 'NUMERO', unidad: 'mm', obligatorio: true, orden: 40 },
         { id: 'cam_altura_contra_etiqueta', nombre: 'Altura ContraEtiqueta (CET)', tipo: 'NUMERO', unidad: 'mm', obligatorio: false, orden: 50 },
         { id: 'cam_altura_medalla', nombre: 'Altura medalla', tipo: 'NUMERO', unidad: 'mm', obligatorio: false, orden: 60 },
-        { id: 'cam_medidas_etiqueta', nombre: 'Medidas etiqueta', tipo: 'TEXTO', obligatorio: true, orden: 70 },
-        { id: 'cam_tipo_chaleco', nombre: 'Tipo de chaleco', tipo: 'TEXTO', obligatorio: false, orden: 80 }
+        { id: 'cam_medidas_etiqueta', nombre: 'Medidas ETQ', tipo: 'TEXTO', obligatorio: true, orden: 70 },
+        { id: 'cam_medidas_etiqueta_cet', nombre: 'Medidas CET', tipo: 'TEXTO', obligatorio: false, orden: 80 }
       ]
     },
     {
@@ -55,7 +55,8 @@ const TemplateService = {
         { id: 'cam_formato_botella', nombre: 'Número formato (botella)', tipo: 'TEXTO', obligatorio: false, orden: 20 },
         { id: 'cam_color_formato', nombre: 'Color de formato', tipo: 'TEXTO', obligatorio: false, orden: 30 },
         { id: 'cam_material_capsula', nombre: 'Material (PVC / Complex)', tipo: 'TEXTO', obligatorio: false, orden: 40 },
-        { id: 'cam_sinfin_capsuladora', nombre: 'Sinfín capsuladora', tipo: 'TEXTO', obligatorio: false, orden: 50 }
+        { id: 'cam_sinfin_capsuladora', nombre: 'Sinfín capsuladora', tipo: 'TEXTO', obligatorio: false, orden: 50 },
+        { id: 'cam_tipo_chaleco', nombre: 'Tipo de chaleco', tipo: 'TEXTO', obligatorio: false, orden: 60 }
       ]
     }
   ],

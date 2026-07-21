@@ -166,6 +166,7 @@
     document.getElementById('draftForm').addEventListener('submit', saveDraft);
     document.getElementById('draftCategorySearch').addEventListener('input', () => syncDraftSearchField('category'));
     document.getElementById('draftBottleSearch').addEventListener('input', () => syncDraftSearchField('bottle'));
+    document.getElementById('newDraftButton').addEventListener('click', startNewDraft);
     document.getElementById('backupButton').addEventListener('click', createBackup);
     document.querySelectorAll('.image-input').forEach((input) => {
       input.addEventListener('change', validateImageInput);
@@ -778,6 +779,49 @@
     if (form.codigoCet) form.codigoCet.value = draft.codigoCet || '';
     fillDraftTechnicalValues(draft);
     renderDraftImageStatus(draft);
+    renderDraftMode(draft);
+  }
+
+  function renderDraftMode(draft) {
+    const notice = document.getElementById('draftModeNotice');
+    const text = document.getElementById('draftModeText');
+    if (!notice || !text) return;
+    if (!draft || !draft.id) {
+      notice.hidden = true;
+      text.textContent = '';
+      return;
+    }
+    notice.hidden = false;
+    text.textContent = 'Editando ' + (draft.codigoArticulo || 'borrador sin código') + '. Los cambios se guardarán sobre este mismo pendiente.';
+  }
+
+  function startNewDraft() {
+    const editingId = state.editingDraftId;
+    const form = document.getElementById('draftForm');
+    const reset = () => {
+      resetDraftForm(form);
+      showToast('Formulario listo para un producto nuevo.');
+    };
+    if (!editingId) {
+      reset();
+      return;
+    }
+    setOperationStatus('Cerrando edición del borrador...', 'info');
+    callServer('apiReleaseDraftLock', { borradorId: editingId })
+      .catch(() => null)
+      .then(reset)
+      .finally(() => setOperationStatus('', ''));
+  }
+
+  function resetDraftForm(form) {
+    if (!form) return;
+    form.reset();
+    state.editingDraftId = '';
+    if (form.elements.id) form.elements.id.value = '';
+    setDraftSearchValue('category', '');
+    setDraftSearchValue('bottle', '');
+    clearImageInputs(form);
+    renderDraftMode(null);
   }
 
   function fillDraftTechnicalValues(draft) {
@@ -1018,9 +1062,7 @@
           return callServer('apiReleaseDraftLock', { borradorId: savedDraft.id })
             .catch(() => null)
             .then(() => {
-              form.reset();
-              state.editingDraftId = '';
-              clearImageInputs(form);
+              resetDraftForm(form);
               showToast('Borrador guardado.');
               loadInitialData();
               return null;
@@ -1028,9 +1070,7 @@
         }
         return callServer('apiActivateDraft', { borradorId: savedDraft.id })
           .then(() => {
-            form.reset();
-            state.editingDraftId = '';
-            clearImageInputs(form);
+            resetDraftForm(form);
             showToast('Producto guardado y activado.');
             loadInitialData();
             return null;

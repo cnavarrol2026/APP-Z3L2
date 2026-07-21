@@ -150,6 +150,13 @@
         <h3>Agregar producto nuevo</h3>
         <form id="draftForm" class="wizard-grid">
           <input type="hidden" name="id">
+          <div id="draftModeNotice" class="draft-mode-notice" hidden>
+            <div>
+              <strong>Editando borrador pendiente</strong>
+              <span id="draftModeText">Los cambios se guardarán sobre este mismo borrador.</span>
+            </div>
+            <button id="newDraftButton" class="secondary small-button" type="button">Crear producto nuevo</button>
+          </div>
           <label>Categoría
             <input id="draftCategorySearch" class="search-combo-input" list="draftCategoryOptions" placeholder="Escribe para buscar categoría" autocomplete="off">
             <input type="hidden" name="categoriaId" id="draftCategory">

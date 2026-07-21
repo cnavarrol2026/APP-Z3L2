@@ -339,6 +339,34 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
+  .draft-mode-notice {
+    display: flex;
+    grid-column: 1 / -1;
+    justify-content: space-between;
+    gap: 14px;
+    align-items: center;
+    padding: 12px 14px;
+    border: 1px solid #b8c7e6;
+    border-radius: 8px;
+    background: #eef4ff;
+    color: var(--blue-dark);
+  }
+
+  .draft-mode-notice[hidden] {
+    display: none;
+  }
+
+  .draft-mode-notice div {
+    display: grid;
+    gap: 3px;
+  }
+
+  .draft-mode-notice span {
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
   .help,
   .actions {
     grid-column: 1 / -1;

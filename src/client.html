@@ -65,8 +65,9 @@
   const LOCAL_TEMPLATE = {
     secciones: [
       { id: 'sec_botella_insumos', nombre: 'Botella e Insumos', orden: 10 },
-      { id: 'sec_ajustes_etiquetadora', nombre: 'Ajustes Mecánicos de Etiquetadora', orden: 20 },
-      { id: 'sec_ajustes_capsuladora', nombre: 'Formatos', orden: 30 }
+      { id: 'sec_formatos', nombre: 'FORMATOS', orden: 20 },
+      { id: 'sec_ajustes_etiquetadora', nombre: 'Ajustes Mecánicos de Etiquetadora', orden: 30 },
+      { id: 'sec_ajustes_capsuladora', nombre: 'Ajustes de Capsuladora', orden: 40 }
     ],
     unidades: [
       { id: 'uni_mm', nombre: 'mm', orden: 10 },
@@ -81,6 +82,7 @@
       { id: 'cam_altura_medalla', seccionId: 'sec_botella_insumos', nombre: 'Altura medalla', tipo: 'NUMERO', unidadId: 'uni_mm', obligatorio: false, orden: 60 },
       { id: 'cam_medidas_etiqueta', seccionId: 'sec_botella_insumos', nombre: 'Medidas ETQ', tipo: 'TEXTO', obligatorio: true, orden: 70 },
       { id: 'cam_medidas_etiqueta_cet', seccionId: 'sec_botella_insumos', nombre: 'Medidas CET', tipo: 'TEXTO', obligatorio: false, orden: 80 },
+      { id: 'cam_tipo_chaleco', seccionId: 'sec_formatos', nombre: 'Tipo de chaleco', tipo: 'TEXTO', obligatorio: false, orden: 10 },
       { id: 'cam_ajuste_sinfin_a', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Ajuste sinfín A', tipo: 'TEXTO', obligatorio: false, orden: 10 },
       { id: 'cam_ajuste_sinfin_b', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Ajuste sinfín B', tipo: 'TEXTO', obligatorio: false, orden: 20 },
       { id: 'cam_guia_botellas_a', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Guía botellas A', tipo: 'TEXTO', obligatorio: false, orden: 30 },
@@ -109,8 +111,7 @@
       { id: 'cam_formato_botella', seccionId: 'sec_ajustes_capsuladora', nombre: 'Número formato (botella)', tipo: 'TEXTO', obligatorio: false, orden: 20 },
       { id: 'cam_color_formato', seccionId: 'sec_ajustes_capsuladora', nombre: 'Color de formato', tipo: 'TEXTO', obligatorio: false, orden: 30 },
       { id: 'cam_material_capsula', seccionId: 'sec_ajustes_capsuladora', nombre: 'Material (PVC / Complex)', tipo: 'TEXTO', obligatorio: false, orden: 40 },
-      { id: 'cam_sinfin_capsuladora', seccionId: 'sec_ajustes_capsuladora', nombre: 'Sinfín capsuladora', tipo: 'TEXTO', obligatorio: false, orden: 50 },
-      { id: 'cam_tipo_chaleco', seccionId: 'sec_ajustes_capsuladora', nombre: 'Tipo de chaleco', tipo: 'TEXTO', obligatorio: false, orden: 60 }
+      { id: 'cam_sinfin_capsuladora', seccionId: 'sec_ajustes_capsuladora', nombre: 'Sinfín capsuladora', tipo: 'TEXTO', obligatorio: false, orden: 50 }
     ]
   };
   const MECHANICAL_SECTION_ID = 'sec_ajustes_etiquetadora';

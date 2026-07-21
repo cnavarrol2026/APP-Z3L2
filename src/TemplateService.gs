@@ -16,9 +16,17 @@ const TemplateService = {
       ]
     },
     {
+      id: 'sec_formatos',
+      nombre: 'FORMATOS',
+      orden: 20,
+      fields: [
+        { id: 'cam_tipo_chaleco', nombre: 'Tipo de chaleco', tipo: 'TEXTO', obligatorio: false, orden: 10 }
+      ]
+    },
+    {
       id: 'sec_ajustes_etiquetadora',
       nombre: 'Ajustes Mecánicos de Etiquetadora',
-      orden: 20,
+      orden: 30,
       fields: [
         { id: 'cam_ajuste_sinfin_a', nombre: 'Ajuste sinfín A', tipo: 'TEXTO', obligatorio: false, orden: 10 },
         { id: 'cam_ajuste_sinfin_b', nombre: 'Ajuste sinfín B', tipo: 'TEXTO', obligatorio: false, orden: 20 },
@@ -48,15 +56,14 @@ const TemplateService = {
     },
     {
       id: 'sec_ajustes_capsuladora',
-      nombre: 'Formatos',
-      orden: 30,
+      nombre: 'Ajustes de Capsuladora',
+      orden: 40,
       fields: [
         { id: 'cam_formato_capsula', nombre: 'Número formato (cápsula)', tipo: 'TEXTO', obligatorio: false, orden: 10 },
         { id: 'cam_formato_botella', nombre: 'Número formato (botella)', tipo: 'TEXTO', obligatorio: false, orden: 20 },
         { id: 'cam_color_formato', nombre: 'Color de formato', tipo: 'TEXTO', obligatorio: false, orden: 30 },
         { id: 'cam_material_capsula', nombre: 'Material (PVC / Complex)', tipo: 'TEXTO', obligatorio: false, orden: 40 },
-        { id: 'cam_sinfin_capsuladora', nombre: 'Sinfín capsuladora', tipo: 'TEXTO', obligatorio: false, orden: 50 },
-        { id: 'cam_tipo_chaleco', nombre: 'Tipo de chaleco', tipo: 'TEXTO', obligatorio: false, orden: 60 }
+        { id: 'cam_sinfin_capsuladora', nombre: 'Sinfín capsuladora', tipo: 'TEXTO', obligatorio: false, orden: 50 }
       ]
     }
   ],
@@ -125,8 +132,8 @@ const TemplateService = {
   ensureDefaultTechnicalTemplate: function(userEmail) {
     const date = nowIso();
     const unitsByName = this.ensureDefaultUnits(userEmail, date);
-    this.ensureDefaultSections(userEmail, date);
-    this.ensureDefaultFields(userEmail, date, unitsByName);
+    const sectionIdMap = this.ensureDefaultSections(userEmail, date);
+    this.ensureDefaultFields(userEmail, date, unitsByName, sectionIdMap);
     this.deactivateObsoleteFields(userEmail, date);
   },
 
@@ -172,14 +179,21 @@ const TemplateService = {
   },
 
   ensureDefaultSections: function(userEmail, date) {
+    const sectionIdMap = {};
+    const sections = SheetRepository.list(Config.SHEETS.SECTIONS);
     const sectionsById = {};
-    SheetRepository.list(Config.SHEETS.SECTIONS).forEach(function(section) {
+    sections.forEach(function(section) {
       sectionsById[section.id] = section;
     });
 
     this.DEFAULT_SECTIONS.forEach(function(section) {
-      const current = sectionsById[section.id];
+      let current = sectionsById[section.id];
       const normalized = normalizeText(section.nombre);
+      if (!current && section.id === 'sec_formatos') {
+        current = sections.find(function(row) {
+          return row.id !== 'sec_ajustes_capsuladora' && normalizeText(row.nombre) === normalized;
+        }) || null;
+      }
       if (!current) {
         SheetRepository.append(Config.SHEETS.SECTIONS, {
           id: section.id,
@@ -193,8 +207,10 @@ const TemplateService = {
           modificadoPor: userEmail,
           version: 1
         });
+        sectionIdMap[section.id] = section.id;
         return;
       }
+      sectionIdMap[section.id] = current.id;
       if (
         current.nombre !== section.nombre ||
         current.nombreNormalizado !== normalized ||
@@ -212,21 +228,23 @@ const TemplateService = {
         });
       }
     });
+    return sectionIdMap;
   },
 
-  ensureDefaultFields: function(userEmail, date, unitsByName) {
+  ensureDefaultFields: function(userEmail, date, unitsByName, sectionIdMap) {
     const fieldsById = {};
     SheetRepository.list(Config.SHEETS.FIELDS).forEach(function(field) {
       fieldsById[field.id] = field;
     });
 
     this.DEFAULT_SECTIONS.forEach(function(section) {
+      const actualSectionId = sectionIdMap[section.id] || section.id;
       section.fields.forEach(function(field) {
         const unit = field.unidad ? unitsByName[normalizeText(field.unidad)] : null;
         const expected = {
-          seccionId: section.id,
+          seccionId: actualSectionId,
           nombre: field.nombre,
-          nombreNormalizado: normalizeText(section.id + '|' + field.nombre),
+          nombreNormalizado: normalizeText(actualSectionId + '|' + field.nombre),
           tipo: field.tipo,
           obligatorio: field.obligatorio,
           unidadId: unit ? unit.id : '',

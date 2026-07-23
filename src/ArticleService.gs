@@ -135,7 +135,7 @@
       throw new Error('El código ya existe como artículo activo: ' + existsInArticles.codigoArticulo + ' - ' + existsInArticles.descripcion + '.');
     }
     if (existsInDrafts) {
-      throw new Error('El código ya existe en borradores con estado ' + (existsInDrafts.estado || 'SIN ESTADO') + ': ' + existsInDrafts.codigoArticulo + ' - ' + existsInDrafts.descripcion + '.');
+      throw new Error('El código ya existe en Pendientes: ' + existsInDrafts.codigoArticulo + ' - ' + existsInDrafts.descripcion + '. Abre ese pendiente con Completar / revisar antes de guardar cambios.');
     }
   },
 

@@ -1770,7 +1770,11 @@
     const form = event.currentTarget;
     const payload = Object.fromEntries(new FormData(form).entries());
     const action = event.submitter && event.submitter.dataset.action === 'activate' ? 'activate' : 'draft';
-    if (!state.editingDraftId || payload.id !== state.editingDraftId) {
+    const currentEditingId = state.editingDraftId || (form.elements.id ? form.elements.id.value : '');
+    if (currentEditingId && (!payload.id || payload.id === currentEditingId)) {
+      payload.id = currentEditingId;
+      if (form.elements.id) form.elements.id.value = currentEditingId;
+    } else {
       payload.id = '';
       if (form.elements.id) form.elements.id.value = '';
     }

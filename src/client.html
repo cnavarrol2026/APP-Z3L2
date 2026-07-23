@@ -241,7 +241,6 @@
     document.getElementById('unitForm').addEventListener('submit', submitCatalog('apiCreateUnit'));
     document.getElementById('fieldForm').addEventListener('submit', submitField);
     document.getElementById('draftForm').addEventListener('submit', saveDraft);
-    document.getElementById('capsuladoraAplica').addEventListener('change', updateCapsuladoraMode);
     document.getElementById('draftCategorySearch').addEventListener('input', () => syncDraftSearchField('category'));
     document.getElementById('draftBottleSearch').addEventListener('input', () => syncDraftSearchField('bottle'));
     document.getElementById('newDraftButton').addEventListener('click', startNewDraft);
@@ -821,7 +820,6 @@
       if (!sectionFields.length) return;
       const block = document.createElement('section');
       block.className = section.id === MECHANICAL_SECTION_ID ? 'draft-section mechanical-entry-section' : 'draft-section';
-      if (isCapsuladoraSection(section)) block.dataset.sectionRole = 'capsuladora';
       const title = document.createElement('h4');
       title.textContent = section.nombre;
       if (section.id === MECHANICAL_SECTION_ID) {
@@ -839,6 +837,10 @@
       } else if (isFormatosSection(section)) {
         block.append(title);
         renderFormatosDraftFields(block, sectionFields, units);
+      } else if (isCapsuladoraSection(section)) {
+        block.dataset.sectionRole = 'capsuladora';
+        block.append(title);
+        renderCapsuladoraDraftFields(block, sectionFields, units);
       } else {
         const grid = document.createElement('div');
         grid.className = 'draft-field-grid';
@@ -851,6 +853,54 @@
       container.appendChild(block);
     });
     updateCapsuladoraMode();
+  }
+
+  function renderCapsuladoraDraftFields(block, fields, units) {
+    const modePanel = document.createElement('section');
+    modePanel.className = 'capsuladora-mode-panel';
+
+    const modeHead = document.createElement('div');
+    modeHead.className = 'capsuladora-mode-head';
+
+    const toggle = document.createElement('label');
+    toggle.className = 'toggle-row';
+    const checkbox = document.createElement('input');
+    checkbox.id = 'capsuladoraAplica';
+    checkbox.type = 'checkbox';
+    checkbox.name = 'capsuladoraAplica';
+    checkbox.checked = true;
+    checkbox.addEventListener('change', updateCapsuladoraMode);
+    const toggleText = document.createElement('span');
+    toggleText.textContent = 'Aplica ajustes de capsuladora';
+    toggle.append(checkbox, toggleText);
+
+    const modeText = document.createElement('p');
+    modeText.id = 'capsuladoraModeText';
+    modeText.textContent = 'Producto con capsuladora activa. Completa los ajustes correspondientes en esta sección.';
+    modeHead.append(toggle, modeText);
+
+    const bypassFieldConfig = getCapsuladoraBypassField(fields);
+    const bypassLabel = document.createElement('label');
+    bypassLabel.id = 'capsuladoraBypassField';
+    bypassLabel.className = 'capsuladora-bypass-field';
+    bypassLabel.hidden = true;
+    bypassLabel.textContent = bypassFieldConfig ? bypassFieldConfig.nombre : 'Programa capsuladora bypass tapa';
+    const bypassInput = document.createElement('input');
+    bypassInput.name = 'programaCapsuladoraBypassTapa';
+    bypassInput.autocomplete = 'off';
+    bypassLabel.appendChild(bypassInput);
+
+    modePanel.append(modeHead, bypassLabel);
+
+    const grid = document.createElement('div');
+    grid.className = 'draft-field-grid capsuladora-fields-grid';
+    grid.dataset.capsuladoraFields = 'true';
+    fields.forEach((field) => {
+      if (isCapsuladoraBypassField(field)) return;
+      grid.appendChild(createDraftField(field, units));
+    });
+
+    block.append(modePanel, grid);
   }
 
   function renderMechanicalDraftFields(block, fields, units) {
@@ -1385,15 +1435,18 @@
     const bypassField = document.getElementById('capsuladoraBypassField');
     const bypassInput = form.programaCapsuladoraBypassTapa;
     document.querySelectorAll('[data-section-role="capsuladora"]').forEach((section) => {
-      section.hidden = !applies;
-      section.querySelectorAll('input, select, textarea').forEach((control) => {
+      section.classList.toggle('capsuladora-bypass-mode', !applies);
+    });
+    document.querySelectorAll('[data-capsuladora-fields="true"]').forEach((grid) => {
+      grid.hidden = !applies;
+      grid.querySelectorAll('input, select, textarea').forEach((control) => {
         control.disabled = !applies;
       });
     });
     if (text) {
       text.textContent = applies
-        ? 'Producto con capsuladora activa. Completa los ajustes correspondientes en la ficha técnica.'
-        : 'Producto de tapa. La sección de capsuladora se omite y solo se registra el programa bypass para tapa.';
+        ? 'Producto con capsuladora activa. Completa los ajustes correspondientes en esta sección.'
+        : 'Producto de tapa. No se solicitan ajustes de capsuladora; registra solo el programa bypass para tapa.';
     }
     if (bypassField) bypassField.hidden = applies;
     if (bypassInput) {

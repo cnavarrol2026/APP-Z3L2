@@ -75,3 +75,4 @@
 - Se audita y refuerza la compatibilidad con campos manuales: se elimina una definición duplicada de normalización en frontend y la carga de borradores vuelve a tomar valores por ID o por nombre de campo para evitar pérdidas visuales ante cambios de ID interno.
 - Se restaura en Producto nuevo el mensaje de ayuda con enlace a `https://dsgr.ccu.cl/CODIGO.pdf` para ubicar ETQ/CET antes de cargar imágenes PNG.
 - Se agrega control `Aplica ajustes de capsuladora` en Producto nuevo; al desmarcarlo se oculta la sección de capsuladora, se guarda `Programa capsuladora bypass tapa` y backend/PDF omiten ajustes normales de capsuladora para productos de tapa.
+- Se reubica el control `Aplica ajustes de capsuladora` dentro de la sección `Ajustes de Capsuladora`; al desmarcarlo se ocultan solo los campos de ajuste y queda visible el campo `Programa capsuladora bypass tapa`.

@@ -642,6 +642,25 @@
     text-transform: uppercase;
   }
 
+  .article-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .article-technical-sheet {
+    display: grid;
+    gap: 14px;
+  }
+
+  .article-value-card span {
+    color: var(--ink);
+    font-size: 1rem;
+    font-weight: 800;
+    text-transform: none;
+  }
+
   .featured-bottle-field,
   .featured-bottle-input {
     border: 1px solid #9cc8aa;

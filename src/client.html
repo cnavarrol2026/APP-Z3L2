@@ -481,6 +481,22 @@
     }
     detail.className = '';
     detail.innerHTML = '';
+    renderArticleSummary(detail, article);
+    renderArticleTechnicalSheet(detail, article);
+    images.className = '';
+    images.innerHTML = '';
+    const etq = document.createElement('div');
+    etq.className = 'list-item';
+    etq.textContent = article.etqAplica === true || article.etqAplica === 'TRUE' ? 'ETQ: ' + article.codigoEtq : 'ETQ: No aplica';
+    const cet = document.createElement('div');
+    cet.className = 'list-item';
+    cet.textContent = article.cetAplica === true || article.cetAplica === 'TRUE' ? 'CET: ' + article.codigoCet : 'CET: No aplica';
+    images.append(etq, cet);
+  }
+
+  function renderArticleSummary(container, article) {
+    const summary = document.createElement('section');
+    summary.className = 'article-summary-grid';
     [
       ['Código', article.codigoArticulo],
       ['Descripción', article.descripcion],
@@ -491,17 +507,230 @@
       const item = document.createElement('div');
       item.className = 'list-item';
       item.textContent = label + ': ' + (value || '');
-      detail.appendChild(item);
+      summary.appendChild(item);
     });
-    images.className = '';
-    images.innerHTML = '';
-    const etq = document.createElement('div');
-    etq.className = 'list-item';
-    etq.textContent = article.etqAplica === true || article.etqAplica === 'TRUE' ? 'ETQ: ' + article.codigoEtq : 'ETQ: No aplica';
-    const cet = document.createElement('div');
-    cet.className = 'list-item';
-    cet.textContent = article.cetAplica === true || article.cetAplica === 'TRUE' ? 'CET: ' + article.codigoCet : 'CET: No aplica';
-    images.append(etq, cet);
+    container.appendChild(summary);
+  }
+
+  function renderArticleTechnicalSheet(container, article) {
+    const sections = (state.admin.secciones || []).slice().sort((a, b) => Number(a.orden || 0) - Number(b.orden || 0));
+    const fields = state.admin.campos || [];
+    const units = state.admin.unidades || [];
+    const values = Array.isArray(article.valores) ? article.valores : [];
+    if (!sections.length || !fields.length) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.textContent = 'No hay estructura técnica cargada para mostrar la ficha.';
+      container.appendChild(empty);
+      return;
+    }
+    const sheet = document.createElement('section');
+    sheet.className = 'article-technical-sheet';
+    sections.forEach((section) => {
+      const sectionFields = fields
+        .filter((field) => field.seccionId === section.id)
+        .sort((a, b) => Number(a.orden || 0) - Number(b.orden || 0));
+      if (!sectionFields.length) return;
+      if (isCapsuladoraSection(section) && !articleCapsuladoraApplies(article, values)) {
+        renderArticleCapsuladoraBypass(sheet, section, sectionFields, values);
+        return;
+      }
+      const block = document.createElement('section');
+      block.className = section.id === MECHANICAL_SECTION_ID ? 'draft-section mechanical-entry-section' : 'draft-section';
+      const title = document.createElement('h4');
+      title.textContent = section.nombre;
+      block.appendChild(title);
+      if (section.id === MECHANICAL_SECTION_ID) {
+        renderArticleMechanicalFields(block, sectionFields, units, values);
+      } else if (section.id === 'sec_botella_insumos') {
+        renderArticleBottleFields(block, sectionFields, units, values);
+      } else if (isFormatosSection(section)) {
+        renderArticleFormatosFields(block, sectionFields, units, values);
+      } else {
+        renderArticleSimpleFields(block, sectionFields.filter((field) => !isCapsuladoraBypassField(field)), units, values);
+      }
+      sheet.appendChild(block);
+    });
+    container.appendChild(sheet);
+  }
+
+  function renderArticleBottleFields(block, fields, units, values) {
+    const grid = document.createElement('div');
+    grid.className = 'field-grid bottle-insumos-grid';
+    fields.forEach((field) => {
+      if (isGroupedBottleField(field)) return;
+      grid.appendChild(createArticleValueCard(field, units, values));
+    });
+    renderArticleBottleGroups(grid, fields, units, values);
+    block.appendChild(grid);
+  }
+
+  function renderArticleBottleGroups(container, fields, units, values) {
+    BOTTLE_FIELD_GROUPS.forEach((group) => {
+      const groupBlock = document.createElement('div');
+      groupBlock.className = 'bottle-mini-card';
+      const title = document.createElement('h5');
+      title.textContent = group.title;
+      const row = document.createElement('div');
+      row.className = 'bottle-mini-fields';
+      group.fields.forEach((item) => {
+        const field = getFieldById(fields, item.id);
+        if (!field) return;
+        row.appendChild(createArticleValueCard(field, units, values, item.label));
+      });
+      groupBlock.append(title, row);
+      container.appendChild(groupBlock);
+    });
+  }
+
+  function renderArticleFormatosFields(block, fields, units, values) {
+    const fixedGrid = document.createElement('div');
+    fixedGrid.className = 'field-grid formatos-fixed-grid';
+    fields.forEach((field) => {
+      if (isFormatosSpecialField(field)) return;
+      fixedGrid.appendChild(createArticleValueCard(field, units, values));
+    });
+    if (fixedGrid.children.length) block.appendChild(fixedGrid);
+    renderArticleAntaresGroup(block, fields, units, values);
+    renderArticleLevasPlatos(block, fields, values);
+  }
+
+  function renderArticleAntaresGroup(container, fields, units, values) {
+    const antaresFields = FORMATOS_ANTARES_FIELDS
+      .map((item) => getFieldById(fields, item.id) || getFormatosFieldByName(fields, item.label))
+      .filter(Boolean);
+    if (!antaresFields.length) return;
+    const group = document.createElement('div');
+    group.className = 'antares-mini-card';
+    const title = document.createElement('h5');
+    title.textContent = 'Antares';
+    const row = document.createElement('div');
+    row.className = 'antares-mini-fields';
+    antaresFields.forEach((field) => row.appendChild(createArticleValueCard(field, units, values)));
+    group.append(title, row);
+    container.appendChild(group);
+  }
+
+  function renderArticleLevasPlatos(container, fields, values) {
+    const field = getLevasPlatosField(fields);
+    if (!field) return;
+    const rows = parseLevasPlatosRows(getArticleFieldValue(values, field));
+    const block = document.createElement('div');
+    block.className = 'levas-platos-block';
+    const head = document.createElement('div');
+    head.className = 'levas-platos-head';
+    const title = document.createElement('h5');
+    title.textContent = field.nombre || 'Levas Platos';
+    head.appendChild(title);
+    const table = document.createElement('div');
+    table.className = 'levas-platos-table';
+    ['N° Elementos', 'Acción', 'Inicio Master', 'Final Master', 'Posición Relativa Slave'].forEach((label) => {
+      const cell = document.createElement('div');
+      cell.className = 'levas-platos-header';
+      cell.textContent = label;
+      table.appendChild(cell);
+    });
+    rows.forEach((row) => {
+      [row.numeroElemento, row.accion, row.inicioMaster, row.finalMaster, row.posicionRelativaSlave].forEach((value) => {
+        const cell = document.createElement('div');
+        cell.className = 'levas-platos-preview-cell';
+        cell.textContent = value || 'Sin datos';
+        table.appendChild(cell);
+      });
+    });
+    block.append(head, table);
+    container.appendChild(block);
+  }
+
+  function renderArticleMechanicalFields(block, fields, units, values) {
+    const groupGrid = document.createElement('div');
+    groupGrid.className = 'mechanical-mini-grid';
+    MECHANICAL_GROUPS.forEach((group) => {
+      const groupBlock = document.createElement('div');
+      groupBlock.className = 'mechanical-mini-card';
+      const title = document.createElement('h5');
+      title.textContent = group.title;
+      const row = document.createElement('div');
+      row.className = 'mechanical-mini-fields';
+      group.fields.forEach((item) => {
+        const field = getFieldById(fields, item.id);
+        if (!field) return;
+        row.appendChild(createArticleValueCard(field, units, values, item.label));
+      });
+      groupBlock.append(title, row);
+      groupGrid.appendChild(groupBlock);
+    });
+    block.appendChild(groupGrid);
+    const matrix = document.createElement('div');
+    matrix.className = 'mechanical-matrix-preview';
+    matrix.appendChild(createMatrixHeaderCell('Posicionadores'));
+    MECHANICAL_STATIONS.forEach((station) => matrix.appendChild(createMatrixHeaderCell(station.title)));
+    MECHANICAL_MATRIX_ROWS.forEach((rowConfig) => {
+      matrix.appendChild(createMatrixRowHeader(rowConfig.title));
+      MECHANICAL_STATIONS.forEach((station) => {
+        const field = getFieldById(fields, 'cam_' + station.key + '_' + rowConfig.suffix);
+        const cell = document.createElement('div');
+        cell.className = 'mechanical-matrix-cell';
+        if (field) cell.appendChild(createArticleValueCard(field, units, values, ''));
+        matrix.appendChild(cell);
+      });
+    });
+    block.appendChild(matrix);
+  }
+
+  function renderArticleCapsuladoraBypass(container, section, fields, values) {
+    const block = document.createElement('section');
+    block.className = 'draft-section capsuladora-bypass-mode';
+    const title = document.createElement('h4');
+    title.textContent = section.nombre;
+    const bypassField = getCapsuladoraBypassField(fields);
+    const info = document.createElement('div');
+    info.className = 'capsuladora-mode-panel';
+    const text = document.createElement('p');
+    text.textContent = 'Producto de tapa. No aplican ajustes normales de capsuladora.';
+    info.appendChild(text);
+    if (bypassField) info.appendChild(createArticleValueCard(bypassField, state.admin.unidades || [], values));
+    block.append(title, info);
+    container.appendChild(block);
+  }
+
+  function renderArticleSimpleFields(block, fields, units, values) {
+    const grid = document.createElement('div');
+    grid.className = 'field-grid';
+    fields.forEach((field) => grid.appendChild(createArticleValueCard(field, units, values)));
+    block.appendChild(grid);
+  }
+
+  function createArticleValueCard(field, units, values, labelText) {
+    const unit = getUnit(field, units);
+    const card = document.createElement('div');
+    card.className = isFeaturedBottleField(field) ? 'field-card article-value-card featured-bottle-field' : 'field-card article-value-card';
+    const label = document.createElement('strong');
+    label.textContent = (arguments.length >= 4 ? labelText : field.nombre) || field.nombre;
+    const value = document.createElement('span');
+    value.textContent = formatArticleFieldValue(getArticleFieldValue(values, field), unit);
+    card.append(label, value);
+    return card;
+  }
+
+  function getArticleFieldValue(values, field) {
+    const match = (values || []).find((item) => (
+      item.campoId === field.id ||
+      normalizeClientText(item.campo) === normalizeClientText(field.nombre)
+    ));
+    return match ? (match.valor || '') : '';
+  }
+
+  function formatArticleFieldValue(value, unit) {
+    const text = String(value || '').trim();
+    if (!text) return 'Sin datos';
+    return unit ? text + ' ' + unit.nombre : text;
+  }
+
+  function articleCapsuladoraApplies(article, values) {
+    const bypassValue = values.find((item) => isCapsuladoraBypassField({ id: item.campoId, nombre: item.campo }));
+    if (bypassValue && String(bypassValue.valor || '').trim()) return false;
+    return article.capsuladoraAplica !== false;
   }
 
   function fillSelect(id, rows, emptyText) {

@@ -18,9 +18,9 @@
       copy.valores = copy.valores.map(function(item) {
         const next = Object.assign({}, item);
         next.campoId = cleanText(next.campoId, 80);
-        if (self.isPinzasValue(next)) {
-          next.valor = self.normalizePinzasValue(next.valor);
-          next.campo = 'PINZAS';
+        if (self.isFlexibleCapsuladoraTextValue(next)) {
+          next.valor = self.normalizeFlexibleTextValue(next.valor, cleanText(next.campo, 80) || next.campoId || 'El campo');
+          if (self.isPinzasValue(next)) next.campo = 'PINZAS';
           return next;
         }
         if (self.isLevasPlatosValue(next)) {
@@ -56,12 +56,42 @@
     );
   },
 
-  normalizePinzasValue: function(value) {
+  isFlexibleCapsuladoraTextValue: function(item) {
+    if (!item) return false;
+    const fieldId = cleanText(item.campoId, 80);
+    const fieldName = normalizeText(item.campo);
+    return [
+      'cam_pinzas',
+      'cam_color_formato',
+      'cam_sinfin_capsuladora'
+    ].indexOf(fieldId) !== -1 || [
+      'pinzas',
+      'color de formato',
+      normalizeText('Sinfín capsuladora')
+    ].indexOf(fieldName) !== -1;
+  },
+
+  normalizeFlexibleTextValue: function(value, label) {
     const text = toSystemUpperText(value, 120);
     if (text && !/^[A-ZÁÉÍÓÚÜÑ0-9 \-\/()]*$/.test(text)) {
-      throw new Error('PINZAS solo acepta letras, números, espacios y los caracteres - / ( ).');
+      throw new Error(label + ' solo acepta letras, números, espacios y los caracteres - / ( ).');
     }
     return text;
+  },
+
+  normalizePinzasValue: function(value) {
+    return this.normalizeFlexibleTextValue(value, 'PINZAS');
+  },
+
+  normalizeTechnicalValue: function(item) {
+    const fieldId = cleanText(item.campoId, 80);
+    const isLevasPlatos = this.isLevasPlatosValue(item);
+    const isFlexibleText = this.isFlexibleCapsuladoraTextValue(item);
+    const maxLength = isLevasPlatos ? 20000 : (isFlexibleText ? 120 : 500);
+    const value = cleanText(item.valor, maxLength);
+    if (isLevasPlatos) return value;
+    if (isFlexibleText) return this.normalizeFlexibleTextValue(value, cleanText(item.campo, 80) || fieldId || 'El campo');
+    return toSystemUpperText(value, 500);
   },
 
   isLevasPlatosValue: function(item) {
@@ -376,16 +406,13 @@
     const values = Array.isArray(data.valores) ? data.valores : [];
     values.forEach(function(item) {
       const fieldId = cleanText(item.campoId, 80);
-      const isLevasPlatos = ArticleService.isLevasPlatosValue(item);
-      const isPinzas = ArticleService.isPinzasValue(item);
-      const maxLength = isLevasPlatos ? 20000 : (isPinzas ? 120 : 500);
-      const value = cleanText(item.valor, maxLength);
+      const value = ArticleService.normalizeTechnicalValue(item);
       if (!fieldId || !value) return;
       SheetRepository.append(Config.SHEETS.ARTICLE_VALUES, {
         id: createId('val'),
         articuloId: articleId,
         campoId: fieldId,
-        valor: isLevasPlatos ? value : (isPinzas ? ArticleService.normalizePinzasValue(value) : toSystemUpperText(value, 500)),
+        valor: value,
         unidadId: cleanText(item.unidadId, 80),
         fechaCreacion: date,
         creadoPor: userEmail,
@@ -400,27 +427,34 @@
     const existing = SheetRepository.list(Config.SHEETS.ARTICLE_VALUES).filter(function(row) {
       return row.articuloId === articleId;
     });
+    const sheet = SheetRepository.getSheet(Config.SHEETS.ARTICLE_VALUES);
+    const headers = SheetRepository.headers(Config.SHEETS.ARTICLE_VALUES);
+    const allRows = sheet.getDataRange().getValues();
+    const idIndex = headers.indexOf('id');
+    const rowIndexById = {};
+    for (let i = 1; i < allRows.length; i++) {
+      rowIndexById[allRows[i][idIndex]] = i + 1;
+    }
     const existingByField = {};
     existing.forEach(function(row) {
       existingByField[row.campoId] = row;
     });
     values.forEach(function(item) {
       const fieldId = cleanText(item.campoId, 80);
-      const isLevasPlatos = ArticleService.isLevasPlatosValue(item);
-      const isPinzas = ArticleService.isPinzasValue(item);
-      const maxLength = isLevasPlatos ? 20000 : (isPinzas ? 120 : 500);
-      const value = cleanText(item.valor, maxLength);
       if (!fieldId) return;
-      const normalizedValue = isLevasPlatos ? value : (isPinzas ? ArticleService.normalizePinzasValue(value) : toSystemUpperText(value, 500));
+      const normalizedValue = ArticleService.normalizeTechnicalValue(item);
       const current = existingByField[fieldId];
       if (current) {
-        SheetRepository.updateById(Config.SHEETS.ARTICLE_VALUES, current.id, {
+        const updatedRow = Object.assign({}, current, {
           valor: normalizedValue,
           unidadId: cleanText(item.unidadId, 80),
           fechaModificacion: date,
           modificadoPor: userEmail,
           version: Number(current.version || 1) + 1
         });
+        const rowIndex = rowIndexById[current.id];
+        if (!rowIndex) throw new Error('No se encontró el valor técnico para actualizar: ' + current.id);
+        sheet.getRange(rowIndex, 1, 1, headers.length).setValues([objectToRow(headers, updatedRow)]);
         return;
       }
       if (!normalizedValue) return;

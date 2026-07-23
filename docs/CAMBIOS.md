@@ -86,3 +86,5 @@
 - Consulta ahora muestra las imágenes PNG guardadas para ETQ/CET junto a sus códigos, con enlace para abrir el archivo en Drive y aviso claro si falta la imagen.
 - Se centra la información dentro de las tarjetas de Consulta para mejorar armonía visual y lectura de la ficha técnica.
 - La vista previa de imágenes ETQ/CET en Consulta ya no depende del thumbnail público de Drive: la app carga el PNG desde backend y permite verlo en un modal interno.
+- Se optimiza el guardado de productos activos reduciendo lecturas repetidas de `VALORES_ARTICULO`, se limita el formateo de columnas de texto en Sheets y se amplía el tiempo de espera frontend para evitar falsos timeout en operaciones de guardado.
+- `Color de formato`, `Sinfín capsuladora` y `PINZAS` quedan tratados como texto flexible para aceptar letras, números, espacios y caracteres `- / ( )`.

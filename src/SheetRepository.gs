@@ -47,7 +47,7 @@ const SheetRepository = {
       sheet.insertRowsAfter(1, 1);
     }
     const headers = Config.HEADERS[sheetName];
-    const rowCount = sheet.getMaxRows() - 1;
+    const rowCount = Math.min(sheet.getMaxRows() - 1, Math.max(sheet.getLastRow() - 1, 1) + 100);
     columns.forEach(function(columnName) {
       const columnIndex = headers.indexOf(columnName);
       if (columnIndex === -1) return;

@@ -89,3 +89,4 @@
 - Se optimiza el guardado de productos activos reduciendo lecturas repetidas de `VALORES_ARTICULO`, se limita el formateo de columnas de texto en Sheets y se amplía el tiempo de espera frontend para evitar falsos timeout en operaciones de guardado.
 - `Color de formato`, `Sinfín capsuladora` y `PINZAS` quedan tratados como texto flexible para aceptar letras, números, espacios y caracteres `- / ( )`.
 - Se agrega auditoría interna en `Respaldo` para revisar conteos, duplicados, registros huérfanos, imágenes activas repetidas y formato texto en columnas de valores.
+- En Consulta, la matriz de `Ajustes Mecánicos de Etiquetadora` muestra solo el valor dentro de cada celda, evitando repetir estación y posicionador cuando ya están visibles en los encabezados.

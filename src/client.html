@@ -818,7 +818,7 @@
         const field = getFieldById(fields, 'cam_' + station.key + '_' + rowConfig.suffix);
         const cell = document.createElement('div');
         cell.className = 'mechanical-matrix-cell';
-        if (field) cell.appendChild(createArticleValueCard(field, units, values, ''));
+        if (field) cell.appendChild(createArticleValueCard(field, units, values, '', true));
         matrix.appendChild(cell);
       });
     });
@@ -848,15 +848,20 @@
     block.appendChild(grid);
   }
 
-  function createArticleValueCard(field, units, values, labelText) {
+  function createArticleValueCard(field, units, values, labelText, valueOnly) {
     const unit = getUnit(field, units);
     const card = document.createElement('div');
     card.className = isFeaturedBottleField(field) ? 'field-card article-value-card featured-bottle-field' : 'field-card article-value-card';
-    const label = document.createElement('strong');
-    label.textContent = (arguments.length >= 4 ? labelText : field.nombre) || field.nombre;
+    if (valueOnly) {
+      card.classList.add('value-only-card');
+    } else {
+      const label = document.createElement('strong');
+      label.textContent = arguments.length >= 4 ? labelText : field.nombre;
+      card.appendChild(label);
+    }
     const value = document.createElement('span');
     value.textContent = formatArticleFieldValue(getArticleFieldValue(values, field), unit);
-    card.append(label, value);
+    card.appendChild(value);
     return card;
   }
 

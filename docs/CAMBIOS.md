@@ -91,3 +91,5 @@
 - Se agrega auditoría interna en `Respaldo` para revisar conteos, duplicados, registros huérfanos, imágenes activas repetidas y formato texto en columnas de valores.
 - En Consulta, la matriz de `Ajustes Mecánicos de Etiquetadora` muestra solo el valor dentro de cada celda, evitando repetir estación y posicionador cuando ya están visibles en los encabezados.
 - Se agrega en `Ajustes Mecánicos de Etiquetadora` el mini-bloque `Ajuste de codificado` con campos `A` y `H`, disponible en Producto nuevo/edición, Consulta y plantilla de campos de Sheets.
+- La tabla `Levas Platos` ahora muestra correctamente el valor `0` en `N° Elementos` en lugar de interpretarlo como `Sin datos`.
+- La auditoría de base ahora detalla los códigos de artículo duplicados indicando código, estado, ID y descripción de cada registro afectado.

@@ -114,7 +114,12 @@ const AuditService = {
     const rows = articles.concat(drafts).filter(function(row) {
       return row.codigoNormalizado && row.estado !== Config.STATES.DISCARDED;
     });
-    return this.findDuplicates_(rows, function(row) { return row.codigoNormalizado; });
+    return this.findDuplicates_(rows, function(row) { return row.codigoNormalizado; }).map(function(duplicate) {
+      duplicate.registros = rows
+        .filter(function(row) { return row.codigoNormalizado === duplicate.clave; })
+        .map(function(row) { return AuditService.slimArticleRow_(row); });
+      return duplicate;
+    });
   },
 
   findDuplicateValueRows_: function(values) {
@@ -180,6 +185,16 @@ const AuditService = {
       articuloId: row.articuloId,
       tipoImagen: row.tipoImagen,
       nombreArchivo: row.nombreArchivo
+    };
+  },
+
+  slimArticleRow_: function(row) {
+    return {
+      id: row.id,
+      codigoArticulo: row.codigoArticulo,
+      descripcion: row.descripcion,
+      estado: row.estado,
+      fechaModificacion: row.fechaModificacion || row.fechaCreacion || ''
     };
   },
 

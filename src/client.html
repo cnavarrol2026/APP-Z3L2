@@ -787,7 +787,7 @@
       [row.numeroElemento, row.accion, row.inicioMaster, row.finalMaster, row.posicionRelativaSlave].forEach((value) => {
         const cell = document.createElement('div');
         cell.className = 'levas-platos-preview-cell';
-        cell.textContent = value || 'Sin datos';
+        cell.textContent = formatEmptyAwareValue(value);
         table.appendChild(cell);
       });
     });
@@ -876,13 +876,18 @@
       item.campoId === field.id ||
       normalizeClientText(item.campo) === normalizeClientText(field.nombre)
     ));
-    return match ? (match.valor || '') : '';
+    return match ? (match.valor == null ? '' : match.valor) : '';
   }
 
   function formatArticleFieldValue(value, unit) {
-    const text = String(value || '').trim();
+    const text = String(value == null ? '' : value).trim();
     if (!text) return 'Sin datos';
     return unit ? text + ' ' + unit.nombre : text;
+  }
+
+  function formatEmptyAwareValue(value) {
+    const text = String(value == null ? '' : value).trim();
+    return text ? text : 'Sin datos';
   }
 
   function articleCapsuladoraApplies(article, values) {
@@ -2485,6 +2490,7 @@
     result.appendChild(summary);
 
     result.appendChild(createAuditList('Observaciones', audit.alertas || []));
+    result.appendChild(createAuditList('Códigos duplicados', formatDuplicateCodeAuditRows(audit)));
     result.appendChild(createAuditList('Formato texto revisado', (audit.formatosTexto || []).map((item) => (
       item.hoja + ' / ' + item.columna + ': ' + (item.formatoTexto ? 'OK' : item.celdasSinFormatoTexto + ' celdas sin formato texto')
     ))));
@@ -2494,6 +2500,18 @@
     result.appendChild(createAuditList('Detalle de pendientes', (audit.integridad.borradoresPendientes || []).map((item) => (
       item.codigoArticulo + ' - valores en payload: ' + (item.payloadTieneValores ? 'sí' : 'no') + ', imágenes activas: ' + item.imagenesActivas
     ))));
+  }
+
+  function formatDuplicateCodeAuditRows(audit) {
+    return (((audit || {}).duplicados || {}).codigosArticulo || []).map((duplicate) => {
+      const records = (duplicate.registros || []).map((row) => (
+        (row.codigoArticulo || duplicate.clave) +
+        ' [' + (row.estado || 'SIN ESTADO') + '] ' +
+        (row.id || 'sin id') +
+        (row.descripcion ? ' - ' + row.descripcion : '')
+      ));
+      return duplicate.clave + ' (' + duplicate.cantidad + ' registros): ' + records.join(' | ');
+    });
   }
 
   function createAuditList(titleText, rows) {

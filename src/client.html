@@ -483,15 +483,81 @@
     detail.innerHTML = '';
     renderArticleSummary(detail, article);
     renderArticleTechnicalSheet(detail, article);
-    images.className = '';
-    images.innerHTML = '';
-    const etq = document.createElement('div');
-    etq.className = 'list-item';
-    etq.textContent = article.etqAplica === true || article.etqAplica === 'TRUE' ? 'ETQ: ' + article.codigoEtq : 'ETQ: No aplica';
-    const cet = document.createElement('div');
-    cet.className = 'list-item';
-    cet.textContent = article.cetAplica === true || article.cetAplica === 'TRUE' ? 'CET: ' + article.codigoCet : 'CET: No aplica';
-    images.append(etq, cet);
+    renderArticleImages(images, article);
+  }
+
+  function renderArticleImages(container, article) {
+    container.className = 'article-image-list';
+    container.innerHTML = '';
+    container.appendChild(createArticleImageCard(article, 'ETQ', 'Etiqueta'));
+    container.appendChild(createArticleImageCard(article, 'CET', 'Contraetiqueta'));
+  }
+
+  function createArticleImageCard(article, type, label) {
+    const applies = type === 'ETQ'
+      ? toBooleanClient(article.etqAplica)
+      : toBooleanClient(article.cetAplica);
+    const code = type === 'ETQ' ? article.codigoEtq : article.codigoCet;
+    const image = findArticleImage(article, type);
+    const card = document.createElement('article');
+    card.className = 'article-image-card' + (!applies || !image ? ' missing' : '');
+
+    const head = document.createElement('div');
+    head.className = 'article-image-head';
+    const title = document.createElement('strong');
+    title.textContent = type;
+    const detail = document.createElement('span');
+    detail.textContent = applies ? (code || 'Código pendiente') : 'No aplica';
+    head.append(title, detail);
+    card.appendChild(head);
+
+    if (!applies) {
+      const note = document.createElement('p');
+      note.textContent = label + ' no requerida para este producto.';
+      card.appendChild(note);
+      return card;
+    }
+
+    if (!image) {
+      const note = document.createElement('p');
+      note.textContent = 'Imagen ' + type + ' pendiente de carga.';
+      card.appendChild(note);
+      return card;
+    }
+
+    const preview = document.createElement('img');
+    preview.src = getDrivePreviewUrl(image);
+    preview.alt = label + ' ' + (code || type);
+    preview.loading = 'lazy';
+    card.appendChild(preview);
+
+    const link = document.createElement('a');
+    link.className = 'article-image-link';
+    link.href = image.url || getDriveOpenUrl(image);
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = 'Abrir imagen';
+    card.appendChild(link);
+    return card;
+  }
+
+  function findArticleImage(article, type) {
+    const images = Array.isArray(article && article.imagenes) ? article.imagenes : [];
+    return images.find((image) => image.tipoImagen === type && toBooleanClient(image.activo));
+  }
+
+  function getDrivePreviewUrl(image) {
+    if (image && image.driveFileId) {
+      return 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(image.driveFileId) + '&sz=w640';
+    }
+    return image && image.url ? image.url : '';
+  }
+
+  function getDriveOpenUrl(image) {
+    if (image && image.driveFileId) {
+      return 'https://drive.google.com/file/d/' + encodeURIComponent(image.driveFileId) + '/view';
+    }
+    return '#';
   }
 
   function renderArticleSummary(container, article) {

@@ -82,18 +82,19 @@ function apiGetSavedData() {
     const relations = SheetRepository.listSafe(Config.SHEETS.CATEGORY_BOTTLE).filter(function(row) { return toBoolean(row.activo); });
     const articles = SheetRepository.listSafe(Config.SHEETS.ARTICLES).filter(function(row) { return row.estado === Config.STATES.ACTIVE; });
     const articleValues = SheetRepository.listSafe(Config.SHEETS.ARTICLE_VALUES);
-    const articleImages = SheetRepository.listSafe(Config.SHEETS.ARTICLE_IMAGES).filter(function(row) { return toBoolean(row.activo); });
+    const activeImages = SheetRepository.listSafe(Config.SHEETS.ARTICLE_IMAGES).filter(function(row) { return toBoolean(row.activo); });
+    const valuesByOwner = groupRowsBy_(articleValues, 'articuloId');
+    const imagesByOwner = groupRowsBy_(activeImages, 'articuloId');
     articles.forEach(function(article) {
-      article.valores = articleValues.filter(function(value) { return value.articuloId === article.id; });
-      article.imagenes = articleImages.filter(function(image) { return image.articuloId === article.id; });
+      article.valores = valuesByOwner[article.id] || [];
+      article.imagenes = imagesByOwner[article.id] || [];
     });
     const sections = SheetRepository.listSafe(Config.SHEETS.SECTIONS).filter(function(row) { return toBoolean(row.activo); }).sort(CatalogService.byOrder);
     const fields = SheetRepository.listSafe(Config.SHEETS.FIELDS).filter(function(row) { return toBoolean(row.activo); }).sort(CatalogService.byOrder);
     const units = SheetRepository.listSafe(Config.SHEETS.UNITS).filter(function(row) { return toBoolean(row.activo); }).sort(CatalogService.byOrder);
     const drafts = DraftService.listPendingDrafts();
-    const images = SheetRepository.listSafe(Config.SHEETS.ARTICLE_IMAGES).filter(function(row) { return toBoolean(row.activo); });
     drafts.forEach(function(draft) {
-      draft.imagenes = images.filter(function(image) { return image.articuloId === draft.id; });
+      draft.imagenes = imagesByOwner[draft.id] || [];
     });
     const discarded = DraftService.listDiscardedDrafts();
     return ok({
@@ -268,4 +269,14 @@ function apiRunDatabaseAudit() {
   return Api.withAuth('apiRunDatabaseAudit', function(user) {
     return ok(AuditService.runDatabaseAudit(user.email), 'Auditoría completada.');
   });
+}
+
+function groupRowsBy_(rows, key) {
+  return (rows || []).reduce(function(index, row) {
+    const value = row[key];
+    if (!value) return index;
+    if (!index[value]) index[value] = [];
+    index[value].push(row);
+    return index;
+  }, {});
 }

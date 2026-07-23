@@ -95,3 +95,6 @@
 - La auditoría de base ahora detalla los códigos de artículo duplicados indicando código, estado, ID y descripción de cada registro afectado.
 - Al activar un borrador, el registro en `BORRADORES` queda con estado `ACTIVADO` en vez de `ACTIVO`; Pendientes y auditoría solo consideran borradores con estado `BORRADOR`.
 - La auditoría puede normalizar borradores antiguos que hayan quedado como `ACTIVO` cuando ya existe su artículo activo, registrando la reparación en historial y mostrándola en `Reparaciones aplicadas`.
+- Se optimiza la carga principal evitando sincronizar la plantilla técnica en cada lectura cuando la versión vigente ya fue aplicada al Google Sheets.
+- `apiGetSavedData` reduce lecturas duplicadas de imágenes y agrupa valores/imágenes en memoria para asociarlos a artículos y borradores sin filtrar listas completas repetidamente.
+- Se agrega escritura por lote para nuevos valores técnicos e historial de detalle, reduciendo llamadas repetidas a Google Sheets durante activaciones y guardados.

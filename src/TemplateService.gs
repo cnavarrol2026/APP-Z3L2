@@ -138,11 +138,16 @@ const TemplateService = {
   },
 
   ensureDefaultTechnicalTemplate: function(userEmail) {
+    const versionKey = 'TEMPLATE_VERSION';
+    if (ConfigService.getValue(versionKey) === Config.TEMPLATE_VERSION) {
+      return;
+    }
     const date = nowIso();
     const unitsByName = this.ensureDefaultUnits(userEmail, date);
     const sectionIdMap = this.ensureDefaultSections(userEmail, date);
     this.ensureDefaultFields(userEmail, date, unitsByName, sectionIdMap);
     this.deactivateObsoleteFields(userEmail, date);
+    ConfigService.setValue(versionKey, Config.TEMPLATE_VERSION, 'Versión de plantilla técnica aplicada.');
   },
 
   ensureDefaultUnits: function(userEmail, date) {

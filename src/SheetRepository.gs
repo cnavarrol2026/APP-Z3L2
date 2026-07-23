@@ -96,6 +96,18 @@ const SheetRepository = {
     return object;
   },
 
+  appendMany: function(sheetName, objects) {
+    if (!objects || !objects.length) return [];
+    const sheet = this.getSheet(sheetName);
+    const headers = this.headers(sheetName);
+    const rows = objects.map(function(object) {
+      return objectToRow(headers, object);
+    });
+    const startRow = Math.max(sheet.getLastRow() + 1, 2);
+    sheet.getRange(startRow, 1, rows.length, headers.length).setValues(rows);
+    return objects;
+  },
+
   updateById: function(sheetName, id, patch) {
     const sheet = this.getSheet(sheetName);
     const headers = this.headers(sheetName);

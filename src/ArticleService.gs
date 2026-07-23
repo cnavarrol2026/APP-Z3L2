@@ -407,11 +407,12 @@
   saveArticleValuesFromDraft: function(draft, articleId, userEmail, date) {
     const data = safeJsonParse(draft.payloadJson, {});
     const values = Array.isArray(data.valores) ? data.valores : [];
+    const rows = [];
     values.forEach(function(item) {
       const fieldId = cleanText(item.campoId, 80);
       const value = ArticleService.normalizeTechnicalValue(item);
       if (!fieldId || !value) return;
-      SheetRepository.append(Config.SHEETS.ARTICLE_VALUES, {
+      rows.push({
         id: createId('val'),
         articuloId: articleId,
         campoId: fieldId,
@@ -424,6 +425,7 @@
         version: 1
       });
     });
+    SheetRepository.appendMany(Config.SHEETS.ARTICLE_VALUES, rows);
   },
 
   upsertArticleValues: function(articleId, values, userEmail, date) {
@@ -439,6 +441,7 @@
       rowIndexById[allRows[i][idIndex]] = i + 1;
     }
     const existingByField = {};
+    const rowsToAppend = [];
     existing.forEach(function(row) {
       existingByField[row.campoId] = row;
     });
@@ -461,7 +464,7 @@
         return;
       }
       if (!normalizedValue) return;
-      SheetRepository.append(Config.SHEETS.ARTICLE_VALUES, {
+      rowsToAppend.push({
         id: createId('val'),
         articuloId: articleId,
         campoId: fieldId,
@@ -474,6 +477,7 @@
         version: 1
       });
     });
+    SheetRepository.appendMany(Config.SHEETS.ARTICLE_VALUES, rowsToAppend);
   },
 
   validateActivation: function(draft) {

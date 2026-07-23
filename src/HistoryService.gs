@@ -12,15 +12,16 @@ const HistoryService = {
       motivo: input.reason || ''
     });
 
-    (input.details || []).forEach(function(detail) {
-      SheetRepository.append(Config.SHEETS.HISTORY_DETAIL, {
+    const detailRows = (input.details || []).map(function(detail) {
+      return {
         id: createId('det'),
         eventoId: eventId,
         campo: detail.field,
         valorAnterior: detail.before === undefined ? '' : detail.before,
         valorNuevo: detail.after === undefined ? '' : detail.after
-      });
+      };
     });
+    SheetRepository.appendMany(Config.SHEETS.HISTORY_DETAIL, detailRows);
 
     return eventId;
   },

@@ -7,7 +7,8 @@
     history: [],
     user: null,
     editingDraftId: '',
-    editingArticleId: ''
+    editingArticleId: '',
+    imagePreviewCache: {}
   };
 
   const catalogModalState = { active: '', editingId: '' };
@@ -263,6 +264,7 @@
     document.getElementById('articleSelect').addEventListener('change', renderArticleDetail);
     document.getElementById('pdfButton').addEventListener('click', generatePdf);
     bindCatalogModal();
+    bindImagePreviewModal();
   }
 
   function callServer(functionName, payload) {
@@ -525,19 +527,33 @@
       return card;
     }
 
-    const preview = document.createElement('img');
-    preview.src = getDrivePreviewUrl(image);
-    preview.alt = label + ' ' + (code || type);
-    preview.loading = 'lazy';
-    card.appendChild(preview);
+    const previewWrap = document.createElement('button');
+    previewWrap.className = 'article-image-preview-button';
+    previewWrap.type = 'button';
+    previewWrap.textContent = 'Cargando imagen...';
+    previewWrap.addEventListener('click', () => openImagePreviewModal(article, type, label));
+    card.appendChild(previewWrap);
 
-    const link = document.createElement('a');
-    link.className = 'article-image-link';
-    link.href = image.url || getDriveOpenUrl(image);
-    link.target = '_blank';
-    link.rel = 'noopener';
-    link.textContent = 'Abrir imagen';
-    card.appendChild(link);
+    loadArticleImagePreview(article, type, label)
+      .then((preview) => {
+        previewWrap.innerHTML = '';
+        const previewImage = document.createElement('img');
+        previewImage.src = preview.dataUrl;
+        previewImage.alt = label + ' ' + (code || type);
+        previewImage.loading = 'lazy';
+        previewWrap.appendChild(previewImage);
+      })
+      .catch(() => {
+        previewWrap.classList.add('unavailable');
+        previewWrap.textContent = 'No fue posible mostrar la vista previa.';
+      });
+
+    const button = document.createElement('button');
+    button.className = 'article-image-link';
+    button.type = 'button';
+    button.textContent = 'Ver imagen';
+    button.addEventListener('click', () => openImagePreviewModal(article, type, label));
+    card.appendChild(button);
     return card;
   }
 
@@ -546,18 +562,67 @@
     return images.find((image) => image.tipoImagen === type && toBooleanClient(image.activo));
   }
 
-  function getDrivePreviewUrl(image) {
-    if (image && image.driveFileId) {
-      return 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(image.driveFileId) + '&sz=w640';
-    }
-    return image && image.url ? image.url : '';
+  function getImageCacheKey(article, type) {
+    return article.id + ':' + type;
   }
 
-  function getDriveOpenUrl(image) {
-    if (image && image.driveFileId) {
-      return 'https://drive.google.com/file/d/' + encodeURIComponent(image.driveFileId) + '/view';
+  function loadArticleImagePreview(article, type) {
+    const key = getImageCacheKey(article, type);
+    if (state.imagePreviewCache[key]) {
+      return Promise.resolve(state.imagePreviewCache[key]);
     }
-    return '#';
+    return callServer('apiGetArticleImagePreview', {
+      articuloId: article.id,
+      tipoImagen: type
+    }).then((preview) => {
+      state.imagePreviewCache[key] = preview;
+      return preview;
+    });
+  }
+
+  function bindImagePreviewModal() {
+    document.querySelectorAll('[data-close-image-modal]').forEach((item) => {
+      item.addEventListener('click', closeImagePreviewModal);
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeImagePreviewModal();
+    });
+  }
+
+  function openImagePreviewModal(article, type, label) {
+    const modal = document.getElementById('imagePreviewModal');
+    const title = document.getElementById('imagePreviewTitle');
+    const eyebrow = document.getElementById('imagePreviewEyebrow');
+    const body = document.getElementById('imagePreviewBody');
+    if (!modal || !body) return;
+    const code = type === 'ETQ' ? article.codigoEtq : article.codigoCet;
+    eyebrow.textContent = type + ' / ' + (label || 'Imagen');
+    title.textContent = (code || 'Imagen guardada');
+    body.innerHTML = '<div class="empty-state">Cargando imagen...</div>';
+    modal.hidden = false;
+    document.body.classList.add('modal-open');
+    loadArticleImagePreview(article, type, label)
+      .then((preview) => {
+        body.innerHTML = '';
+        const image = document.createElement('img');
+        image.src = preview.dataUrl;
+        image.alt = (label || type) + ' ' + (code || '');
+        body.appendChild(image);
+      })
+      .catch((error) => {
+        body.innerHTML = '';
+        const message = document.createElement('div');
+        message.className = 'empty-state';
+        message.textContent = getErrorMessage(error, 'No fue posible cargar la imagen.');
+        body.appendChild(message);
+      });
+  }
+
+  function closeImagePreviewModal() {
+    const modal = document.getElementById('imagePreviewModal');
+    if (!modal || modal.hidden) return;
+    modal.hidden = true;
+    document.body.classList.remove('modal-open');
   }
 
   function renderArticleSummary(container, article) {

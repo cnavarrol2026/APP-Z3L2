@@ -85,3 +85,4 @@
 - Se corrige la vista `Consulta` para renderizar la ficha técnica completa de productos activos usando secciones, campos dinámicos, matriz de ajustes mecánicos, mini-bloques y tabla `Levas Platos`, mostrando `Sin datos` cuando un campo no tenga valor.
 - Consulta ahora muestra las imágenes PNG guardadas para ETQ/CET junto a sus códigos, con enlace para abrir el archivo en Drive y aviso claro si falta la imagen.
 - Se centra la información dentro de las tarjetas de Consulta para mejorar armonía visual y lectura de la ficha técnica.
+- La vista previa de imágenes ETQ/CET en Consulta ya no depende del thumbnail público de Drive: la app carga el PNG desde backend y permite verlo en un modal interno.

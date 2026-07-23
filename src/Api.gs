@@ -246,6 +246,12 @@ function apiUploadDraftImage(payload) {
   });
 }
 
+function apiGetArticleImagePreview(payload) {
+  return Api.withAuth('apiGetArticleImagePreview', function() {
+    return ok(ImageService.getArticleImagePreview(payload), 'Imagen cargada.');
+  });
+}
+
 function apiGeneratePdf(payload) {
   return Api.withAuth('apiGeneratePdf', function(user) {
     return ok(PdfService.generateArticlePdf(payload.articuloId, user.email), 'PDF generado sin imágenes.');

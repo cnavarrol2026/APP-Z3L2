@@ -334,6 +334,19 @@
       </div>
     </section>
   </div>
+  <div id="imagePreviewModal" class="modal-shell image-preview-shell" hidden>
+    <div class="modal-backdrop" data-close-image-modal></div>
+    <section class="image-preview-modal" role="dialog" aria-modal="true" aria-labelledby="imagePreviewTitle">
+      <button class="modal-close" type="button" aria-label="Cerrar" data-close-image-modal>×</button>
+      <div class="modal-heading">
+        <p id="imagePreviewEyebrow" class="eyebrow">Imagen ETQ / CET</p>
+        <h3 id="imagePreviewTitle">Vista previa</h3>
+      </div>
+      <div id="imagePreviewBody" class="image-preview-body">
+        <div class="empty-state">Cargando imagen...</div>
+      </div>
+    </section>
+  </div>
   <?!= include('client'); ?>
 </body>
 </html>

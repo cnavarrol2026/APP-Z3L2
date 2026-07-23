@@ -82,6 +82,39 @@ const ImageService = {
     });
   },
 
+  getArticleImagePreview: function(payload) {
+    if (!payload || !payload.articuloId) throw new Error('Falta el artículo de la imagen.');
+    if ([Config.IMAGE_TYPES.ETQ, Config.IMAGE_TYPES.CET].indexOf(payload.tipoImagen) === -1) {
+      throw new Error('El tipo de imagen no es válido.');
+    }
+    const article = SheetRepository.findById(Config.SHEETS.ARTICLES, payload.articuloId);
+    if (!article || article.estado !== Config.STATES.ACTIVE) {
+      throw new Error('No se encontró el artículo activo asociado a la imagen.');
+    }
+    const image = SheetRepository.list(Config.SHEETS.ARTICLE_IMAGES).find(function(row) {
+      return row.articuloId === payload.articuloId && row.tipoImagen === payload.tipoImagen && toBoolean(row.activo);
+    });
+    if (!image) {
+      throw new Error('No hay imagen ' + payload.tipoImagen + ' guardada para este artículo.');
+    }
+    const file = DriveApp.getFileById(image.driveFileId);
+    const blob = file.getBlob();
+    if (blob.getContentType() !== Config.IMAGE_MIME_TYPE) {
+      throw new Error('La imagen guardada no es PNG.');
+    }
+    const bytes = blob.getBytes();
+    if (bytes.length > Config.MAX_IMAGE_BYTES) {
+      throw new Error('La imagen guardada supera el máximo permitido de 1 MB.');
+    }
+    return {
+      tipoImagen: image.tipoImagen,
+      codigo: image.codigo,
+      nombreArchivo: image.nombreArchivo,
+      url: image.url,
+      dataUrl: 'data:' + Config.IMAGE_MIME_TYPE + ';base64,' + Utilities.base64Encode(bytes)
+    };
+  },
+
   validatePayload: function(payload, requireArticle) {
     if (!payload) throw new Error('Falta la imagen.');
     if (requireArticle && !payload.articuloId) throw new Error('Falta el artículo de la imagen.');

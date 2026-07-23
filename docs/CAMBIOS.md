@@ -80,3 +80,5 @@
 - Se agrega `PINZAS` como campo oficial de `FORMATOS` tipo `TEXTO`; acepta letras, números, espacios y `- / ( )`, y las columnas `valor` de `VALORES_BORRADOR` y `VALORES_ARTICULO` se formatean como texto plano para evitar que Sheets convierta valores como `1/2 (AMARILLO)`.
 - Se agrega feedback visual al botón `Completar / revisar` de Pendientes mientras abre el borrador, y se incorpora la pestaña `Activos` en Configuración para identificar productos activos disponibles en Consulta/PDF.
 - Se refuerza el guardado de borradores en modo edición para conservar el `id` interno aunque el campo oculto llegue vacío, evitando que un pendiente abierto se intente guardar como producto nuevo y choque contra su propio código.
+- Consulta ahora muestra solo categorías y botellas con productos activos asociados, sin depender de relaciones manuales categoría-botella cuando ya existe un artículo activo.
+- Se agrega acción `Editar` en la pestaña `Activos`; carga el producto activo en el formulario, muestra modo `Editando producto activo` y guarda cambios directamente sobre el artículo activo.

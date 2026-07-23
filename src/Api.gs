@@ -81,6 +81,12 @@ function apiGetSavedData() {
     const bottles = SheetRepository.listSafe(Config.SHEETS.BOTTLES).filter(function(row) { return toBoolean(row.activo); });
     const relations = SheetRepository.listSafe(Config.SHEETS.CATEGORY_BOTTLE).filter(function(row) { return toBoolean(row.activo); });
     const articles = SheetRepository.listSafe(Config.SHEETS.ARTICLES).filter(function(row) { return row.estado === Config.STATES.ACTIVE; });
+    const articleValues = SheetRepository.listSafe(Config.SHEETS.ARTICLE_VALUES);
+    const articleImages = SheetRepository.listSafe(Config.SHEETS.ARTICLE_IMAGES).filter(function(row) { return toBoolean(row.activo); });
+    articles.forEach(function(article) {
+      article.valores = articleValues.filter(function(value) { return value.articuloId === article.id; });
+      article.imagenes = articleImages.filter(function(image) { return image.articuloId === article.id; });
+    });
     const sections = SheetRepository.listSafe(Config.SHEETS.SECTIONS).filter(function(row) { return toBoolean(row.activo); }).sort(CatalogService.byOrder);
     const fields = SheetRepository.listSafe(Config.SHEETS.FIELDS).filter(function(row) { return toBoolean(row.activo); }).sort(CatalogService.byOrder);
     const units = SheetRepository.listSafe(Config.SHEETS.UNITS).filter(function(row) { return toBoolean(row.activo); }).sort(CatalogService.byOrder);
@@ -195,6 +201,12 @@ function apiSaveDraft(payload) {
 function apiActivateDraft(payload) {
   return Api.withAuth('apiActivateDraft', function(user) {
     return ok(ArticleService.activateDraft(payload, user.email), 'Artículo activado.');
+  });
+}
+
+function apiUpdateArticle(payload) {
+  return Api.withAuth('apiUpdateArticle', function(user) {
+    return ok(ArticleService.updateArticle(payload, user.email), 'Artículo actualizado.');
   });
 }
 

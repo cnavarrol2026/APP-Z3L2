@@ -129,7 +129,7 @@
       return row.codigoNormalizado === normalized && row.id !== ignoreId;
     });
     const existsInDrafts = SheetRepository.list(Config.SHEETS.DRAFTS).find(function(row) {
-      return row.codigoNormalizado === normalized && row.id !== ignoreId && row.estado !== Config.STATES.DISCARDED;
+      return row.codigoNormalizado === normalized && row.id !== ignoreId && row.estado !== Config.STATES.DISCARDED && row.estado !== Config.STATES.ACTIVE;
     });
     if (existsInArticles) {
       throw new Error('El código ya existe como artículo activo: ' + existsInArticles.codigoArticulo + ' - ' + existsInArticles.descripcion + '.');
@@ -308,6 +308,69 @@
     }
   },
 
+  updateArticle: function(payload, userEmail) {
+    const lock = LockService.getScriptLock();
+    lock.waitLock(30000);
+    try {
+      const article = SheetRepository.findById(Config.SHEETS.ARTICLES, payload.id);
+      if (!article) {
+        throw new Error('No se encontró el producto activo para actualizar.');
+      }
+      this.validateArticlePayload(payload, article.id);
+      const date = nowIso();
+      const technicalPayload = this.normalizeDraftPayload(payload.payload || {});
+      const updated = {
+        id: article.id,
+        categoriaId: payload.categoriaId || '',
+        botellaId: payload.botellaId || '',
+        codigoArticulo: toSystemUpperText(payload.codigoArticulo, 80),
+        codigoNormalizado: normalizeText(payload.codigoArticulo),
+        descripcion: toSystemUpperText(payload.descripcion, 240),
+        estado: Config.STATES.ACTIVE,
+        etqAplica: !!payload.etqAplica,
+        codigoEtq: toSystemUpperText(payload.codigoEtq, 80),
+        cetAplica: !!payload.cetAplica,
+        codigoCet: toSystemUpperText(payload.codigoCet, 80),
+        fechaCreacion: article.fechaCreacion,
+        creadoPor: article.creadoPor,
+        fechaModificacion: date,
+        modificadoPor: userEmail,
+        version: Number(article.version || 1) + 1
+      };
+      SheetRepository.updateById(Config.SHEETS.ARTICLES, article.id, updated);
+      this.upsertArticleValues(article.id, technicalPayload.valores || [], userEmail, date);
+      HistoryService.recordEvent({
+        user: userEmail,
+        type: 'MODIFICAR_ARTICULO',
+        entity: Config.SHEETS.ARTICLES,
+        entityId: article.id,
+        productId: article.id,
+        reason: payload.motivo || 'Edición de producto activo.',
+        details: this.diffRows(article, updated)
+      });
+      return Object.assign({}, updated, {
+        valores: SheetRepository.list(Config.SHEETS.ARTICLE_VALUES).filter(function(value) { return value.articuloId === article.id; }),
+        imagenes: SheetRepository.list(Config.SHEETS.ARTICLE_IMAGES).filter(function(image) { return image.articuloId === article.id && toBoolean(image.activo); })
+      });
+    } finally {
+      lock.releaseLock();
+    }
+  },
+
+  validateArticlePayload: function(payload, ignoreId) {
+    this.validateUniqueCode(payload.codigoArticulo, ignoreId);
+    if (!payload.categoriaId || !payload.botellaId) throw new Error('La categoría y la botella son obligatorias.');
+    if (!SheetRepository.findById(Config.SHEETS.CATEGORIES, payload.categoriaId)) throw new Error('La categoría no existe.');
+    if (!SheetRepository.findById(Config.SHEETS.BOTTLES, payload.botellaId)) throw new Error('La botella no existe.');
+    if (!cleanText(payload.descripcion, 240)) throw new Error('La descripción es obligatoria.');
+    if (payload.etqAplica && !cleanText(payload.codigoEtq, 80)) throw new Error('El código ETQ es obligatorio cuando ETQ aplica.');
+    if (payload.cetAplica && !cleanText(payload.codigoCet, 80)) throw new Error('El código CET es obligatorio cuando CET aplica.');
+    const technicalPayload = payload.payload || {};
+    if (technicalPayload.capsuladoraAplica === false && !cleanText(technicalPayload.programaCapsuladoraBypassTapa, 120)) {
+      throw new Error('El programa capsuladora bypass tapa es obligatorio cuando no aplica capsuladora.');
+    }
+  },
+
   saveArticleValuesFromDraft: function(draft, articleId, userEmail, date) {
     const data = safeJsonParse(draft.payloadJson, {});
     const values = Array.isArray(data.valores) ? data.valores : [];
@@ -323,6 +386,49 @@
         articuloId: articleId,
         campoId: fieldId,
         valor: isLevasPlatos ? value : (isPinzas ? ArticleService.normalizePinzasValue(value) : toSystemUpperText(value, 500)),
+        unidadId: cleanText(item.unidadId, 80),
+        fechaCreacion: date,
+        creadoPor: userEmail,
+        fechaModificacion: date,
+        modificadoPor: userEmail,
+        version: 1
+      });
+    });
+  },
+
+  upsertArticleValues: function(articleId, values, userEmail, date) {
+    const existing = SheetRepository.list(Config.SHEETS.ARTICLE_VALUES).filter(function(row) {
+      return row.articuloId === articleId;
+    });
+    const existingByField = {};
+    existing.forEach(function(row) {
+      existingByField[row.campoId] = row;
+    });
+    values.forEach(function(item) {
+      const fieldId = cleanText(item.campoId, 80);
+      const isLevasPlatos = ArticleService.isLevasPlatosValue(item);
+      const isPinzas = ArticleService.isPinzasValue(item);
+      const maxLength = isLevasPlatos ? 20000 : (isPinzas ? 120 : 500);
+      const value = cleanText(item.valor, maxLength);
+      if (!fieldId) return;
+      const normalizedValue = isLevasPlatos ? value : (isPinzas ? ArticleService.normalizePinzasValue(value) : toSystemUpperText(value, 500));
+      const current = existingByField[fieldId];
+      if (current) {
+        SheetRepository.updateById(Config.SHEETS.ARTICLE_VALUES, current.id, {
+          valor: normalizedValue,
+          unidadId: cleanText(item.unidadId, 80),
+          fechaModificacion: date,
+          modificadoPor: userEmail,
+          version: Number(current.version || 1) + 1
+        });
+        return;
+      }
+      if (!normalizedValue) return;
+      SheetRepository.append(Config.SHEETS.ARTICLE_VALUES, {
+        id: createId('val'),
+        articuloId: articleId,
+        campoId: fieldId,
+        valor: normalizedValue,
         unidadId: cleanText(item.unidadId, 80),
         fechaCreacion: date,
         creadoPor: userEmail,

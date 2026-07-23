@@ -6,7 +6,8 @@
     discarded: [],
     history: [],
     user: null,
-    editingDraftId: ''
+    editingDraftId: '',
+    editingArticleId: ''
   };
 
   const catalogModalState = { active: '', editingId: '' };
@@ -434,16 +435,18 @@
   }
 
   function renderCategorySelect() {
-    fillSelect('categorySelect', state.lookup.categorias, 'Selecciona categoría');
+    const categoryIds = uniqueClientValues((state.lookup.articulos || []).map((article) => article.categoriaId));
+    const categories = (state.lookup.categorias || []).filter((category) => categoryIds.includes(category.id));
+    fillSelect('categorySelect', categories, 'Selecciona categoría');
     renderBottleSelect();
   }
 
   function renderBottleSelect() {
     const categoryId = document.getElementById('categorySelect').value;
-    const bottleIds = state.lookup.relaciones
-      .filter((relation) => relation.categoriaId === categoryId)
-      .map((relation) => relation.botellaId);
-    const bottles = state.lookup.botellas.filter((bottle) => bottleIds.includes(bottle.id));
+    const bottleIds = uniqueClientValues((state.lookup.articulos || [])
+      .filter((article) => article.categoriaId === categoryId)
+      .map((article) => article.botellaId));
+    const bottles = (state.lookup.botellas || []).filter((bottle) => bottleIds.includes(bottle.id));
     fillSelect('bottleSelect', bottles, 'Selecciona botella');
     renderArticleSelect();
   }
@@ -515,6 +518,10 @@
       select.appendChild(option);
     });
     fillDraftSelects();
+  }
+
+  function uniqueClientValues(values) {
+    return Array.from(new Set((values || []).filter(Boolean)));
   }
 
   function fillDraftSelects() {
@@ -1344,6 +1351,15 @@
           '<strong>' + (article.codigoArticulo || 'SIN CÓDIGO') + '</strong>' +
           '<span>' + (article.descripcion || 'Sin descripción') + '</span>' +
           '<small>' + ['ACTIVO', category, bottle, etq, cet, article.fechaModificacion || ''].filter(Boolean).join(' · ') + '</small>';
+        const actions = document.createElement('div');
+        actions.className = 'draft-card-actions';
+        const editButton = document.createElement('button');
+        editButton.type = 'button';
+        editButton.className = 'small-button';
+        editButton.textContent = 'Editar';
+        editButton.addEventListener('click', () => editActiveArticle(article.id, editButton));
+        actions.appendChild(editButton);
+        item.appendChild(actions);
         container.appendChild(item);
       });
   }
@@ -1451,10 +1467,64 @@
       });
   }
 
+  function editActiveArticle(articleId, button) {
+    const article = (state.lookup.articulos || []).find((item) => item.id === articleId);
+    if (!article) {
+      showToast('No fue posible encontrar el producto activo seleccionado.');
+      return;
+    }
+    const originalLabel = button ? button.textContent : '';
+    if (button) {
+      button.disabled = true;
+      button.classList.add('is-loading');
+      button.textContent = 'Abriendo...';
+    }
+    setOperationStatus('Abriendo producto activo...', 'info');
+    window.setTimeout(() => {
+      loadArticleIntoForm(article);
+      openConfigPage('producto', { preserveDraft: true });
+      showToast('Producto activo cargado para edición.');
+      if (button) {
+        button.disabled = false;
+        button.classList.remove('is-loading');
+        button.textContent = originalLabel || 'Editar';
+      }
+      setOperationStatus('', '');
+    }, 40);
+  }
+
+  function loadArticleIntoForm(article) {
+    const form = document.getElementById('draftForm');
+    if (!form) return;
+    state.editingDraftId = '';
+    state.editingArticleId = article.id || '';
+    if (form.elements.id) form.elements.id.value = '';
+    setDraftSearchValue('category', article.categoriaId || '');
+    setDraftSearchValue('bottle', article.botellaId || '');
+    if (form.codigoArticulo) form.codigoArticulo.value = article.codigoArticulo || '';
+    if (form.descripcion) form.descripcion.value = article.descripcion || '';
+    if (form.etqAplica) form.etqAplica.checked = toBooleanClient(article.etqAplica);
+    if (form.codigoEtq) form.codigoEtq.value = article.codigoEtq || '';
+    if (form.cetAplica) form.cetAplica.checked = toBooleanClient(article.cetAplica);
+    if (form.codigoCet) form.codigoCet.value = article.codigoCet || '';
+    const articleData = {
+      valores: Array.isArray(article.valores) ? article.valores : [],
+      capsuladoraAplica: article.capsuladoraAplica !== false,
+      programaCapsuladoraBypassTapa: article.programaCapsuladoraBypassTapa || ''
+    };
+    if (form.capsuladoraAplica) form.capsuladoraAplica.checked = articleData.capsuladoraAplica !== false;
+    if (form.programaCapsuladoraBypassTapa) form.programaCapsuladoraBypassTapa.value = articleData.programaCapsuladoraBypassTapa || getDraftTechnicalValueByName(articleData, 'Programa capsuladora bypass tapa') || '';
+    updateCapsuladoraMode();
+    fillDraftTechnicalValues({ payloadJson: JSON.stringify(articleData) });
+    renderDraftImageStatus({ imagenes: Array.isArray(article.imagenes) ? article.imagenes : [] });
+    renderDraftMode(article, 'article');
+  }
+
   function loadDraftIntoForm(draft) {
     const form = document.getElementById('draftForm');
     if (!form) return;
     state.editingDraftId = draft.id || '';
+    state.editingArticleId = '';
     if (form.elements.id) form.elements.id.value = draft.id || '';
     setDraftSearchValue('category', draft.categoriaId || '');
     setDraftSearchValue('bottle', draft.botellaId || '');
@@ -1472,20 +1542,43 @@
     updateCapsuladoraMode();
     fillDraftTechnicalValues(draft);
     renderDraftImageStatus(draft);
-    renderDraftMode(draft);
+    renderDraftMode(draft, 'draft');
   }
 
-  function renderDraftMode(draft) {
+  function renderDraftMode(draft, mode) {
     const notice = document.getElementById('draftModeNotice');
     const text = document.getElementById('draftModeText');
     if (!notice || !text) return;
     if (!draft || !draft.id) {
       notice.hidden = true;
       text.textContent = '';
+      setProductFormActionMode('draft');
       return;
     }
     notice.hidden = false;
+    if (mode === 'article') {
+      notice.querySelector('strong').textContent = 'Editando producto activo';
+      text.textContent = 'Editando ' + (draft.codigoArticulo || 'producto sin código') + '. Los cambios se guardarán sobre el producto activo.';
+      setProductFormActionMode('article');
+      return;
+    }
+    notice.querySelector('strong').textContent = 'Editando borrador pendiente';
     text.textContent = 'Editando ' + (draft.codigoArticulo || 'borrador sin código') + '. Los cambios se guardarán sobre este mismo pendiente.';
+    setProductFormActionMode('draft');
+  }
+
+  function setProductFormActionMode(mode) {
+    const draftButton = document.querySelector('#draftForm button[data-action="draft"]');
+    const activateButton = document.querySelector('#draftForm button[data-action="activate"]');
+    if (!draftButton || !activateButton) return;
+    if (mode === 'article') {
+      draftButton.hidden = true;
+      activateButton.textContent = 'Guardar cambios';
+      return;
+    }
+    draftButton.hidden = false;
+    draftButton.textContent = 'Guardar borrador';
+    activateButton.textContent = 'Guardar y activar';
   }
 
   function updateCapsuladoraMode() {
@@ -1538,6 +1631,7 @@
     if (!form) return;
     form.reset();
     state.editingDraftId = '';
+    state.editingArticleId = '';
     if (form.elements.id) form.elements.id.value = '';
     setDraftSearchValue('category', '');
     setDraftSearchValue('bottle', '');
@@ -1758,6 +1852,21 @@
       ), Promise.resolve()));
   }
 
+  function uploadArticleImages(articleId, form) {
+    return Promise.all([
+      readImageInput(form, 'ETQ', articleId),
+      readImageInput(form, 'CET', articleId)
+    ])
+      .then((payloads) => payloads.filter(Boolean).map((payload) => {
+        payload.articuloId = articleId;
+        delete payload.borradorId;
+        return payload;
+      }))
+      .then((payloads) => payloads.reduce((chain, payload) => (
+        chain.then(() => callServer('apiUploadImage', payload))
+      ), Promise.resolve()));
+  }
+
   function clearImageInputs(form) {
     form.querySelectorAll('.image-input').forEach((input) => {
       input.value = '';
@@ -1831,6 +1940,28 @@
         valor: JSON.stringify(collectLevasPlatosRows())
       }])
     };
+    if (state.editingArticleId) {
+      payload.id = state.editingArticleId;
+      setFormBusy(form, true, 'Guardando cambios del producto activo...');
+      callServer('apiUpdateArticle', payload)
+        .then((article) => uploadArticleImages(article.id, form)
+          .then(() => ({ article: article, imageWarning: '' }))
+          .catch((error) => ({
+            article: article,
+            imageWarning: getErrorMessage(error, 'El producto quedó guardado, pero la imagen no pudo guardarse.')
+          })))
+        .then((result) => {
+          resetDraftForm(form);
+          showToast(result.imageWarning ? 'Producto actualizado. Imagen pendiente: ' + result.imageWarning : 'Producto activo actualizado.');
+          loadInitialData();
+        })
+        .catch((error) => showToast(getErrorMessage(error, 'No fue posible actualizar el producto activo.')))
+        .finally(() => {
+          setFormBusy(form, false);
+          updateCapsuladoraMode();
+        });
+      return;
+    }
     setFormBusy(form, true, action === 'activate' ? 'Guardando y activando producto...' : 'Guardando borrador...');
     callServer('apiSaveDraft', payload)
       .then((savedDraft) => uploadDraftImages(savedDraft.id, form)

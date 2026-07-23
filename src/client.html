@@ -1288,6 +1288,7 @@
 
   function renderDraftLists() {
     renderDraftCards('draftList', state.drafts || [], 'No hay productos pendientes.');
+    renderActiveCards('activeList', state.lookup.articulos || []);
     renderDiscardedCards('discardedList', state.discarded || []);
   }
 
@@ -1314,11 +1315,42 @@
       editButton.type = 'button';
       editButton.className = 'small-button';
       editButton.textContent = 'Completar / revisar';
-      editButton.addEventListener('click', () => continueDraft(draft.id));
+      editButton.addEventListener('click', () => continueDraft(draft.id, editButton));
       actions.appendChild(editButton);
       item.appendChild(actions);
       container.appendChild(item);
     });
+  }
+
+  function renderActiveCards(id, rows) {
+    const container = document.getElementById(id);
+    if (!container) return;
+    container.innerHTML = '';
+    if (!rows.length) {
+      container.innerHTML = '<div class="empty-state">No hay productos activos.</div>';
+      return;
+    }
+    rows
+      .slice()
+      .sort((a, b) => String(a.codigoArticulo || '').localeCompare(String(b.codigoArticulo || '')))
+      .forEach((article) => {
+        const item = document.createElement('div');
+        item.className = 'draft-card active-card';
+        const category = getCatalogName(state.lookup.categorias, article.categoriaId, 'Sin categoría');
+        const bottle = getCatalogName(state.lookup.botellas, article.botellaId, 'Sin botella');
+        const etq = toBooleanClient(article.etqAplica) ? 'ETQ aplica' : 'ETQ no aplica';
+        const cet = toBooleanClient(article.cetAplica) ? 'CET aplica' : 'CET no aplica';
+        item.innerHTML =
+          '<strong>' + (article.codigoArticulo || 'SIN CÓDIGO') + '</strong>' +
+          '<span>' + (article.descripcion || 'Sin descripción') + '</span>' +
+          '<small>' + ['ACTIVO', category, bottle, etq, cet, article.fechaModificacion || ''].filter(Boolean).join(' · ') + '</small>';
+        container.appendChild(item);
+      });
+  }
+
+  function getCatalogName(rows, id, fallback) {
+    const match = (rows || []).find((item) => item.id === id);
+    return match ? (match.nombre || fallback || '') : (fallback || '');
   }
 
   function renderDiscardedCards(id, rows) {
@@ -1389,19 +1421,34 @@
     return value === true || value === 'TRUE' || value === 'true' || value === '1';
   }
 
-  function continueDraft(draftId) {
+  function continueDraft(draftId, button) {
     const draft = (state.drafts || []).find((item) => item.id === draftId);
     if (!draft) {
       showToast('No fue posible encontrar el borrador seleccionado.');
       return;
     }
+    const originalLabel = button ? button.textContent : '';
+    if (button) {
+      button.disabled = true;
+      button.classList.add('is-loading');
+      button.textContent = 'Abriendo...';
+    }
+    setOperationStatus('Abriendo borrador pendiente...', 'info');
     callServer('apiAcquireDraftLock', { borradorId: draftId })
       .then(() => {
         loadDraftIntoForm(draft);
         openConfigPage('producto', { preserveDraft: true });
         showToast('Borrador cargado para edición.');
       })
-      .catch((error) => showToast(getErrorMessage(error, 'No fue posible abrir el borrador.')));
+      .catch((error) => showToast(getErrorMessage(error, 'No fue posible abrir el borrador.')))
+      .finally(() => {
+        if (button) {
+          button.disabled = false;
+          button.classList.remove('is-loading');
+          button.textContent = originalLabel || 'Completar / revisar';
+        }
+        setOperationStatus('', '');
+      });
   }
 
   function loadDraftIntoForm(draft) {

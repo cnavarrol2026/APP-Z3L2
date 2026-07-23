@@ -93,3 +93,5 @@
 - Se agrega en `Ajustes Mecánicos de Etiquetadora` el mini-bloque `Ajuste de codificado` con campos `A` y `H`, disponible en Producto nuevo/edición, Consulta y plantilla de campos de Sheets.
 - La tabla `Levas Platos` ahora muestra correctamente el valor `0` en `N° Elementos` en lugar de interpretarlo como `Sin datos`.
 - La auditoría de base ahora detalla los códigos de artículo duplicados indicando código, estado, ID y descripción de cada registro afectado.
+- Al activar un borrador, el registro en `BORRADORES` queda con estado `ACTIVADO` en vez de `ACTIVO`; Pendientes y auditoría solo consideran borradores con estado `BORRADOR`.
+- La auditoría puede normalizar borradores antiguos que hayan quedado como `ACTIVO` cuando ya existe su artículo activo, registrando la reparación en historial y mostrándola en `Reparaciones aplicadas`.

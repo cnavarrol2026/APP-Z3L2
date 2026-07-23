@@ -2,7 +2,7 @@ const DraftService = {
   listPendingDrafts: function() {
     return SheetRepository.list(Config.SHEETS.DRAFTS).filter(function(row) {
       const state = toSystemUpperText(row.estado, 40);
-      return row.codigoArticulo && state !== Config.STATES.ACTIVE && state !== Config.STATES.DISCARDED;
+      return row.codigoArticulo && state === Config.STATES.DRAFT;
     });
   },
 

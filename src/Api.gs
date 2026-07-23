@@ -265,7 +265,7 @@ function apiCreateBackup() {
 }
 
 function apiRunDatabaseAudit() {
-  return Api.withAuth('apiRunDatabaseAudit', function() {
-    return ok(AuditService.runDatabaseAudit(), 'Auditoría completada.');
+  return Api.withAuth('apiRunDatabaseAudit', function(user) {
+    return ok(AuditService.runDatabaseAudit(user.email), 'Auditoría completada.');
   });
 }

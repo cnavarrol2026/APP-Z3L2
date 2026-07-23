@@ -14,6 +14,7 @@ const Config = Object.freeze({
   }),
   STATES: Object.freeze({
     DRAFT: 'BORRADOR',
+    ACTIVATED: 'ACTIVADO',
     ACTIVE: 'ACTIVO',
     INACTIVE: 'INACTIVO',
     DISCARDED: 'DESCARTADO'

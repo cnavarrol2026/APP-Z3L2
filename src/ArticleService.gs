@@ -159,7 +159,7 @@
       return row.codigoNormalizado === normalized && row.id !== ignoreId;
     });
     const existsInDrafts = SheetRepository.list(Config.SHEETS.DRAFTS).find(function(row) {
-      return row.codigoNormalizado === normalized && row.id !== ignoreId && row.estado !== Config.STATES.DISCARDED && row.estado !== Config.STATES.ACTIVE;
+      return row.codigoNormalizado === normalized && row.id !== ignoreId && toSystemUpperText(row.estado, 40) === Config.STATES.DRAFT;
     });
     if (existsInArticles) {
       throw new Error('El código ya existe como artículo activo: ' + existsInArticles.codigoArticulo + ' - ' + existsInArticles.descripcion + '.');
@@ -293,6 +293,9 @@
       if (!draft) {
         throw new Error('No se encontró el borrador.');
       }
+      if (toSystemUpperText(draft.estado, 40) !== Config.STATES.DRAFT) {
+        throw new Error('Este borrador ya no está pendiente y no puede activarse nuevamente.');
+      }
       this.validateActivation(draft);
       const date = nowIso();
       const article = {
@@ -317,7 +320,7 @@
       this.saveArticleValuesFromDraft(draft, article.id, userEmail, date);
       ImageService.moveDraftImagesToArticle(draft.id, article.id, userEmail, date);
       SheetRepository.updateById(Config.SHEETS.DRAFTS, draft.id, {
-        estado: Config.STATES.ACTIVE,
+        estado: Config.STATES.ACTIVATED,
         fechaModificacion: date,
         modificadoPor: userEmail,
         version: Number(draft.version || 1) + 1
@@ -330,7 +333,7 @@
         entityId: article.id,
         productId: article.id,
         reason: payload.motivo || 'Activación de borrador.',
-        details: [{ field: 'estado', before: Config.STATES.DRAFT, after: Config.STATES.ACTIVE }]
+        details: [{ field: 'estado', before: Config.STATES.DRAFT, after: Config.STATES.ACTIVATED }]
       });
       return article;
     } finally {

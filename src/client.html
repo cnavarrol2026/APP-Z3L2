@@ -2491,6 +2491,9 @@
 
     result.appendChild(createAuditList('Observaciones', audit.alertas || []));
     result.appendChild(createAuditList('Códigos duplicados', formatDuplicateCodeAuditRows(audit)));
+    result.appendChild(createAuditList('Reparaciones aplicadas', ((audit.integridad || {}).reparacionesAplicadas || []).map((item) => (
+      item.codigoArticulo + ' - borrador ' + item.id + ': ' + item.estadoAnterior + ' -> ' + item.estadoNuevo + ' (artículo ' + item.articuloActivoId + ')'
+    ))));
     result.appendChild(createAuditList('Formato texto revisado', (audit.formatosTexto || []).map((item) => (
       item.hoja + ' / ' + item.columna + ': ' + (item.formatoTexto ? 'OK' : item.celdasSinFormatoTexto + ' celdas sin formato texto')
     ))));

@@ -1,11 +1,13 @@
 const AuditService = {
-  runDatabaseAudit: function() {
-    const rows = this.readAuditRows_();
+  runDatabaseAudit: function(userEmail) {
+    let rows = this.readAuditRows_();
+    const repairs = this.normalizeActivatedDraftStates_(rows, userEmail);
+    if (repairs.length) rows = this.readAuditRows_();
     const activeArticles = rows[Config.SHEETS.ARTICLES].filter(function(row) {
-      return row.estado === Config.STATES.ACTIVE;
+      return toSystemUpperText(row.estado, 40) === Config.STATES.ACTIVE;
     });
     const pendingDrafts = rows[Config.SHEETS.DRAFTS].filter(function(row) {
-      return row.estado === Config.STATES.DRAFT;
+      return toSystemUpperText(row.estado, 40) === Config.STATES.DRAFT;
     });
     const discardedDrafts = rows[Config.SHEETS.DISCARDED_DRAFTS].filter(function(row) {
       return row.estado === Config.STATES.DISCARDED;
@@ -32,7 +34,7 @@ const AuditService = {
       },
       duplicados: {
         ids: this.findDuplicatedIds_(rows),
-        codigosArticulo: this.findDuplicateCodes_(rows[Config.SHEETS.ARTICLES], rows[Config.SHEETS.DRAFTS]),
+        codigosArticulo: this.findDuplicateCodes_(activeArticles, pendingDrafts),
         valoresArticuloPorArticuloCampo: this.findDuplicateValueRows_(articleValues),
         imagenesActivasPorOwnerTipo: this.findDuplicateActiveImages_(articleImages)
       },
@@ -66,7 +68,8 @@ const AuditService = {
               return image.articuloId === article.id && toBoolean(image.activo);
             }).length
           };
-        })
+        }),
+        reparacionesAplicadas: repairs
       },
       formatosTexto: this.auditTextFormats_()
     };
@@ -100,6 +103,49 @@ const AuditService = {
       if (row.id) index[row.id] = true;
       return index;
     }, {});
+  },
+
+  normalizeActivatedDraftStates_: function(rows, userEmail) {
+    const activeByCode = rows[Config.SHEETS.ARTICLES].reduce(function(index, row) {
+      if (toSystemUpperText(row.estado, 40) === Config.STATES.ACTIVE && row.codigoNormalizado) index[row.codigoNormalizado] = row;
+      return index;
+    }, {});
+    const date = nowIso();
+    return rows[Config.SHEETS.DRAFTS]
+      .filter(function(draft) {
+        return draft.codigoNormalizado &&
+          toSystemUpperText(draft.estado, 40) === Config.STATES.ACTIVE &&
+          activeByCode[draft.codigoNormalizado];
+      })
+      .map(function(draft) {
+        const article = activeByCode[draft.codigoNormalizado];
+        SheetRepository.updateById(Config.SHEETS.DRAFTS, draft.id, {
+          estado: Config.STATES.ACTIVATED,
+          fechaModificacion: date,
+          modificadoPor: userEmail || 'auditoria',
+          version: Number(draft.version || 1) + 1
+        });
+        HistoryService.recordEvent({
+          user: userEmail || 'auditoria',
+          type: 'NORMALIZAR_BORRADOR_ACTIVADO',
+          entity: Config.SHEETS.DRAFTS,
+          entityId: draft.id,
+          productId: article.id,
+          reason: 'Reparación automática: borrador ya activado permanecía con estado ACTIVO.',
+          details: [
+            { field: 'estado', before: Config.STATES.ACTIVE, after: Config.STATES.ACTIVATED },
+            { field: 'codigoArticulo', before: draft.codigoArticulo, after: draft.codigoArticulo }
+          ]
+        });
+        return {
+          id: draft.id,
+          codigoArticulo: draft.codigoArticulo,
+          descripcion: draft.descripcion,
+          estadoAnterior: Config.STATES.ACTIVE,
+          estadoNuevo: Config.STATES.ACTIVATED,
+          articuloActivoId: article.id
+        };
+      });
   },
 
   findDuplicatedIds_: function(rowsBySheet) {

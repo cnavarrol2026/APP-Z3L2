@@ -18,6 +18,11 @@
       copy.valores = copy.valores.map(function(item) {
         const next = Object.assign({}, item);
         next.campoId = cleanText(next.campoId, 80);
+        if (self.isPinzasValue(next)) {
+          next.valor = self.normalizePinzasValue(next.valor);
+          next.campo = 'PINZAS';
+          return next;
+        }
         if (self.isLevasPlatosValue(next)) {
           next.valor = JSON.stringify(self.normalizeLevasPlatos(next.valor));
           next.campo = 'Levas Platos';
@@ -42,6 +47,21 @@
       }
     }
     return copy;
+  },
+
+  isPinzasValue: function(item) {
+    return item && (
+      cleanText(item.campoId, 80) === 'cam_pinzas' ||
+      normalizeText(item.campo) === 'pinzas'
+    );
+  },
+
+  normalizePinzasValue: function(value) {
+    const text = toSystemUpperText(value, 120);
+    if (text && !/^[A-ZÁÉÍÓÚÜÑ0-9 \-\/()]*$/.test(text)) {
+      throw new Error('PINZAS solo acepta letras, números, espacios y los caracteres - / ( ).');
+    }
+    return text;
   },
 
   isLevasPlatosValue: function(item) {
@@ -294,14 +314,15 @@
     values.forEach(function(item) {
       const fieldId = cleanText(item.campoId, 80);
       const isLevasPlatos = ArticleService.isLevasPlatosValue(item);
-      const maxLength = isLevasPlatos ? 20000 : 500;
+      const isPinzas = ArticleService.isPinzasValue(item);
+      const maxLength = isLevasPlatos ? 20000 : (isPinzas ? 120 : 500);
       const value = cleanText(item.valor, maxLength);
       if (!fieldId || !value) return;
       SheetRepository.append(Config.SHEETS.ARTICLE_VALUES, {
         id: createId('val'),
         articuloId: articleId,
         campoId: fieldId,
-        valor: isLevasPlatos ? value : toSystemUpperText(value, 500),
+        valor: isLevasPlatos ? value : (isPinzas ? ArticleService.normalizePinzasValue(value) : toSystemUpperText(value, 500)),
         unidadId: cleanText(item.unidadId, 80),
         fechaCreacion: date,
         creadoPor: userEmail,

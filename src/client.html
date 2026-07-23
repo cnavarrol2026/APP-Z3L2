@@ -86,6 +86,7 @@
       { id: 'cam_antares_luz', seccionId: 'sec_formatos', nombre: 'LUZ', tipo: 'TEXTO', obligatorio: false, orden: 20 },
       { id: 'cam_antares_focus_radial', seccionId: 'sec_formatos', nombre: 'FOCUS RADIAL', tipo: 'TEXTO', obligatorio: false, orden: 30 },
       { id: 'cam_antares_camara', seccionId: 'sec_formatos', nombre: 'CÁMARA', tipo: 'TEXTO', obligatorio: false, orden: 40 },
+      { id: 'cam_pinzas', seccionId: 'sec_formatos', nombre: 'PINZAS', tipo: 'TEXTO', obligatorio: false, orden: 50 },
       { id: 'cam_levas_platos', seccionId: 'sec_formatos', nombre: 'Levas Platos', tipo: 'TEXTO', obligatorio: false, orden: 100 },
       { id: 'cam_ajuste_sinfin_a', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Ajuste sinfín A', tipo: 'TEXTO', obligatorio: false, orden: 10 },
       { id: 'cam_ajuste_sinfin_b', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Ajuste sinfín B', tipo: 'TEXTO', obligatorio: false, orden: 20 },
@@ -123,6 +124,7 @@
   const FORMATOS_SECTION_ID = 'sec_formatos';
   const CAPSULADORA_SECTION_ID = 'sec_ajustes_capsuladora';
   const CAPSULADORA_BYPASS_FIELD_ID = 'cam_programa_capsuladora_bypass_tapa';
+  const PINZAS_FIELD_ID = 'cam_pinzas';
   const LEVAS_PLATOS_FIELD_ID = 'cam_levas_platos';
   const LEVAS_PLATOS_ACTION = 'Posicionando';
   const FEATURED_BOTTLE_FIELD_IDS = ['cam_programa_maquina', 'cam_programa_estacion'];
@@ -684,8 +686,20 @@
     input.type = field.tipo === 'NUMERO' ? 'number' : 'text';
     input.required = field.obligatorio === true || field.obligatorio === 'TRUE';
     if (field.tipo === 'NUMERO') input.step = 'any';
+    if (isPinzasField(field)) {
+      input.maxLength = 120;
+      input.pattern = '[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 \\-/() ]*';
+      input.title = 'Acepta letras, números, espacios y los caracteres - / ( ). Ejemplo: 1/2 (AMARILLO)';
+    }
     label.appendChild(input);
     return label;
+  }
+
+  function isPinzasField(field) {
+    return field && (
+      field.id === PINZAS_FIELD_ID ||
+      normalizeClientText(field.nombre) === 'pinzas'
+    );
   }
 
   function renderTemplateStructure() {

@@ -75,6 +75,7 @@ function apiGetInitialData() {
 function apiGetSavedData() {
   return Api.withSessionOnly('apiGetSavedData', function(user) {
     const fallback = TemplateService.getFallbackAdminData();
+    SheetRepository.ensureDatabase();
     TemplateService.ensureDefaultTechnicalTemplate(user.email || user.effectiveEmail || 'usuario.google');
     const categories = SheetRepository.listSafe(Config.SHEETS.CATEGORIES).filter(function(row) { return toBoolean(row.activo); });
     const bottles = SheetRepository.listSafe(Config.SHEETS.BOTTLES).filter(function(row) { return toBoolean(row.activo); });

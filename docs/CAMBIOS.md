@@ -77,3 +77,4 @@
 - Se agrega control `Aplica ajustes de capsuladora` en Producto nuevo; al desmarcarlo se oculta la sección de capsuladora, se guarda `Programa capsuladora bypass tapa` y backend/PDF omiten ajustes normales de capsuladora para productos de tapa.
 - Se reubica el control `Aplica ajustes de capsuladora` dentro de la sección `Ajustes de Capsuladora`; al desmarcarlo se ocultan solo los campos de ajuste y queda visible el campo `Programa capsuladora bypass tapa`.
 - Se corrige el CSS global de elementos `hidden` para asegurar que las grillas dinámicas, como los campos normales de capsuladora, se oculten realmente al desmarcar el control.
+- Se agrega `PINZAS` como campo oficial de `FORMATOS` tipo `TEXTO`; acepta letras, números, espacios y `- / ( )`, y las columnas `valor` de `VALORES_BORRADOR` y `VALORES_ARTICULO` se formatean como texto plano para evitar que Sheets convierta valores como `1/2 (AMARILLO)`.

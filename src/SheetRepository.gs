@@ -1,5 +1,9 @@
 const SheetRepository = {
   _spreadsheet: null,
+  TEXT_FORMAT_COLUMNS: Object.freeze({
+    VALORES_ARTICULO: ['valor'],
+    VALORES_BORRADOR: ['valor']
+  }),
 
   getSpreadsheet: function() {
     if (this._spreadsheet) {
@@ -32,6 +36,22 @@ const SheetRepository = {
         range.setValues([headers]);
         sheet.setFrozenRows(1);
       }
+      SheetRepository.applySheetFormats_(sheetName, sheet);
+    });
+  },
+
+  applySheetFormats_: function(sheetName, sheet) {
+    const columns = this.TEXT_FORMAT_COLUMNS[sheetName] || [];
+    if (!columns.length) return;
+    if (sheet.getMaxRows() < 2) {
+      sheet.insertRowsAfter(1, 1);
+    }
+    const headers = Config.HEADERS[sheetName];
+    const rowCount = sheet.getMaxRows() - 1;
+    columns.forEach(function(columnName) {
+      const columnIndex = headers.indexOf(columnName);
+      if (columnIndex === -1) return;
+      sheet.getRange(2, columnIndex + 1, rowCount, 1).setNumberFormat('@');
     });
   },
 

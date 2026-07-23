@@ -26,10 +26,32 @@ const PdfService = {
     body.appendParagraph('CET: ' + (toBoolean(article.cetAplica) ? 'Aplica - ' + article.codigoCet : 'No aplica'));
     body.appendParagraph('');
     body.appendParagraph('Parámetros').setHeading(DocumentApp.ParagraphHeading.HEADING2);
-    if (!values.length) {
+    const hasCapsuladoraBypass = values.some(function(value) {
+      const field = fields.find(function(row) { return row.id === value.campoId; }) || {};
+      return value.campoId === 'cam_programa_capsuladora_bypass_tapa' || normalizeText(field.nombre) === normalizeText('Programa capsuladora bypass tapa');
+    });
+    const printableValues = hasCapsuladoraBypass ? values.filter(function(value) {
+      const field = fields.find(function(row) { return row.id === value.campoId; }) || {};
+      const name = normalizeText(field.nombre);
+      if (value.campoId === 'cam_programa_capsuladora_bypass_tapa' || name === normalizeText('Programa capsuladora bypass tapa')) return true;
+      return [
+        'cam_formato_capsula',
+        'cam_formato_botella',
+        'cam_color_formato',
+        'cam_material_capsula',
+        'cam_sinfin_capsuladora'
+      ].indexOf(value.campoId) === -1 && [
+        'Número formato (cápsula)',
+        'Número formato (botella)',
+        'Color de formato',
+        'Material (PVC / Complex)',
+        'Sinfín capsuladora'
+      ].map(normalizeText).indexOf(name) === -1;
+    }) : values;
+    if (!printableValues.length) {
       body.appendParagraph('No existen parámetros registrados.');
     }
-    values.forEach(function(value) {
+    printableValues.forEach(function(value) {
       const field = fields.find(function(row) { return row.id === value.campoId; }) || {};
       const unit = units.find(function(row) { return row.id === value.unidadId; }) || {};
       if (value.campoId === 'cam_levas_platos' || normalizeText(field.nombre) === normalizeText('Levas Platos')) {

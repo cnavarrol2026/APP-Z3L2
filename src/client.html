@@ -111,6 +111,7 @@
       { id: 'cam_est1_df', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 1 - DF', tipo: 'TEXTO', obligatorio: false, orden: 260 },
       { id: 'cam_est2_df', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 2 - DF', tipo: 'TEXTO', obligatorio: false, orden: 270 },
       { id: 'cam_est3_df', seccionId: 'sec_ajustes_etiquetadora', nombre: 'Estación 3 - DF', tipo: 'TEXTO', obligatorio: false, orden: 280 },
+      { id: 'cam_programa_capsuladora_bypass_tapa', seccionId: 'sec_ajustes_capsuladora', nombre: 'Programa capsuladora bypass tapa', tipo: 'TEXTO', obligatorio: false, orden: 5 },
       { id: 'cam_formato_capsula', seccionId: 'sec_ajustes_capsuladora', nombre: 'Número formato (cápsula)', tipo: 'TEXTO', obligatorio: false, orden: 10 },
       { id: 'cam_formato_botella', seccionId: 'sec_ajustes_capsuladora', nombre: 'Número formato (botella)', tipo: 'TEXTO', obligatorio: false, orden: 20 },
       { id: 'cam_color_formato', seccionId: 'sec_ajustes_capsuladora', nombre: 'Color de formato', tipo: 'TEXTO', obligatorio: false, orden: 30 },
@@ -120,6 +121,8 @@
   };
   const MECHANICAL_SECTION_ID = 'sec_ajustes_etiquetadora';
   const FORMATOS_SECTION_ID = 'sec_formatos';
+  const CAPSULADORA_SECTION_ID = 'sec_ajustes_capsuladora';
+  const CAPSULADORA_BYPASS_FIELD_ID = 'cam_programa_capsuladora_bypass_tapa';
   const LEVAS_PLATOS_FIELD_ID = 'cam_levas_platos';
   const LEVAS_PLATOS_ACTION = 'Posicionando';
   const FEATURED_BOTTLE_FIELD_IDS = ['cam_programa_maquina', 'cam_programa_estacion'];
@@ -238,6 +241,7 @@
     document.getElementById('unitForm').addEventListener('submit', submitCatalog('apiCreateUnit'));
     document.getElementById('fieldForm').addEventListener('submit', submitField);
     document.getElementById('draftForm').addEventListener('submit', saveDraft);
+    document.getElementById('capsuladoraAplica').addEventListener('change', updateCapsuladoraMode);
     document.getElementById('draftCategorySearch').addEventListener('input', () => syncDraftSearchField('category'));
     document.getElementById('draftBottleSearch').addEventListener('input', () => syncDraftSearchField('bottle'));
     document.getElementById('newDraftButton').addEventListener('click', startNewDraft);
@@ -604,6 +608,20 @@
     return section && (section.id === FORMATOS_SECTION_ID || normalizeClientText(section.nombre) === 'formatos');
   }
 
+  function isCapsuladoraSection(section) {
+    return section && (
+      section.id === CAPSULADORA_SECTION_ID ||
+      normalizeClientText(section.nombre) === 'ajustes de capsuladora'
+    );
+  }
+
+  function isCapsuladoraBypassField(field) {
+    return field && (
+      field.id === CAPSULADORA_BYPASS_FIELD_ID ||
+      normalizeClientText(field.nombre) === 'programa capsuladora bypass tapa'
+    );
+  }
+
   function isAntaresField(field) {
     if (!field) return false;
     return FORMATOS_ANTARES_FIELDS.some((item) => (
@@ -627,6 +645,10 @@
 
   function getLevasPlatosField(fields) {
     return fields.find((field) => isLevasPlatosField(field)) || null;
+  }
+
+  function getCapsuladoraBypassField(fields) {
+    return fields.find((field) => isCapsuladoraBypassField(field)) || null;
   }
 
   function fieldMetaText(field, units) {
@@ -799,6 +821,7 @@
       if (!sectionFields.length) return;
       const block = document.createElement('section');
       block.className = section.id === MECHANICAL_SECTION_ID ? 'draft-section mechanical-entry-section' : 'draft-section';
+      if (isCapsuladoraSection(section)) block.dataset.sectionRole = 'capsuladora';
       const title = document.createElement('h4');
       title.textContent = section.nombre;
       if (section.id === MECHANICAL_SECTION_ID) {
@@ -820,12 +843,14 @@
         const grid = document.createElement('div');
         grid.className = 'draft-field-grid';
         sectionFields.forEach((field) => {
+          if (isCapsuladoraSection(section) && isCapsuladoraBypassField(field)) return;
           grid.appendChild(createDraftField(field, units));
         });
         block.append(title, grid);
       }
       container.appendChild(block);
     });
+    updateCapsuladoraMode();
   }
 
   function renderMechanicalDraftFields(block, fields, units) {
@@ -1063,6 +1088,24 @@
       id: block ? block.dataset.fieldId : (levasField ? levasField.id : LEVAS_PLATOS_FIELD_ID),
       name: block ? block.dataset.fieldName : (levasField ? levasField.nombre : 'Levas Platos')
     };
+  }
+
+  function getCapsuladoraBypassPayloadField() {
+    const fields = state.admin.campos || [];
+    const bypassField = getCapsuladoraBypassField(fields);
+    return {
+      id: bypassField ? bypassField.id : CAPSULADORA_BYPASS_FIELD_ID,
+      name: bypassField ? bypassField.nombre : 'Programa capsuladora bypass tapa'
+    };
+  }
+
+  function isCapsuladoraInput(input) {
+    if (!input || !input.dataset) return false;
+    const fields = state.admin.campos || [];
+    const field = fields.find((item) => item.id === input.dataset.fieldId);
+    if (!field || isCapsuladoraBypassField(field)) return false;
+    const section = (state.admin.secciones || []).find((item) => item.id === field.seccionId);
+    return isCapsuladoraSection(section);
   }
 
   function parseLevasPlatosRows(value) {
@@ -1310,6 +1353,12 @@
     if (form.codigoEtq) form.codigoEtq.value = draft.codigoEtq || '';
     if (form.cetAplica) form.cetAplica.checked = toBooleanClient(draft.cetAplica);
     if (form.codigoCet) form.codigoCet.value = draft.codigoCet || '';
+    const draftData = safeParseClientJson(draft.payloadJson);
+    if (form.capsuladoraAplica) form.capsuladoraAplica.checked = draftData.capsuladoraAplica !== false;
+    if (form.programaCapsuladoraBypassTapa) {
+      form.programaCapsuladoraBypassTapa.value = draftData.programaCapsuladoraBypassTapa || getDraftTechnicalValueByName(draftData, 'Programa capsuladora bypass tapa') || '';
+    }
+    updateCapsuladoraMode();
     fillDraftTechnicalValues(draft);
     renderDraftImageStatus(draft);
     renderDraftMode(draft);
@@ -1326,6 +1375,31 @@
     }
     notice.hidden = false;
     text.textContent = 'Editando ' + (draft.codigoArticulo || 'borrador sin código') + '. Los cambios se guardarán sobre este mismo pendiente.';
+  }
+
+  function updateCapsuladoraMode() {
+    const form = document.getElementById('draftForm');
+    if (!form || !form.capsuladoraAplica) return;
+    const applies = form.capsuladoraAplica.checked;
+    const text = document.getElementById('capsuladoraModeText');
+    const bypassField = document.getElementById('capsuladoraBypassField');
+    const bypassInput = form.programaCapsuladoraBypassTapa;
+    document.querySelectorAll('[data-section-role="capsuladora"]').forEach((section) => {
+      section.hidden = !applies;
+      section.querySelectorAll('input, select, textarea').forEach((control) => {
+        control.disabled = !applies;
+      });
+    });
+    if (text) {
+      text.textContent = applies
+        ? 'Producto con capsuladora activa. Completa los ajustes correspondientes en la ficha técnica.'
+        : 'Producto de tapa. La sección de capsuladora se omite y solo se registra el programa bypass para tapa.';
+    }
+    if (bypassField) bypassField.hidden = applies;
+    if (bypassInput) {
+      bypassInput.disabled = applies;
+      if (applies) bypassInput.value = '';
+    }
   }
 
   function startNewDraft() {
@@ -1353,7 +1427,10 @@
     if (form.elements.id) form.elements.id.value = '';
     setDraftSearchValue('category', '');
     setDraftSearchValue('bottle', '');
+    if (form.capsuladoraAplica) form.capsuladoraAplica.checked = true;
+    if (form.programaCapsuladoraBypassTapa) form.programaCapsuladoraBypassTapa.value = '';
     setLevasPlatosRows([]);
+    updateCapsuladoraMode();
     clearImageInputs(form);
     renderDraftMode(null);
   }
@@ -1375,6 +1452,13 @@
       normalizeClientText(item.campo) === 'levas platos'
     ));
     setLevasPlatosRows(parseLevasPlatosRows(levas ? levas.valor : []));
+  }
+
+  function getDraftTechnicalValueByName(data, fieldName) {
+    const values = Array.isArray(data && data.valores) ? data.valores : [];
+    const normalized = normalizeClientText(fieldName);
+    const match = values.find((item) => normalizeClientText(item.campo) === normalized);
+    return match ? (match.valor || '') : '';
   }
 
   function safeParseClientJson(value) {
@@ -1596,12 +1680,34 @@
     payload.cetAplica = form.cetAplica.checked;
     payload.etapa = 'FICHA_TECNICA';
     const levasPayloadField = getLevasPlatosPayloadField();
-    payload.payload = {
-      valores: Array.from(document.querySelectorAll('.draft-field')).map((input) => ({
+    const capsuladoraAplica = form.capsuladoraAplica ? form.capsuladoraAplica.checked : true;
+    const bypassValue = !capsuladoraAplica && form.programaCapsuladoraBypassTapa
+      ? toUpperClientText(form.programaCapsuladoraBypassTapa.value)
+      : '';
+    if (form.programaCapsuladoraBypassTapa) form.programaCapsuladoraBypassTapa.value = bypassValue;
+    if (!capsuladoraAplica && !bypassValue) {
+      showToast('Ingresa el programa capsuladora bypass tapa.');
+      return;
+    }
+    const technicalValues = Array.from(document.querySelectorAll('.draft-field'))
+      .filter((input) => !input.disabled && (capsuladoraAplica || !isCapsuladoraInput(input)))
+      .map((input) => ({
         campoId: input.dataset.fieldId,
         campo: input.dataset.fieldName,
         valor: toUpperClientText(input.value)
-      })).concat([{
+      }));
+    if (!capsuladoraAplica && bypassValue) {
+      const bypassField = getCapsuladoraBypassPayloadField();
+      technicalValues.push({
+        campoId: bypassField.id,
+        campo: bypassField.name,
+        valor: bypassValue
+      });
+    }
+    payload.payload = {
+      capsuladoraAplica: capsuladoraAplica,
+      programaCapsuladoraBypassTapa: bypassValue,
+      valores: technicalValues.concat([{
         campoId: levasPayloadField.id,
         campo: levasPayloadField.name,
         valor: JSON.stringify(collectLevasPlatosRows())
@@ -1646,7 +1752,10 @@
           });
       })
       .catch((error) => showToast(getErrorMessage(error, 'No fue posible guardar el producto.')))
-      .finally(() => setFormBusy(form, false));
+      .finally(() => {
+        setFormBusy(form, false);
+        updateCapsuladoraMode();
+      });
   }
   function validateImageInput(event) {
     const file = event.target.files[0];

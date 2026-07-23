@@ -74,3 +74,4 @@
 - Se corrige el reconocimiento de `FORMATOS`, `Antares` y `Levas Platos` para funcionar también cuando la sección o campos ya existen en Sheets con IDs creados manualmente desde Catálogos.
 - Se audita y refuerza la compatibilidad con campos manuales: se elimina una definición duplicada de normalización en frontend y la carga de borradores vuelve a tomar valores por ID o por nombre de campo para evitar pérdidas visuales ante cambios de ID interno.
 - Se restaura en Producto nuevo el mensaje de ayuda con enlace a `https://dsgr.ccu.cl/CODIGO.pdf` para ubicar ETQ/CET antes de cargar imágenes PNG.
+- Se agrega control `Aplica ajustes de capsuladora` en Producto nuevo; al desmarcarlo se oculta la sección de capsuladora, se guarda `Programa capsuladora bypass tapa` y backend/PDF omiten ajustes normales de capsuladora para productos de tapa.

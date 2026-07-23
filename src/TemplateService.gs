@@ -63,6 +63,7 @@ const TemplateService = {
       nombre: 'Ajustes de Capsuladora',
       orden: 40,
       fields: [
+        { id: 'cam_programa_capsuladora_bypass_tapa', nombre: 'Programa capsuladora bypass tapa', tipo: 'TEXTO', obligatorio: false, orden: 5 },
         { id: 'cam_formato_capsula', nombre: 'Número formato (cápsula)', tipo: 'TEXTO', obligatorio: false, orden: 10 },
         { id: 'cam_formato_botella', nombre: 'Número formato (botella)', tipo: 'TEXTO', obligatorio: false, orden: 20 },
         { id: 'cam_color_formato', nombre: 'Color de formato', tipo: 'TEXTO', obligatorio: false, orden: 30 },

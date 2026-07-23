@@ -10,6 +10,10 @@
   normalizeDraftPayload: function(data) {
     const self = this;
     const copy = JSON.parse(JSON.stringify(data || {}));
+    copy.capsuladoraAplica = copy.capsuladoraAplica !== false;
+    copy.programaCapsuladoraBypassTapa = copy.capsuladoraAplica
+      ? ''
+      : toSystemUpperText(copy.programaCapsuladoraBypassTapa, 120);
     if (Array.isArray(copy.valores)) {
       copy.valores = copy.valores.map(function(item) {
         const next = Object.assign({}, item);
@@ -21,7 +25,21 @@
         }
         next.valor = toSystemUpperText(next.valor, 500);
         return next;
+      }).filter(function(item) {
+        return copy.capsuladoraAplica || !self.isCapsuladoraValue(item) || self.isCapsuladoraBypassValue(item);
       });
+      if (!copy.capsuladoraAplica && copy.programaCapsuladoraBypassTapa) {
+        const hasBypass = copy.valores.some(function(item) {
+          return self.isCapsuladoraBypassValue(item);
+        });
+        if (!hasBypass) {
+          copy.valores.push({
+            campoId: 'cam_programa_capsuladora_bypass_tapa',
+            campo: 'Programa capsuladora bypass tapa',
+            valor: copy.programaCapsuladoraBypassTapa
+          });
+        }
+      }
     }
     return copy;
   },
@@ -31,6 +49,36 @@
       cleanText(item.campoId, 80) === 'cam_levas_platos' ||
       normalizeText(item.campo) === normalizeText('Levas Platos')
     );
+  },
+
+  isCapsuladoraBypassValue: function(item) {
+    return item && (
+      cleanText(item.campoId, 80) === 'cam_programa_capsuladora_bypass_tapa' ||
+      normalizeText(item.campo) === normalizeText('Programa capsuladora bypass tapa')
+    );
+  },
+
+  isCapsuladoraValue: function(item) {
+    if (!item) return false;
+    const fieldId = cleanText(item.campoId, 80);
+    const fieldName = normalizeText(item.campo);
+    const capsuladoraIds = [
+      'cam_programa_capsuladora_bypass_tapa',
+      'cam_formato_capsula',
+      'cam_formato_botella',
+      'cam_color_formato',
+      'cam_material_capsula',
+      'cam_sinfin_capsuladora'
+    ];
+    const capsuladoraNames = [
+      'Programa capsuladora bypass tapa',
+      'Número formato (cápsula)',
+      'Número formato (botella)',
+      'Color de formato',
+      'Material (PVC / Complex)',
+      'Sinfín capsuladora'
+    ].map(normalizeText);
+    return capsuladoraIds.indexOf(fieldId) !== -1 || capsuladoraNames.indexOf(fieldName) !== -1;
   },
 
   normalizeLevasPlatos: function(value) {
@@ -172,6 +220,7 @@
 
   validateDraftPayload: function(payload, ignoreId) {
     this.validateUniqueCode(payload.codigoArticulo, ignoreId);
+    const technicalPayload = payload.payload || {};
     if (!cleanText(payload.descripcion, 240)) {
       throw new Error('La descripción es obligatoria.');
     }
@@ -180,6 +229,9 @@
     }
     if (payload.cetAplica && (!cleanText(payload.codigoCet, 80))) {
       throw new Error('El código CET es obligatorio cuando CET aplica.');
+    }
+    if (technicalPayload.capsuladoraAplica === false && !cleanText(technicalPayload.programaCapsuladoraBypassTapa, 120)) {
+      throw new Error('El programa capsuladora bypass tapa es obligatorio cuando no aplica capsuladora.');
     }
   },
 

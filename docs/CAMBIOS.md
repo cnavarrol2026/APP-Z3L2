@@ -76,3 +76,4 @@
 - Se restaura en Producto nuevo el mensaje de ayuda con enlace a `https://dsgr.ccu.cl/CODIGO.pdf` para ubicar ETQ/CET antes de cargar imágenes PNG.
 - Se agrega control `Aplica ajustes de capsuladora` en Producto nuevo; al desmarcarlo se oculta la sección de capsuladora, se guarda `Programa capsuladora bypass tapa` y backend/PDF omiten ajustes normales de capsuladora para productos de tapa.
 - Se reubica el control `Aplica ajustes de capsuladora` dentro de la sección `Ajustes de Capsuladora`; al desmarcarlo se ocultan solo los campos de ajuste y queda visible el campo `Programa capsuladora bypass tapa`.
+- Se corrige el CSS global de elementos `hidden` para asegurar que las grillas dinámicas, como los campos normales de capsuladora, se oculten realmente al desmarcar el control.

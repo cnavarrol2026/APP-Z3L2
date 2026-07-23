@@ -256,6 +256,7 @@
       }
     });
     document.getElementById('backupButton').addEventListener('click', createBackup);
+    document.getElementById('auditButton').addEventListener('click', runDatabaseAudit);
     document.querySelectorAll('.image-input').forEach((input) => {
       input.addEventListener('change', validateImageInput);
     });
@@ -411,6 +412,21 @@
     } else {
       setOperationStatus('', '');
     }
+  }
+
+  function setButtonBusy(button, isBusy, message) {
+    if (!button) return;
+    if (isBusy) {
+      button.dataset.originalText = button.textContent;
+      button.textContent = message || 'Procesando...';
+      button.disabled = true;
+      button.classList.add('is-loading');
+      return;
+    }
+    button.textContent = button.dataset.originalText || button.textContent;
+    button.disabled = false;
+    button.classList.remove('is-loading');
+    delete button.dataset.originalText;
   }
 
   function renderAll() {
@@ -2402,6 +2418,87 @@
       })
       .catch((error) => showToast(getErrorMessage(error, 'No fue posible crear el respaldo.')))
       .finally(() => setOperationStatus('', ''));
+  }
+
+  function runDatabaseAudit() {
+    const button = document.getElementById('auditButton');
+    const result = document.getElementById('auditResult');
+    setButtonBusy(button, true, 'Auditando...');
+    result.className = 'audit-result empty-state';
+    result.textContent = 'Revisando base de datos...';
+    setOperationStatus('Auditando base de datos...', 'info');
+    callServer('apiRunDatabaseAudit')
+      .then((audit) => {
+        renderAuditResult(audit);
+        showToast(audit.estado === 'OK' ? 'Auditoría sin observaciones.' : 'Auditoría completada con observaciones.');
+      })
+      .catch((error) => {
+        result.className = 'audit-result empty-state error-state';
+        result.textContent = getErrorMessage(error, 'No fue posible auditar la base.');
+        showToast(getErrorMessage(error, 'No fue posible auditar la base.'));
+      })
+      .finally(() => {
+        setButtonBusy(button, false);
+        setOperationStatus('', '');
+      });
+  }
+
+  function renderAuditResult(audit) {
+    const result = document.getElementById('auditResult');
+    result.className = 'audit-result ' + (audit.estado === 'OK' ? 'ok' : 'warning');
+    result.innerHTML = '';
+    const header = document.createElement('div');
+    header.className = 'audit-result-head';
+    const title = document.createElement('strong');
+    title.textContent = audit.estado === 'OK' ? 'Base sin observaciones críticas' : 'Base con observaciones';
+    const date = document.createElement('span');
+    date.textContent = audit.fecha || '';
+    header.append(title, date);
+    result.appendChild(header);
+
+    const summary = document.createElement('div');
+    summary.className = 'audit-summary-grid';
+    [
+      ['Borradores pendientes', audit.resumen.borradoresPendientes],
+      ['Productos activos', audit.resumen.articulosActivos],
+      ['Valores de artículos', audit.resumen.valoresArticulo],
+      ['Imágenes registradas', audit.resumen.imagenesArticulo],
+      ['Eventos historial', audit.resumen.historialEventos],
+      ['Detalle historial', audit.resumen.historialDetalle]
+    ].forEach(([label, value]) => {
+      const item = document.createElement('div');
+      item.className = 'audit-summary-item';
+      item.innerHTML = '<span>' + label + '</span><strong>' + String(value || 0) + '</strong>';
+      summary.appendChild(item);
+    });
+    result.appendChild(summary);
+
+    result.appendChild(createAuditList('Observaciones', audit.alertas || []));
+    result.appendChild(createAuditList('Formato texto revisado', (audit.formatosTexto || []).map((item) => (
+      item.hoja + ' / ' + item.columna + ': ' + (item.formatoTexto ? 'OK' : item.celdasSinFormatoTexto + ' celdas sin formato texto')
+    ))));
+    result.appendChild(createAuditList('Detalle de activos', (audit.integridad.articulosActivos || []).map((item) => (
+      item.codigoArticulo + ' - valores: ' + item.valores + ', imágenes activas: ' + item.imagenesActivas
+    ))));
+    result.appendChild(createAuditList('Detalle de pendientes', (audit.integridad.borradoresPendientes || []).map((item) => (
+      item.codigoArticulo + ' - valores en payload: ' + (item.payloadTieneValores ? 'sí' : 'no') + ', imágenes activas: ' + item.imagenesActivas
+    ))));
+  }
+
+  function createAuditList(titleText, rows) {
+    const block = document.createElement('section');
+    block.className = 'audit-list-block';
+    const title = document.createElement('h4');
+    title.textContent = titleText;
+    block.appendChild(title);
+    const list = document.createElement('ul');
+    (rows && rows.length ? rows : ['Sin registros.']).forEach((text) => {
+      const item = document.createElement('li');
+      item.textContent = text;
+      list.appendChild(item);
+    });
+    block.appendChild(list);
+    return block;
   }
 
   function showToast(message) {

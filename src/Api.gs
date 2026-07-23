@@ -263,3 +263,9 @@ function apiCreateBackup() {
     return ok(BackupService.createBackup(user.email), 'Respaldo creado.');
   });
 }
+
+function apiRunDatabaseAudit() {
+  return Api.withAuth('apiRunDatabaseAudit', function() {
+    return ok(AuditService.runDatabaseAudit(), 'Auditoría completada.');
+  });
+}

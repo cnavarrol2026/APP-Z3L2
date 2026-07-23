@@ -261,6 +261,15 @@
           <p class="help">Genera un ZIP con CSV por hoja y JSON maestro relacional.</p>
           <button id="backupButton" type="button">Crear respaldo ZIP</button>
         </section>
+        <section class="wide-panel audit-panel">
+          <div>
+            <p class="eyebrow">Revisión de datos</p>
+            <h3>Auditar base actual</h3>
+          </div>
+          <p class="help">Revisa duplicados, registros huérfanos, imágenes activas repetidas y formato texto en columnas de valores.</p>
+          <button id="auditButton" type="button">Auditar base</button>
+          <div id="auditResult" class="audit-result empty-state">Ejecuta la auditoría para ver el estado actual de la base.</div>
+        </section>
       </section>
     </section>
 

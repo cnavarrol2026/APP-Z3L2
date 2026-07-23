@@ -39,6 +39,8 @@ const TemplateService = {
         { id: 'cam_guia_botellas_h', nombre: 'Guía botellas H', tipo: 'TEXTO', obligatorio: false, orden: 40 },
         { id: 'cam_altura_estrella_entrada', nombre: 'Altura estrella entrada', tipo: 'NUMERO', unidad: 'mm', obligatorio: false, orden: 50 },
         { id: 'cam_altura_estrella_salida', nombre: 'Altura estrella salida', tipo: 'NUMERO', unidad: 'mm', obligatorio: false, orden: 60 },
+        { id: 'cam_ajuste_codificado_a', nombre: 'Ajuste de codificado A', tipo: 'TEXTO', obligatorio: false, orden: 70 },
+        { id: 'cam_ajuste_codificado_h', nombre: 'Ajuste de codificado H', tipo: 'TEXTO', obligatorio: false, orden: 80 },
         { id: 'cam_est1_altura', nombre: 'Estación 1 - Altura', tipo: 'NUMERO', unidad: 'mm', obligatorio: false, orden: 110 },
         { id: 'cam_est2_altura', nombre: 'Estación 2 - Altura', tipo: 'NUMERO', unidad: 'mm', obligatorio: false, orden: 120 },
         { id: 'cam_est3_altura', nombre: 'Estación 3 - Altura', tipo: 'NUMERO', unidad: 'mm', obligatorio: false, orden: 130 },

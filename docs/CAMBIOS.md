@@ -90,3 +90,4 @@
 - `Color de formato`, `Sinfín capsuladora` y `PINZAS` quedan tratados como texto flexible para aceptar letras, números, espacios y caracteres `- / ( )`.
 - Se agrega auditoría interna en `Respaldo` para revisar conteos, duplicados, registros huérfanos, imágenes activas repetidas y formato texto en columnas de valores.
 - En Consulta, la matriz de `Ajustes Mecánicos de Etiquetadora` muestra solo el valor dentro de cada celda, evitando repetir estación y posicionador cuando ya están visibles en los encabezados.
+- Se agrega en `Ajustes Mecánicos de Etiquetadora` el mini-bloque `Ajuste de codificado` con campos `A` y `H`, disponible en Producto nuevo/edición, Consulta y plantilla de campos de Sheets.

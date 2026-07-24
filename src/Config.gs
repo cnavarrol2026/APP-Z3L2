@@ -22,7 +22,8 @@ const Config = Object.freeze({
   }),
   IMAGE_TYPES: Object.freeze({
     ETQ: 'ETQ',
-    CET: 'CET'
+    CET: 'CET',
+    MEDALLA: 'MEDALLA'
   }),
   SHEETS: Object.freeze({
     CONFIG: 'CONFIGURACION',
@@ -49,13 +50,13 @@ const Config = Object.freeze({
     CATEGORIAS: ['id', 'nombre', 'nombreNormalizado', 'activo', 'fechaCreacion', 'creadoPor', 'fechaModificacion', 'modificadoPor', 'version'],
     BOTELLAS: ['id', 'nombre', 'nombreNormalizado', 'activo', 'fechaCreacion', 'creadoPor', 'fechaModificacion', 'modificadoPor', 'version'],
     CATEGORIA_BOTELLA: ['id', 'categoriaId', 'botellaId', 'activo', 'fechaCreacion', 'creadoPor', 'fechaModificacion', 'modificadoPor', 'version'],
-    ARTICULOS: ['id', 'categoriaId', 'botellaId', 'codigoArticulo', 'codigoNormalizado', 'descripcion', 'estado', 'etqAplica', 'codigoEtq', 'cetAplica', 'codigoCet', 'fechaCreacion', 'creadoPor', 'fechaModificacion', 'modificadoPor', 'version'],
+    ARTICULOS: ['id', 'categoriaId', 'botellaId', 'codigoArticulo', 'codigoNormalizado', 'descripcion', 'estado', 'etqAplica', 'codigoEtq', 'cetAplica', 'codigoCet', 'fechaCreacion', 'creadoPor', 'fechaModificacion', 'modificadoPor', 'version', 'medallaAplica', 'codigoMedalla'],
     SECCIONES: ['id', 'nombre', 'nombreNormalizado', 'orden', 'activo', 'fechaCreacion', 'creadoPor', 'fechaModificacion', 'modificadoPor', 'version'],
     CAMPOS: ['id', 'seccionId', 'nombre', 'nombreNormalizado', 'tipo', 'obligatorio', 'unidadId', 'orden', 'activo', 'fechaCreacion', 'creadoPor', 'fechaModificacion', 'modificadoPor', 'version'],
     UNIDADES: ['id', 'nombre', 'nombreNormalizado', 'orden', 'activo', 'fechaCreacion', 'creadoPor', 'fechaModificacion', 'modificadoPor', 'version'],
     VALORES_ARTICULO: ['id', 'articuloId', 'campoId', 'valor', 'unidadId', 'fechaCreacion', 'creadoPor', 'fechaModificacion', 'modificadoPor', 'version'],
     IMAGENES_ARTICULO: ['id', 'articuloId', 'tipoImagen', 'codigo', 'driveFileId', 'nombreArchivo', 'mimeType', 'tamanoBytes', 'url', 'activo', 'fechaCreacion', 'creadoPor', 'fechaModificacion', 'modificadoPor', 'version'],
-    BORRADORES: ['id', 'categoriaId', 'botellaId', 'codigoArticulo', 'codigoNormalizado', 'descripcion', 'estado', 'etqAplica', 'codigoEtq', 'cetAplica', 'codigoCet', 'etapa', 'payloadJson', 'fechaCreacion', 'creadoPor', 'fechaModificacion', 'modificadoPor', 'version'],
+    BORRADORES: ['id', 'categoriaId', 'botellaId', 'codigoArticulo', 'codigoNormalizado', 'descripcion', 'estado', 'etqAplica', 'codigoEtq', 'cetAplica', 'codigoCet', 'etapa', 'payloadJson', 'fechaCreacion', 'creadoPor', 'fechaModificacion', 'modificadoPor', 'version', 'medallaAplica', 'codigoMedalla'],
     VALORES_BORRADOR: ['id', 'borradorId', 'campoId', 'valor', 'unidadId', 'fechaCreacion', 'creadoPor', 'fechaModificacion', 'modificadoPor', 'version'],
     BORRADORES_DESCARTADOS: ['id', 'borradorId', 'datosJson', 'motivo', 'fechaDescarte', 'descartadoPor', 'fechaRecuperacion', 'recuperadoPor', 'estado'],
     HISTORIAL_EVENTOS: ['id', 'fecha', 'usuario', 'tipoAccion', 'entidad', 'entidadId', 'productoId', 'motivo'],

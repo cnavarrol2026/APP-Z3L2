@@ -98,3 +98,5 @@
 - Se optimiza la carga principal evitando sincronizar la plantilla técnica en cada lectura cuando la versión vigente ya fue aplicada al Google Sheets.
 - `apiGetSavedData` reduce lecturas duplicadas de imágenes y agrupa valores/imágenes en memoria para asociarlos a artículos y borradores sin filtrar listas completas repetidamente.
 - Se agrega escritura por lote para nuevos valores técnicos e historial de detalle, reduciendo llamadas repetidas a Google Sheets durante activaciones y guardados.
+- Se agrega `Medalla` como tercer tipo de imagen opcional junto a ETQ/CET, con check `Medalla aplica`, código, carga PNG, reemplazo seguro, vista en Consulta, modal interno y registro textual en PDF.
+- Las columnas `medallaAplica` y `codigoMedalla` se agregan al final de `ARTICULOS` y `BORRADORES` para no desplazar datos existentes al actualizar encabezados en Sheets.

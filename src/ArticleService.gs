@@ -240,6 +240,8 @@
         codigoEtq: toSystemUpperText(payload.codigoEtq, 80),
         cetAplica: !!payload.cetAplica,
         codigoCet: toSystemUpperText(payload.codigoCet, 80),
+        medallaAplica: !!payload.medallaAplica,
+        codigoMedalla: toSystemUpperText(payload.codigoMedalla, 80),
         etapa: cleanText(payload.etapa || 'DATOS_GENERALES', 80),
         payloadJson: JSON.stringify(technicalPayload),
         fechaCreacion: current ? current.fechaCreacion : date,
@@ -280,6 +282,9 @@
     if (payload.cetAplica && (!cleanText(payload.codigoCet, 80))) {
       throw new Error('El código CET es obligatorio cuando CET aplica.');
     }
+    if (payload.medallaAplica && (!cleanText(payload.codigoMedalla, 80))) {
+      throw new Error('El código Medalla es obligatorio cuando Medalla aplica.');
+    }
     if (technicalPayload.capsuladoraAplica === false && !cleanText(technicalPayload.programaCapsuladoraBypassTapa, 120)) {
       throw new Error('El programa capsuladora bypass tapa es obligatorio cuando no aplica capsuladora.');
     }
@@ -310,6 +315,8 @@
         codigoEtq: draft.codigoEtq,
         cetAplica: draft.cetAplica,
         codigoCet: draft.codigoCet,
+        medallaAplica: draft.medallaAplica,
+        codigoMedalla: draft.codigoMedalla,
         fechaCreacion: date,
         creadoPor: userEmail,
         fechaModificacion: date,
@@ -364,6 +371,8 @@
         codigoEtq: toSystemUpperText(payload.codigoEtq, 80),
         cetAplica: !!payload.cetAplica,
         codigoCet: toSystemUpperText(payload.codigoCet, 80),
+        medallaAplica: !!payload.medallaAplica,
+        codigoMedalla: toSystemUpperText(payload.codigoMedalla, 80),
         fechaCreacion: article.fechaCreacion,
         creadoPor: article.creadoPor,
         fechaModificacion: date,
@@ -398,6 +407,7 @@
     if (!cleanText(payload.descripcion, 240)) throw new Error('La descripción es obligatoria.');
     if (payload.etqAplica && !cleanText(payload.codigoEtq, 80)) throw new Error('El código ETQ es obligatorio cuando ETQ aplica.');
     if (payload.cetAplica && !cleanText(payload.codigoCet, 80)) throw new Error('El código CET es obligatorio cuando CET aplica.');
+    if (payload.medallaAplica && !cleanText(payload.codigoMedalla, 80)) throw new Error('El código Medalla es obligatorio cuando Medalla aplica.');
     const technicalPayload = payload.payload || {};
     if (technicalPayload.capsuladoraAplica === false && !cleanText(technicalPayload.programaCapsuladoraBypassTapa, 120)) {
       throw new Error('El programa capsuladora bypass tapa es obligatorio cuando no aplica capsuladora.');
@@ -488,6 +498,7 @@
     if (!draft.descripcion) throw new Error('La descripción es obligatoria.');
     if (toBoolean(draft.etqAplica) && !draft.codigoEtq) throw new Error('Falta el código ETQ.');
     if (toBoolean(draft.cetAplica) && !draft.codigoCet) throw new Error('Falta el código CET.');
+    if (toBoolean(draft.medallaAplica) && !draft.codigoMedalla) throw new Error('Falta el código Medalla.');
   },
 
   diffRows: function(before, after) {

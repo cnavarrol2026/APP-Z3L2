@@ -46,8 +46,8 @@
 
       <div class="content-grid">
         <aside class="visual-panel">
-          <h2>ETQ / CET</h2>
-          <div id="imageSummary" class="empty-state">Selecciona un artículo activo para ver sus códigos ETQ y CET.</div>
+          <h2>Imágenes</h2>
+          <div id="imageSummary" class="empty-state">Selecciona un artículo activo para ver sus códigos e imágenes asociadas.</div>
         </aside>
 
         <section class="detail-panel">
@@ -202,9 +202,23 @@
               </label>
               <div class="image-status" data-image-status="CET">Sin imagen guardada.</div>
             </section>
+
+            <section class="image-choice">
+              <label class="toggle-row">
+                <input type="checkbox" name="medallaAplica">
+                <span>Medalla aplica</span>
+              </label>
+              <label>Código Medalla
+                <input name="codigoMedalla">
+              </label>
+              <label>Imagen Medalla PNG
+                <input class="image-input" data-image-type="MEDALLA" type="file" accept="image/png">
+              </label>
+              <div class="image-status" data-image-status="MEDALLA">Sin imagen guardada.</div>
+            </section>
           </div>
           <p class="help">
-            Para ubicar la Etiqueta (ETQ) o Contraetiqueta (CET), accede a
+            Para ubicar la Etiqueta (ETQ), Contraetiqueta (CET) o Medalla, accede a
             <a href="https://dsgr.ccu.cl/CODIGO.pdf" target="_blank" rel="noopener">https://dsgr.ccu.cl/CODIGO.pdf</a>
             y reemplaza <strong>CODIGO</strong> por el código exacto. La aplicación no descarga imágenes automáticamente.
           </p>
@@ -348,7 +362,7 @@
     <section class="image-preview-modal" role="dialog" aria-modal="true" aria-labelledby="imagePreviewTitle">
       <button class="modal-close" type="button" aria-label="Cerrar" data-close-image-modal>×</button>
       <div class="modal-heading">
-        <p id="imagePreviewEyebrow" class="eyebrow">Imagen ETQ / CET</p>
+        <p id="imagePreviewEyebrow" class="eyebrow">Imagen de producto</p>
         <h3 id="imagePreviewTitle">Vista previa</h3>
       </div>
       <div id="imagePreviewBody" class="image-preview-body">

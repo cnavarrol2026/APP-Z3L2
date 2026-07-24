@@ -27,5 +27,6 @@
 - Las relaciones categoría-botella viven en `CATEGORIA_BOTELLA`.
 - Los valores dinámicos viven en tablas verticales.
 - Las imágenes guardan metadatos, no binarios.
+- Los tipos de imagen administrados son `ETQ`, `CET` y `MEDALLA`.
 - Los borradores descartados no se eliminan.
 - Cada tabla administrable usa auditoría básica: fechas, usuario y versión.

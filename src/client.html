@@ -13,6 +13,21 @@
 
   const catalogModalState = { active: '', editingId: '' };
 
+  const PRODUCT_IMAGE_TYPES = [
+    { type: 'ETQ', label: 'Etiqueta', appliesKey: 'etqAplica', codeKey: 'codigoEtq' },
+    { type: 'CET', label: 'Contraetiqueta', appliesKey: 'cetAplica', codeKey: 'codigoCet' },
+    { type: 'MEDALLA', label: 'Medalla', appliesKey: 'medallaAplica', codeKey: 'codigoMedalla' }
+  ];
+
+  function getProductImageConfig(type) {
+    return PRODUCT_IMAGE_TYPES.find((item) => item.type === type) || {
+      type: type,
+      label: type,
+      appliesKey: '',
+      codeKey: ''
+    };
+  }
+
   const CATALOG_CONFIG = {
     category: {
       eyebrow: 'Catálogo',
@@ -500,7 +515,7 @@
       detail.className = 'empty-state';
       detail.textContent = 'Selecciona un artículo activo para ver la ficha.';
       images.className = 'empty-state';
-      images.textContent = 'Selecciona un artículo activo para ver sus códigos ETQ y CET.';
+      images.textContent = 'Selecciona un artículo activo para ver sus códigos e imágenes asociadas.';
       return;
     }
     detail.className = '';
@@ -513,15 +528,15 @@
   function renderArticleImages(container, article) {
     container.className = 'article-image-list';
     container.innerHTML = '';
-    container.appendChild(createArticleImageCard(article, 'ETQ', 'Etiqueta'));
-    container.appendChild(createArticleImageCard(article, 'CET', 'Contraetiqueta'));
+    PRODUCT_IMAGE_TYPES.forEach((config) => {
+      container.appendChild(createArticleImageCard(article, config.type, config.label));
+    });
   }
 
   function createArticleImageCard(article, type, label) {
-    const applies = type === 'ETQ'
-      ? toBooleanClient(article.etqAplica)
-      : toBooleanClient(article.cetAplica);
-    const code = type === 'ETQ' ? article.codigoEtq : article.codigoCet;
+    const config = getProductImageConfig(type);
+    const applies = toBooleanClient(article[config.appliesKey]);
+    const code = article[config.codeKey];
     const image = findArticleImage(article, type);
     const card = document.createElement('article');
     card.className = 'article-image-card' + (!applies || !image ? ' missing' : '');
@@ -617,7 +632,8 @@
     const eyebrow = document.getElementById('imagePreviewEyebrow');
     const body = document.getElementById('imagePreviewBody');
     if (!modal || !body) return;
-    const code = type === 'ETQ' ? article.codigoEtq : article.codigoCet;
+    const config = getProductImageConfig(type);
+    const code = article[config.codeKey];
     eyebrow.textContent = type + ' / ' + (label || 'Imagen');
     title.textContent = (code || 'Imagen guardada');
     body.innerHTML = '<div class="empty-state">Cargando imagen...</div>';
@@ -1704,10 +1720,11 @@
       item.className = 'draft-card';
       const etq = toBooleanClient(draft.etqAplica) ? 'ETQ aplica' : 'ETQ no aplica';
       const cet = toBooleanClient(draft.cetAplica) ? 'CET aplica' : 'CET no aplica';
+      const medalla = toBooleanClient(draft.medallaAplica) ? 'Medalla aplica' : 'Medalla no aplica';
       item.innerHTML =
         '<strong>' + (draft.codigoArticulo || 'SIN CÓDIGO') + '</strong>' +
         '<span>' + (draft.descripcion || 'Sin descripción') + '</span>' +
-        '<small>' + [draft.estado || 'BORRADOR', etq, cet, draft.fechaModificacion || ''].filter(Boolean).join(' · ') + '</small>';
+        '<small>' + [draft.estado || 'BORRADOR', etq, cet, medalla, draft.fechaModificacion || ''].filter(Boolean).join(' · ') + '</small>';
       const actions = document.createElement('div');
       actions.className = 'draft-card-actions';
       const editButton = document.createElement('button');
@@ -1739,10 +1756,11 @@
         const bottle = getCatalogName(state.lookup.botellas, article.botellaId, 'Sin botella');
         const etq = toBooleanClient(article.etqAplica) ? 'ETQ aplica' : 'ETQ no aplica';
         const cet = toBooleanClient(article.cetAplica) ? 'CET aplica' : 'CET no aplica';
+        const medalla = toBooleanClient(article.medallaAplica) ? 'Medalla aplica' : 'Medalla no aplica';
         item.innerHTML =
           '<strong>' + (article.codigoArticulo || 'SIN CÓDIGO') + '</strong>' +
           '<span>' + (article.descripcion || 'Sin descripción') + '</span>' +
-          '<small>' + ['ACTIVO', category, bottle, etq, cet, article.fechaModificacion || ''].filter(Boolean).join(' · ') + '</small>';
+          '<small>' + ['ACTIVO', category, bottle, etq, cet, medalla, article.fechaModificacion || ''].filter(Boolean).join(' · ') + '</small>';
         const actions = document.createElement('div');
         actions.className = 'draft-card-actions';
         const editButton = document.createElement('button');
@@ -1899,6 +1917,8 @@
     if (form.codigoEtq) form.codigoEtq.value = article.codigoEtq || '';
     if (form.cetAplica) form.cetAplica.checked = toBooleanClient(article.cetAplica);
     if (form.codigoCet) form.codigoCet.value = article.codigoCet || '';
+    if (form.medallaAplica) form.medallaAplica.checked = toBooleanClient(article.medallaAplica);
+    if (form.codigoMedalla) form.codigoMedalla.value = article.codigoMedalla || '';
     const articleData = {
       valores: Array.isArray(article.valores) ? article.valores : [],
       capsuladoraAplica: article.capsuladoraAplica !== false,
@@ -1926,6 +1946,8 @@
     if (form.codigoEtq) form.codigoEtq.value = draft.codigoEtq || '';
     if (form.cetAplica) form.cetAplica.checked = toBooleanClient(draft.cetAplica);
     if (form.codigoCet) form.codigoCet.value = draft.codigoCet || '';
+    if (form.medallaAplica) form.medallaAplica.checked = toBooleanClient(draft.medallaAplica);
+    if (form.codigoMedalla) form.codigoMedalla.value = draft.codigoMedalla || '';
     const draftData = safeParseClientJson(draft.payloadJson);
     if (form.capsuladoraAplica) form.capsuladoraAplica.checked = draftData.capsuladoraAplica !== false;
     if (form.programaCapsuladoraBypassTapa) {
@@ -2073,7 +2095,8 @@
 
   function renderDraftImageStatus(draft) {
     const images = draft && Array.isArray(draft.imagenes) ? draft.imagenes : [];
-    ['ETQ', 'CET'].forEach((type) => {
+    PRODUCT_IMAGE_TYPES.forEach((config) => {
+      const type = config.type;
       const status = document.querySelector('[data-image-status="' + type + '"]');
       if (!status) return;
       const image = images.find((item) => item.tipoImagen === type);
@@ -2212,6 +2235,7 @@
   }
 
   function readImageInput(form, type, draftId) {
+    const config = getProductImageConfig(type);
     const input = form.querySelector('.image-input[data-image-type="' + type + '"]');
     const file = input && input.files ? input.files[0] : null;
     if (!file) return Promise.resolve(null);
@@ -2222,7 +2246,7 @@
         resolve({
           borradorId: draftId,
           tipoImagen: type,
-          codigo: type === 'ETQ' ? form.codigoEtq.value : form.codigoCet.value,
+          codigo: form[config.codeKey] ? form[config.codeKey].value : '',
           nombreArchivo: file.name,
           mimeType: file.type,
           base64: result.split(',')[1] || ''
@@ -2234,10 +2258,7 @@
   }
 
   function uploadDraftImages(draftId, form) {
-    return Promise.all([
-      readImageInput(form, 'ETQ', draftId),
-      readImageInput(form, 'CET', draftId)
-    ])
+    return Promise.all(PRODUCT_IMAGE_TYPES.map((config) => readImageInput(form, config.type, draftId)))
       .then((payloads) => payloads.filter(Boolean))
       .then((payloads) => payloads.reduce((chain, payload) => (
         chain.then(() => callServer('apiUploadDraftImage', payload))
@@ -2245,10 +2266,7 @@
   }
 
   function uploadArticleImages(articleId, form) {
-    return Promise.all([
-      readImageInput(form, 'ETQ', articleId),
-      readImageInput(form, 'CET', articleId)
-    ])
+    return Promise.all(PRODUCT_IMAGE_TYPES.map((config) => readImageInput(form, config.type, articleId)))
       .then((payloads) => payloads.filter(Boolean).map((payload) => {
         payload.articuloId = articleId;
         delete payload.borradorId;
@@ -2291,12 +2309,13 @@
       showToast('Selecciona una botella válida desde la lista.');
       return;
     }
-    ['codigoArticulo', 'descripcion', 'codigoEtq', 'codigoCet'].forEach((key) => {
+    ['codigoArticulo', 'descripcion', 'codigoEtq', 'codigoCet', 'codigoMedalla'].forEach((key) => {
       payload[key] = toUpperClientText(payload[key]);
       if (form[key]) form[key].value = payload[key];
     });
     payload.etqAplica = form.etqAplica.checked;
     payload.cetAplica = form.cetAplica.checked;
+    payload.medallaAplica = form.medallaAplica ? form.medallaAplica.checked : false;
     payload.etapa = 'FICHA_TECNICA';
     const levasPayloadField = getLevasPlatosPayloadField();
     const capsuladoraAplica = form.capsuladoraAplica ? form.capsuladoraAplica.checked : true;

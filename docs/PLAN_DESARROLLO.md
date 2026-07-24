@@ -59,7 +59,7 @@ Objetivo: construir el flujo guiado “Agregar producto nuevo”.
 Tareas:
 - Seleccionar o crear categoría y botella.
 - Crear relación categoría-botella.
-- Capturar código, descripción, ETQ, CET y valores dinámicos.
+- Capturar código, descripción, ETQ, CET, Medalla y valores dinámicos.
 - Guardar borrador o activar si pasa validaciones.
 
 ## Fase 6: borradores
@@ -107,7 +107,7 @@ Objetivo: generar ficha textual sin imágenes.
 Tareas:
 - Branding.
 - Datos principales.
-- ETQ/CET como código y estado, sin imagen.
+- ETQ/CET/Medalla como código y estado, sin imagen.
 - Campos dinámicos.
 
 ## Fase 11: respaldo

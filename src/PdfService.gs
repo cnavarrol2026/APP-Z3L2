@@ -24,6 +24,7 @@ const PdfService = {
     body.appendParagraph('Estado: ' + article.estado);
     body.appendParagraph('ETQ: ' + (toBoolean(article.etqAplica) ? 'Aplica - ' + article.codigoEtq : 'No aplica'));
     body.appendParagraph('CET: ' + (toBoolean(article.cetAplica) ? 'Aplica - ' + article.codigoCet : 'No aplica'));
+    body.appendParagraph('Medalla: ' + (toBoolean(article.medallaAplica) ? 'Aplica - ' + article.codigoMedalla : 'No aplica'));
     body.appendParagraph('');
     body.appendParagraph('Parámetros').setHeading(DocumentApp.ParagraphHeading.HEADING2);
     const hasCapsuladoraBypass = values.some(function(value) {

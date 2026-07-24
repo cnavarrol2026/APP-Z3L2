@@ -84,7 +84,7 @@ const ImageService = {
 
   getArticleImagePreview: function(payload) {
     if (!payload || !payload.articuloId) throw new Error('Falta el artículo de la imagen.');
-    if ([Config.IMAGE_TYPES.ETQ, Config.IMAGE_TYPES.CET].indexOf(payload.tipoImagen) === -1) {
+    if ([Config.IMAGE_TYPES.ETQ, Config.IMAGE_TYPES.CET, Config.IMAGE_TYPES.MEDALLA].indexOf(payload.tipoImagen) === -1) {
       throw new Error('El tipo de imagen no es válido.');
     }
     const article = SheetRepository.findById(Config.SHEETS.ARTICLES, payload.articuloId);
@@ -119,7 +119,7 @@ const ImageService = {
     if (!payload) throw new Error('Falta la imagen.');
     if (requireArticle && !payload.articuloId) throw new Error('Falta el artículo de la imagen.');
     if (!requireArticle && !payload.borradorId) throw new Error('Falta el borrador de la imagen.');
-    if ([Config.IMAGE_TYPES.ETQ, Config.IMAGE_TYPES.CET].indexOf(payload.tipoImagen) === -1) {
+    if ([Config.IMAGE_TYPES.ETQ, Config.IMAGE_TYPES.CET, Config.IMAGE_TYPES.MEDALLA].indexOf(payload.tipoImagen) === -1) {
       throw new Error('El tipo de imagen no es válido.');
     }
     if (!String(payload.nombreArchivo || '').toLowerCase().endsWith(Config.IMAGE_EXTENSION)) {

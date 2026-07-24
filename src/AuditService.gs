@@ -263,7 +263,7 @@ const AuditService = {
     if (Object.keys(audit.duplicados.ids).length) alerts.push('Hay IDs duplicados en una o más hojas.');
     if (audit.duplicados.codigosArticulo.length) alerts.push('Hay códigos de artículo duplicados entre activos y borradores.');
     if (audit.duplicados.valoresArticuloPorArticuloCampo.length) alerts.push('Hay más de un valor para el mismo artículo y campo.');
-    if (audit.duplicados.imagenesActivasPorOwnerTipo.length) alerts.push('Hay más de una imagen activa para el mismo registro y tipo ETQ/CET.');
+    if (audit.duplicados.imagenesActivasPorOwnerTipo.length) alerts.push('Hay más de una imagen activa para el mismo registro y tipo de imagen.');
     if (audit.integridad.valoresSinArticuloActivo.length) alerts.push('Hay valores técnicos asociados a artículos que no están activos.');
     if (audit.integridad.imagenesActivasSinArticuloOBorrador.length) alerts.push('Hay imágenes activas asociadas a registros que no son artículo activo ni borrador pendiente.');
     audit.formatosTexto.forEach(function(item) {
